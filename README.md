@@ -1,49 +1,43 @@
-#### CFPB Open Source Project Template Instructions
+# HMDA Rule Engine
 
-1. Create a new project.
-2. Copy these files into the new project.
-3. Update the README, replacing the contents below as prescribed.
-4. Add any libraries, assets, or hard dependencies whose source code will be included
-   in the project's repository to the _Exceptions_ section in the [TERMS](TERMS.md).
-  - If no exceptions are needed, remove that section from TERMS.
-5. Delete these instructions and everything up to the _Project Title_ from the README.
-6. Write some great software and tell people about it.
+## This project is a work in progress
+Nothing presented in the issues or in this repo is a final product unless it is marked as such.
 
-> Keep the README fresh! It's the first thing people see and will make the initial impression.
+**Description**:  The HMDA Rule Engine processes the [HMDA Edits](http://www.ffiec.gov/hmda/edits.htm) as defined by the FFIEC. It requires as input a valid [HMDA data file](http://www.ffiec.gov/hmda/fileformats.htm). The engine understands edit rules written in the [brij-spec](http://github.com/linuxbozo/brij-spec) standard.
 
-----
+## Requirements
 
-# Project Title
-
-**Description**:  Put a meaningful, short, plain-language description of what
-this project is trying to accomplish and why it matters.
-
-Other things to include:
-
-  - **Status**:  Alpha, Beta, 1.1, etc. It's OK to write a sentence, too. The goal is to let interested people know where this project is at. This is also a good place to link to the [CHANGELOG](CHANGELOG.md).
-  - **Links to production or demo instances**
-  - Describe what sets this apart from related-projects. Linking to another doc or page is OK if this can't be expressed in a sentence or two.
-
-
-**Screenshot**: If the software has visual components, place a screenshot after the description; e.g.,
-
-![](https://raw.githubusercontent.com/cfpb/open-source-project-template/master/screenshot.png)
-
+The project requires [NodeJS](http://nodejs.org) (npm) to build and manage dependencies.
 
 ## How to get this running or how to use it
 
-Detailed instructions on how to install, configure, and get the project running.
-This should be frequently tested to ensure reliability. Alternatively, a link to
-another page is fine, but it's important that this works.
+Make sure you have [NodeJS](https://nodejs.org) installed (version 0.10.33), and you can use the `npm` command:
 
+```shell
+npm version
+```
+
+Install [Grunt](http://gruntjs.com) globally:
+
+```shell
+npm install -g grunt-cli
+```
+
+Then install dependencies from the project root directory:
+
+```shell
+npm install
+```
+
+Running the tests:
+```shell
+grunt test
+```
 
 ## Getting involved
 
-This section should detail why people should get involved and describe key areas you are
-currently focusing on; e.g., trying to get feedback on features, fixing certain bugs, building
-important pieces, etc.
-
-General instructions on _how_ to contribute should be stated with a link to [CONTRIBUTING](CONTRIBUTING.md).
+For details on how to get involved, please first read our [CONTRIBUTING](CONTRIBUTING.md) guidelines.
+This project follows an adapted pull request [workflow](https://github.com/cfpb/hmda-pilot/wiki/GitHub-workflow) on top of GitHub, please consult the details before adding features to the project.
 
 
 ----
@@ -60,4 +54,4 @@ General instructions on _how_ to contribute should be stated with a link to [CON
 
 1. Projects that inspired you
 2. Related projects
-3. Books, papers, talks, or other sources that have meaniginful impact or influence on this project 
+3. Books, papers, talks, or other sources that have meaniginful impact or influence on this project
