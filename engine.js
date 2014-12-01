@@ -1,7 +1,7 @@
 'use strict';
 
 var Engine = function() {
-    return {}
+    return {};
 };
 
 module.exports = new Engine();
