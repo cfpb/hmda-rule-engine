@@ -69,7 +69,8 @@ module.exports = function (grunt) {
 
         jshint: {
             files: [
-                'validate.js',
+                'engine.js',
+                'lib/*.js'
             ],
             options: {
                 jshintrc: '.jshintrc'
