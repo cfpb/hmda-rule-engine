@@ -22,6 +22,10 @@ var Engine = function() {
         return true;
     };
 
+    engine.hasAtLeastOneLAR = function(hmdaFile) {
+        return hmdaFile.loanApplicationRegisters.length > 0;
+    };
+
     return engine;
 };
 

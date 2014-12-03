@@ -75,4 +75,29 @@ describe('Engine', function() {
 
     });
 
+    describe('hasAtLeastOneLAR', function() {
+
+        it('should return true when there is at least one loan application register', function(done) {
+            var hmdaFile = {
+                loanApplicationRegisters: [
+                    {
+                        recordID: '2'
+                    }
+                ]
+            }
+            var result = engine.hasAtLeastOneLAR(hmdaFile);
+            expect(result).to.be(true);
+            done();
+        });
+
+        it('should return false when there is not at least one loan application register', function(done) {
+            var hmdaFile = {
+                loanApplicationRegisters: []
+            }
+            var result = engine.hasAtLeastOneLAR(hmdaFile);
+            expect(result).to.be(false);
+            done();
+        });
+    });
+
 });
