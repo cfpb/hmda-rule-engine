@@ -22,4 +22,57 @@ describe('Engine', function() {
 
     });
 
+    describe('hasRecordIdentifiersForEachRow', function() {
+
+        it('should return true when the HMDA file has correct record identifiers for each row', function(done) {
+            var hmdaFile = {
+                transmittalSheet: {
+                    recordID: '1'
+                },
+                loanApplicationRegisters: [
+                    {
+                        recordID: '2'
+                    }
+                ]
+            };
+            var result = engine.hasRecordIdentifiersForEachRow(hmdaFile);
+            expect(result).to.be(true);
+            done();
+        });
+
+        it('should return false when the transmittal sheet does not have a recordID of 1', function(done) {
+            var hmdaFile = {
+                transmittalSheet: {
+                    recordID: '2'
+                }
+            }
+            var result = engine.hasRecordIdentifiersForEachRow(hmdaFile);
+            expect(result).to.be(false);
+            done();
+        });
+
+        it('should return false when a loan application register does not have a recordID of 2', function(done) {
+            var hmdaFile = {
+                transmittalSheet: {
+                    recordID: '1'
+                },
+                loanApplicationRegisters: [
+                    {
+                        recordID: '2'
+                    },
+                    {
+                        recordID: '1'
+                    },
+                    {
+                        recordID: '2'
+                    }
+                ]
+            }
+            var result = engine.hasRecordIdentifiersForEachRow(hmdaFile);
+            expect(result).to.be(false);
+            done();
+        });
+
+    });
+
 });

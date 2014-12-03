@@ -9,6 +9,19 @@ var Engine = function() {
         return hmdajson.process(file, spec, next);
     };
 
+    engine.hasRecordIdentifiersForEachRow = function(hmdaFile) {
+        if (hmdaFile.transmittalSheet.recordID !== '1') {
+            return false;
+        } else {
+            for (var i=0; i < hmdaFile.loanApplicationRegisters.length; i++) {
+                if (hmdaFile.loanApplicationRegisters[i].recordID !== '2') {
+                    return false;
+                }
+            }
+        }
+        return true;
+    };
+
     return engine;
 };
 
