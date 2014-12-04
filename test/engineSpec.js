@@ -100,4 +100,70 @@ describe('Engine', function() {
         });
     });
 
+    describe('isValidAgencyCode', function() {
+
+        it('should return false if the transmittal sheet has an invalid agency code', function(done) {
+            var hmdaFile = {
+                transmittalSheet: {
+                    agencyCode: 11
+                }
+            };
+            var result = engine.isValidAgencyCode(hmdaFile);
+            expect(result).to.be(false);
+            done();
+        });
+
+        it('should return false if a LAR has an invalid agency code', function(done) {
+            var hmdaFile = {
+                transmittalSheet: {
+                    agencyCode: 1
+                },
+                loanApplicationRegisters: [
+                    {
+                        agencyCode: 11
+                    }
+                ]
+            };
+            var result = engine.isValidAgencyCode(hmdaFile);
+            expect(result).to.be(false);
+            done();
+        });
+
+        it('should return false if a LAR has an agency code that does not match the transmittal sheet agency code', function(done) {
+            var hmdaFile = {
+                transmittalSheet: {
+                    agencyCode: 1
+                },
+                loanApplicationRegisters: [
+                    {
+                        agencyCode: 3
+                    }
+                ]
+            };
+            var result = engine.isValidAgencyCode(hmdaFile);
+            expect(result).to.be(false);
+            done();
+        });
+
+        it('should return true if all LARs have the same agency code as the transmittal sheet', function(done) {
+            var hmdaFile = {
+                transmittalSheet: {
+                    agencyCode: 1
+                },
+                loanApplicationRegisters: [
+                    {
+                        agencyCode: 1
+                    },
+                    {
+                        agencyCode: 1
+                    }
+                ]
+            };
+            var result = engine.isValidAgencyCode(hmdaFile);
+            expect(result).to.be(true);
+            done();
+        });
+    });
+
+
 });

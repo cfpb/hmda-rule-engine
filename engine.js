@@ -1,6 +1,7 @@
 'use strict';
 
-var hmdajson = require('./lib/hmdajson');
+var hmdajson = require('./lib/hmdajson'),
+    _ = require('underscore');
 
 var Engine = function() {
     var engine = {};
@@ -24,6 +25,21 @@ var Engine = function() {
 
     engine.hasAtLeastOneLAR = function(hmdaFile) {
         return hmdaFile.loanApplicationRegisters.length > 0;
+    };
+
+    engine.isValidAgencyCode = function(hmdaFile) {
+        var validAgencies = [1, 2, 3, 5, 7, 9];
+        if (! _.contains(validAgencies, hmdaFile.transmittalSheet.agencyCode)) {
+            return false;
+        } else {
+            var tsAgencyCode = hmdaFile.transmittalSheet.agencyCode;
+            for (var i=0; i < hmdaFile.loanApplicationRegisters.length; i++) {
+                if (hmdaFile.loanApplicationRegisters[i].agencyCode !== tsAgencyCode) {
+                    return false;
+                }
+            }
+        }
+        return true;
     };
 
     return engine;
