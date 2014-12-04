@@ -42,6 +42,10 @@ var Engine = function() {
         return true;
     };
 
+    engine.hasUniqueLoanNumbers = function(hmdaFile) {
+        return _.unique(hmdaFile.loanApplicationRegisters, _.iteratee('loanNumber')).length === hmdaFile.loanApplicationRegisters.length;
+    };
+
     return engine;
 };
 

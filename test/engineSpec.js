@@ -165,5 +165,39 @@ describe('Engine', function() {
         });
     });
 
+    describe('hasUniqueLoanNumbers', function() {
+
+        it('should return false if any LARS have duplicate loanNumbers', function(done) {
+            var hmdaFile = {
+                loanApplicationRegisters: [
+                    {
+                        loanNumber: 1
+                    },
+                    {
+                        loanNumber: 1
+                    }
+                ]
+            }
+            var result = engine.hasUniqueLoanNumbers(hmdaFile);
+            expect(result).to.be(false);
+            done();
+        });
+
+        it('should return false if any LARS have duplicate loanNumbers', function(done) {
+            var hmdaFile = {
+                loanApplicationRegisters: [
+                    {
+                        loanNumber: 1
+                    },
+                    {
+                        loanNumber: 2
+                    }
+                ]
+            }
+            var result = engine.hasUniqueLoanNumbers(hmdaFile);
+            expect(result).to.be(true);
+            done();
+        });
+    });
 
 });
