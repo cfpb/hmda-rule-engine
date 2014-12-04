@@ -32,6 +32,7 @@
     "spec-xunit-file": "0.0.1-2"
   },
   "dependencies": {
-    "line-chomper": "^0.4.5"
+    "line-chomper": "^0.4.5",
+    "underscore": "^1.7.0"
   }
 }
