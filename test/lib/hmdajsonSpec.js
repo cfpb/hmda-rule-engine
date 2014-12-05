@@ -147,6 +147,16 @@ describe('lib/hmdajson', function() {
             });
         });
 
+        it('should return json object when using empty space padding, due to trim option of false', function(done) {
+            HMDAJson.process('test/testdata/padding.dat', FILE_SPEC, function(err, result) {
+                expect(err).to.be.null();
+                expect(result).to.have.property('hmdaFile');
+                expect(result.hmdaFile).to.have.property('loanApplicationRegisters');
+                expect(result.hmdaFile.loanApplicationRegisters.length).to.be(9);
+                done();
+            });
+        })
+
         it('should return json object when hmda file is valid and provided by name', function(done) {
             HMDAJson.process('test/testdata/complete.dat', FILE_SPEC, function(err, result) {
                 expect(err).to.be.null();
