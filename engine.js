@@ -31,16 +31,11 @@ var hmdajson = require('./lib/hmdajson'),
     }
     root.HMDAEngine = HMDAEngine;
 
-    //-----------------------------------------------------//
-
-    HMDAEngine.fileToJson = function(file, spec, next) {
-        hmdajson.process(file, spec, function(err, result) {
-            if (! err && result) {
-                root._HMDA_JSON = result;
-            }
-            next(err, root._HMDA_JSON);
-        });
-    };
+    /*
+     * -----------------------------------------------------
+     * Condition Functions
+     * -----------------------------------------------------
+     */
 
     HMDAEngine.hasRecordIdentifiersForEachRow = function(hmdaFile) {
         if (hmdaFile.transmittalSheet.recordID !== '1') {
@@ -77,6 +72,30 @@ var hmdajson = require('./lib/hmdajson'),
     HMDAEngine.hasUniqueLoanNumbers = function(hmdaFile) {
         return _.unique(hmdaFile.loanApplicationRegisters, _.iteratee('loanNumber')).length === hmdaFile.loanApplicationRegisters.length;
     };
+
+
+    /*
+     * -----------------------------------------------------
+     * Parsing
+     * -----------------------------------------------------
+     */
+
+    HMDAEngine.fileToJson = function(file, spec, next) {
+        hmdajson.process(file, spec, function(err, result) {
+            if (! err && result) {
+                root._HMDA_JSON = result;
+            }
+            next(err, root._HMDA_JSON);
+        });
+    };
+
+    /*
+     * -----------------------------------------------------
+     * Rule Execution
+     * -----------------------------------------------------
+     */
+
+    // TODO
 
 }.call((function() {
   return (typeof module !== 'undefined' && module.exports &&
