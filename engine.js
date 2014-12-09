@@ -28,9 +28,8 @@ var hmdajson = require('./lib/hmdajson'),
             exports = module.exports = HMDAEngine;
         }
         exports.HMDAEngine = HMDAEngine;
-    } else {
-        root.HMDAEngine = HMDAEngine;
     }
+    root.HMDAEngine = HMDAEngine;
 
     //-----------------------------------------------------//
 
