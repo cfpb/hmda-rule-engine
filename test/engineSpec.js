@@ -22,6 +22,38 @@ describe('Engine', function() {
 
     });
 
+    describe('is_true', function() {
+        it('should return false if the argument is false', function(done) {
+            expect(engine.is_true(0)).to.be(false);
+            expect(engine.is_true(false)).to.be(false);
+            expect(engine.is_true('')).to.be(false);
+            done();
+        });
+
+        it('should return true if the argument is true', function(done) {
+            expect(engine.is_true(1)).to.be(true);
+            expect(engine.is_true(true)).to.be(true);
+            expect(engine.is_true(' ')).to.be(true);
+            done();
+        });
+    });
+
+    describe('is_false', function() {
+        it('should return true if the argument is false', function(done) {
+            expect(engine.is_false(0)).to.be(true);
+            expect(engine.is_false(false)).to.be(true);
+            expect(engine.is_false('')).to.be(true);
+            done();
+        });
+
+        it('should return false if the argument is true', function(done) {
+            expect(engine.is_false(1)).to.be(false);
+            expect(engine.is_false(true)).to.be(false);
+            expect(engine.is_false(' ')).to.be(false);
+            done();
+        });
+    });
+
     describe('hasRecordIdentifiersForEachRow', function() {
 
         it('should return true when the HMDA file has correct record identifiers for each row', function(done) {

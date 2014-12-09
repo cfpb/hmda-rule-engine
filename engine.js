@@ -37,6 +37,13 @@ var hmdajson = require('./lib/hmdajson'),
      * -----------------------------------------------------
      */
 
+    HMDAEngine.is_true = function(property) {
+        return !!property;
+    };
+    HMDAEngine.is_false = function(property) {
+        return !property;
+    };
+
     HMDAEngine.hasRecordIdentifiersForEachRow = function(hmdaFile) {
         if (hmdaFile.transmittalSheet.recordID !== '1') {
             return false;
