@@ -1,3 +1,6 @@
+/*global describe:false*/
+/*global it:false*/
+/*global expect:false*/
 'use strict';
 
 var engine = require('../engine');
@@ -54,6 +57,38 @@ describe('Engine', function() {
         });
     });
 
+    describe('is_integer', function() {
+        it('should return true if the argument is an integer', function(done) {
+            expect(engine.is_integer(5)).to.be(true);
+            expect(engine.is_integer(5.0)).to.be(true);
+            expect(engine.is_integer('5')).to.be(true);
+            expect(engine.is_integer('5.0')).to.be(true);
+            done();
+        });
+
+        it('should return false if the argument is not an integer', function(done) {
+            expect(engine.is_integer(5.5)).to.be(false);
+            expect(engine.is_integer('5.5')).to.be(false);
+            done();
+        });
+    });
+
+    describe('is_float', function() {
+        it('should return true if the argument is a float', function(done) {
+            expect(engine.is_float(5.5)).to.be(true);
+            expect(engine.is_float('5.5')).to.be(true);
+            done();
+        });
+
+        it('should return false if the argument is not a float', function(done) {
+            expect(engine.is_float(5)).to.be(false);
+            expect(engine.is_float(5.0)).to.be(false);
+            expect(engine.is_float('5')).to.be(false);
+            expect(engine.is_float('5.0')).to.be(false);
+            done();
+        });
+    });    
+
     describe('hasRecordIdentifiersForEachRow', function() {
 
         it('should return true when the HMDA file has correct record identifiers for each row', function(done) {
@@ -77,7 +112,7 @@ describe('Engine', function() {
                 transmittalSheet: {
                     recordID: '2'
                 }
-            }
+            };
             var result = engine.hasRecordIdentifiersForEachRow(hmdaFile);
             expect(result).to.be(false);
             done();
@@ -99,7 +134,7 @@ describe('Engine', function() {
                         recordID: '2'
                     }
                 ]
-            }
+            };
             var result = engine.hasRecordIdentifiersForEachRow(hmdaFile);
             expect(result).to.be(false);
             done();
@@ -116,7 +151,7 @@ describe('Engine', function() {
                         recordID: '2'
                     }
                 ]
-            }
+            };
             var result = engine.hasAtLeastOneLAR(hmdaFile);
             expect(result).to.be(true);
             done();
@@ -125,7 +160,7 @@ describe('Engine', function() {
         it('should return false when there is not at least one loan application register', function(done) {
             var hmdaFile = {
                 loanApplicationRegisters: []
-            }
+            };
             var result = engine.hasAtLeastOneLAR(hmdaFile);
             expect(result).to.be(false);
             done();
@@ -209,7 +244,7 @@ describe('Engine', function() {
                         loanNumber: 1
                     }
                 ]
-            }
+            };
             var result = engine.hasUniqueLoanNumbers(hmdaFile);
             expect(result).to.be(false);
             done();
@@ -225,7 +260,7 @@ describe('Engine', function() {
                         loanNumber: 2
                     }
                 ]
-            }
+            };
             var result = engine.hasUniqueLoanNumbers(hmdaFile);
             expect(result).to.be(true);
             done();
