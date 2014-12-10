@@ -54,6 +54,135 @@ describe('Engine', function() {
         });
     });
 
+    describe('in', function() {
+        it('should return true if property is in values', function(done) {
+            var valueNums = [1, 2, 3];
+            var valueStrs = ['1', '2', '3'];
+            expect(engine.in(1, valueNums)).to.be(true);
+            expect(engine.in('1', valueStrs)).to.be(true);
+            done();
+        });
+
+        it('should return false if property not in values', function(done) {
+            var valueNums = [1, 2, 3];
+            var valueStrs = ['1', '2', '3'];
+            expect(engine.in(1, valueStrs)).to.be(false);
+            expect(engine.in('1', valueNums)).to.be(false);
+            expect(engine.in(4, valueNums)).to.be(false);
+            expect(engine.in('', valueStrs)).to.be(false);
+            done();
+        });
+    });
+
+    describe('not_in', function() {
+        it('should return false if property is in values', function(done) {
+            var valueNums = [1, 2, 3];
+            var valueStrs = ['1', '2', '3'];
+            expect(engine.not_in(1, valueNums)).to.be(false);
+            expect(engine.not_in('1', valueStrs)).to.be(false);
+            done();
+        });
+
+        it('should return true if property not in values', function(done) {
+            var valueNums = [1, 2, 3];
+            var valueStrs = ['1', '2', '3'];
+            expect(engine.not_in(1, valueStrs)).to.be(true);
+            expect(engine.not_in('1', valueNums)).to.be(true);
+            expect(engine.not_in(4, valueNums)).to.be(true);
+            expect(engine.not_in('', valueStrs)).to.be(true);
+            done();
+        });
+    });
+
+    describe('contains', function() {
+        it('should return true if value is in property', function(done) {
+            var propNums = [1, 2, 3];
+            var propStrs = ['1', '2', '3'];
+            expect(engine.contains(propNums, 1)).to.be(true);
+            expect(engine.contains(propStrs, '1')).to.be(true);
+            done();
+        });
+
+        it('should return false if value not in property', function(done) {
+            var propNums = [1, 2, 3];
+            var propStrs = ['1', '2', '3'];
+            expect(engine.contains(propStrs, 1)).to.be(false);
+            expect(engine.contains(propNums, '1')).to.be(false);
+            expect(engine.contains(propNums, 4)).to.be(false);
+            expect(engine.contains(propStrs, '')).to.be(false);
+            done();
+        });
+    });
+
+    describe('does_not_contain', function() {
+        it('should return false if value is in property', function(done) {
+            var propNums = [1, 2, 3];
+            var propStrs = ['1', '2', '3'];
+            expect(engine.does_not_contain(propNums, 1)).to.be(false);
+            expect(engine.does_not_contain(propStrs, '1')).to.be(false);
+            done();
+        });
+
+        it('should return false if value not in property', function(done) {
+            var propNums = [1, 2, 3];
+            var propStrs = ['1', '2', '3'];
+            expect(engine.does_not_contain(propStrs, 1)).to.be(true);
+            expect(engine.does_not_contain(propNums, '1')).to.be(true);
+            expect(engine.does_not_contain(propNums, 4)).to.be(true);
+            expect(engine.does_not_contain(propStrs, '')).to.be(true);
+            done();
+        });
+    });
+
+    describe('includes_all', function() {
+        it('should return true if property includes all values', function(done) {
+            var valueNums = [1, 2, 3];
+            var valueStrs = ['1', '2', '3'];
+            var propNums = [3, 4, 2, 5, 1];
+            var propStrs = ['3', '4', '2', '5', '1'];
+            expect(engine.includes_all(propNums, valueNums)).to.be(true);
+            expect(engine.includes_all(propStrs, valueStrs)).to.be(true);
+            done();
+        });
+
+        it('should return false if property does not include all values', function(done) {
+            var valueNums = [1, 2, 3];
+            var valueStrs = ['1', '2', '3'];
+            var propNums = [3, 4, 2, 5, 1];
+            var propStrs = ['3', '4', '2', '5', '1'];
+            expect(engine.includes_all(propStrs, valueNums)).to.be(false);
+            expect(engine.includes_all(propNums, valueStrs)).to.be(false);
+            expect(engine.includes_all(propNums, [6])).to.be(false);
+            expect(engine.includes_all(propStrs, [''])).to.be(false);
+            done();
+        });
+    });
+
+
+    describe('includes_none', function() {
+        it('should return false if property includes any values', function(done) {
+            var valueNums = [1, 2, 3];
+            var valueStrs = ['1', '2', '3'];
+            var propNums = [3, 4, 2, 5, 1];
+            var propStrs = ['3', '4', '2', '5', '1'];
+            expect(engine.includes_none(propNums, valueNums)).to.be(false);
+            expect(engine.includes_none(propStrs, valueStrs)).to.be(false);
+            done();
+        });
+
+        it('should return true if property does not include any values', function(done) {
+            var valueNums = [1, 2, 3];
+            var valueStrs = ['1', '2', '3'];
+            var propNums = [3, 4, 2, 5, 1];
+            var propStrs = ['3', '4', '2', '5', '1'];
+            expect(engine.includes_none(propStrs, valueNums)).to.be(true);
+            expect(engine.includes_none(propNums, valueStrs)).to.be(true);
+            expect(engine.includes_none(propNums, [6])).to.be(true);
+            expect(engine.includes_none(propStrs, [''])).to.be(true);
+            done();
+        });
+    });
+
     describe('hasRecordIdentifiersForEachRow', function() {
 
         it('should return true when the HMDA file has correct record identifiers for each row', function(done) {
