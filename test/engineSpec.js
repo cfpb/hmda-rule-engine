@@ -129,7 +129,49 @@ describe('Engine', function() {
             expect(engine.equal_property('5', 5)).to.be(false);
             done();
         });
+    });
+
+    describe('not_equal', function() {
+        it('should return false if property and value are equal', function(done) {
+            expect(engine.not_equal('5', '5')).to.be(false);
+            expect(engine.not_equal(5, 5)).to.be(false);
+            expect(engine.not_equal(5.5, 5.5)).to.be(false);
+            done();
+        });
+
+        it('should return true if property and value are not equal', function(done) {
+            expect(engine.not_equal('5', '6')).to.be(true);
+            expect(engine.not_equal(5, 6)).to.be(true);
+            expect(engine.not_equal(5.5, 6.5)).to.be(true);
+            done();
+        });
+
+        it('should return true if property and value are equivalent but different types', function(done) {
+            expect(engine.not_equal('5', 5)).to.be(true);
+            done();
+        });
     });     
+
+    describe('not_equal_property', function() {
+        it('should return false if first and second are equal', function(done) {
+            expect(engine.not_equal_property('5', '5')).to.be(false);
+            expect(engine.not_equal_property(5, 5)).to.be(false);
+            expect(engine.not_equal_property(5.5, 5.5)).to.be(false);
+            done();
+        });
+
+        it('should return true if first and second are not equal', function(done) {
+            expect(engine.not_equal_property('5', '6')).to.be(true);
+            expect(engine.not_equal_property(5, 6)).to.be(true);
+            expect(engine.not_equal_property(5.5, 6.5)).to.be(true);
+            done();
+        });
+
+        it('should return true if first and second are equivalent but different types', function(done) {
+            expect(engine.not_equal_property('5', 5)).to.be(true);
+            done();
+        });
+    });  
 
     describe('hasRecordIdentifiersForEachRow', function() {
 

@@ -60,6 +60,14 @@ var hmdajson = require('./lib/hmdajson'),
         return first === second;
     };
 
+    HMDAEngine.not_equal = function(property, value) {
+        return property !== value;
+    };
+
+    HMDAEngine.not_equal_property = function(first, second) {
+        return first !== second;
+    };
+
     HMDAEngine.hasRecordIdentifiersForEachRow = function(hmdaFile) {
         if (hmdaFile.transmittalSheet.recordID !== '1') {
             return false;
