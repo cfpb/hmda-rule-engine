@@ -323,6 +323,56 @@ describe('Engine', function() {
         });
     });
 
+    describe('less_than_or_equal', function() {
+        it('should return true if property is <= value', function(done) {
+            expect(engine.less_than_or_equal('4', '5')).to.be(true);
+            expect(engine.less_than_or_equal('4.2', '5.5')).to.be(true);
+            expect(engine.less_than_or_equal('4', '5.5')).to.be(true);
+            expect(engine.less_than_or_equal('4', 5)).to.be(true);
+            expect(engine.less_than_or_equal(4, 5.2)).to.be(true);
+            expect(engine.less_than_or_equal(5.2, 5.2)).to.be(true);
+            done();
+        });
+
+        it('should return false if property is > value', function(done) {
+            expect(engine.less_than_or_equal('6', '5')).to.be(false);
+            expect(engine.less_than_or_equal('6.4', '5')).to.be(false);
+            expect(engine.less_than_or_equal('6', 5.2)).to.be(false);
+            done();
+        });
+
+        it('should return false if property or value is NaN', function(done) {
+            expect(engine.less_than_or_equal('cat', '6')).to.be(false);
+            expect(engine.less_than_or_equal('5', 'cat')).to.be(false);
+            done();
+        });
+    });
+
+    describe('less_than_or_equal_property', function() {
+        it('should return true if first is <= second', function(done) {
+            expect(engine.less_than_or_equal_property('4', '5')).to.be(true);
+            expect(engine.less_than_or_equal_property('4.2', '5.5')).to.be(true);
+            expect(engine.less_than_or_equal_property('4', '5.5')).to.be(true);
+            expect(engine.less_than_or_equal_property('4', 5)).to.be(true);
+            expect(engine.less_than_or_equal_property(4, 5.2)).to.be(true);
+            expect(engine.less_than_or_equal_property(5.2, 5.2)).to.be(true);
+            done();
+        });
+
+        it('should return false if first is > second', function(done) {
+            expect(engine.less_than_or_equal_property('6', '5')).to.be(false);
+            expect(engine.less_than_or_equal_property('6.4', '5')).to.be(false);
+            expect(engine.less_than_or_equal_property('6', 5.2)).to.be(false);
+            done();
+        });
+
+        it('should return false if first or second is NaN', function(done) {
+            expect(engine.less_than_or_equal_property('cat', '6')).to.be(false);
+            expect(engine.less_than_or_equal_property('5', 'cat')).to.be(false);
+            done();
+        });
+    });
+
     describe('hasRecordIdentifiersForEachRow', function() {
 
         it('should return true when the HMDA file has correct record identifiers for each row', function(done) {

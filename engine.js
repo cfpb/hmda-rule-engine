@@ -92,6 +92,14 @@ var hmdajson = require('./lib/hmdajson'),
         return !isNaN(+first) && !isNaN(+second) && +first >= +second;
     };
 
+    HMDAEngine.less_than_or_equal = function(property, value) {
+        return !isNaN(+property) && !isNaN(+value) && +property <= +value;
+    };
+
+    HMDAEngine.less_than_or_equal_property = function(first, second) {
+        return !isNaN(+first) && !isNaN(+second) && +first <= +second;
+    };
+
     HMDAEngine.hasRecordIdentifiersForEachRow = function(hmdaFile) {
         if (hmdaFile.transmittalSheet.recordID !== '1') {
             return false;
