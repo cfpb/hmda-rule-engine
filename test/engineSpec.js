@@ -171,7 +171,57 @@ describe('Engine', function() {
             expect(engine.not_equal_property('5', 5)).to.be(true);
             done();
         });
-    });  
+    });
+
+    describe('greater_than', function() {
+        it('should return true if property is > value', function(done) {
+            expect(engine.greater_than('5', '4')).to.be(true);
+            expect(engine.greater_than('5.5', '4.2')).to.be(true);
+            expect(engine.greater_than('5.5', '4')).to.be(true);
+            expect(engine.greater_than('5', 4)).to.be(true);
+            expect(engine.greater_than(5, 4.2)).to.be(true);
+            done();
+        });
+
+        it('should return false if property is <= value', function(done) {
+            expect(engine.greater_than('5', '6')).to.be(false);
+            expect(engine.greater_than('5', '6.4')).to.be(false);
+            expect(engine.greater_than(5.2, '6')).to.be(false);
+            expect(engine.greater_than(5.2, 5.2)).to.be(false);
+            done();
+        });
+
+        it('should return false if property or value are NaN', function(done) {
+            expect(engine.greater_than('cat', '6')).to.be(false);
+            expect(engine.greater_than('5', 'cat')).to.be(false);
+            done();
+        });
+    });
+
+        describe('greater_than_property', function() {
+        it('should return true if first is > second', function(done) {
+            expect(engine.greater_than_property('5', '4')).to.be(true);
+            expect(engine.greater_than_property('5.5', '4.2')).to.be(true);
+            expect(engine.greater_than_property('5.5', '4')).to.be(true);
+            expect(engine.greater_than_property('5', 4)).to.be(true);
+            expect(engine.greater_than_property(5, 4.2)).to.be(true);
+            done();
+        });
+
+        it('should return false if first is <= second', function(done) {
+            expect(engine.greater_than_property('5', '6')).to.be(false);
+            expect(engine.greater_than_property('5', '6.4')).to.be(false);
+            expect(engine.greater_than_property(5.2, '6')).to.be(false);
+            expect(engine.greater_than_property(5.2, 5.2)).to.be(false);
+            done();
+        });
+
+        it('should return false if first or second are NaN', function(done) {
+            expect(engine.greater_than_property('cat', '6')).to.be(false);
+            expect(engine.greater_than_property('5', 'cat')).to.be(false);
+            done();
+        });
+    });    
 
     describe('hasRecordIdentifiersForEachRow', function() {
 
