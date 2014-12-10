@@ -100,6 +100,10 @@ var hmdajson = require('./lib/hmdajson'),
         return !isNaN(+first) && !isNaN(+second) && +first <= +second;
     };
 
+    HMDAEngine.between = function(property, start, end) {
+        return !isNaN(+property) && !isNaN(+start) && !isNaN(+end) && +property > +start && +property < +end;
+    };
+
     HMDAEngine.hasRecordIdentifiersForEachRow = function(hmdaFile) {
         if (hmdaFile.transmittalSheet.recordID !== '1') {
             return false;

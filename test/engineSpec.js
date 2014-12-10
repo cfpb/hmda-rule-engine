@@ -373,6 +373,29 @@ describe('Engine', function() {
         });
     });
 
+    describe('between', function() {
+        it('should return true if property is between start and end', function(done) {
+            expect(engine.between('5', 4, '8')).to.be(true);
+            expect(engine.between(5.7, '4', '7.94')).to.be(true);
+            done();
+        });
+
+        it('should return false if property is not between start and end', function(done) {
+            expect(engine.between('5', '3', '4')).to.be(false);
+            expect(engine.between('5.5', '4.5', 5.49)).to.be(false);
+            expect(engine.between(5, 5, 7)).to.be(false);
+            expect(engine.between(7.5, '4.2', '7.5')).to.be(false);
+            done();
+        });
+
+        it('should return false if property, start, or end are NaN', function(done) {
+            expect(engine.between('cat', '5', 7)).to.be(false);
+            expect(engine.between(5.4, 'cat', 9)).to.be(false);
+            expect(engine.between(3, '4.5', 'cat')).to.be(false);
+            done();
+        });
+    });
+
     describe('hasRecordIdentifiersForEachRow', function() {
 
         it('should return true when the HMDA file has correct record identifiers for each row', function(done) {
