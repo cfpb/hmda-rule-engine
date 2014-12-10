@@ -52,6 +52,14 @@ var hmdajson = require('./lib/hmdajson'),
         return !isNaN(+property) && +property !== parseInt(property);
     };
 
+    HMDAEngine.equal = function(property, value) {
+        return property === value;
+    };
+
+    HMDAEngine.equal_property = function(first, second) {
+        return first === second;
+    };
+
     HMDAEngine.hasRecordIdentifiersForEachRow = function(hmdaFile) {
         if (hmdaFile.transmittalSheet.recordID !== '1') {
             return false;
