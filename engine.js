@@ -40,8 +40,37 @@ var hmdajson = require('./lib/hmdajson'),
     HMDAEngine.is_true = function(property) {
         return !!property;
     };
+
     HMDAEngine.is_false = function(property) {
         return !property;
+    };
+
+    HMDAEngine.in = function(property, values) {
+        return _.contains(values, property);
+    };
+
+    HMDAEngine.not_in = function(property, values) {
+        return ! _.contains(values, property);
+    };
+
+    HMDAEngine.contains = function(property, value) {
+        return _.contains(property, value);
+    };
+
+    HMDAEngine.does_not_contain = function(property, value) {
+        return ! _.contains(property, value);
+    };
+
+    HMDAEngine.includes_all = function(property, values) {
+        return _.every(values, function(value) {
+            return _.contains(property, value);
+        });
+    };
+
+    HMDAEngine.includes_none = function(property, values) {
+        return _.every(values, function(value) {
+            return ! _.contains(property, value);
+        });
     };
 
     HMDAEngine.is_integer = function(property) {
