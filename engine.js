@@ -54,7 +54,12 @@ var hmdajson = require('./lib/hmdajson'),
     };
 
     HMDAEngine.contains = function(property, value) {
-        return _.contains(property, value);
+        if (_.isArray(property)) {
+            return _.contains(property, value);
+        }
+        if (_.isString(property)) {
+            return property.indexOf(value) !== -1;
+        }
     };
 
     HMDAEngine.does_not_contain = function(property, value) {
@@ -131,6 +136,24 @@ var hmdajson = require('./lib/hmdajson'),
 
     HMDAEngine.between = function(property, start, end) {
         return !isNaN(+property) && !isNaN(+start) && !isNaN(+end) && +property > +start && +property < +end;
+    };
+
+    HMDAEngine.starts_with = function(property, value) {
+        return property.lastIndexOf(value, 0) === 0;
+    };
+
+    HMDAEngine.ends_with = function(property, value) {
+        var position = property.length - value.length;
+        var lastIndex = property.indexOf(value, position);
+        return lastIndex !== -1 && lastIndex === position;
+    };
+
+    HMDAEngine.is_empty = function(property) {
+        return property.trim() === '';
+    };
+
+    HMDAEngine.not_empty = function(property) {
+        return property.trim() !== '';
     };
 
     HMDAEngine.hasRecordIdentifiersForEachRow = function(hmdaFile) {

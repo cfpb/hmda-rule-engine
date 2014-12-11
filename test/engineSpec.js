@@ -102,6 +102,7 @@ describe('Engine', function() {
             var propStrs = ['1', '2', '3'];
             expect(engine.contains(propNums, 1)).to.be(true);
             expect(engine.contains(propStrs, '1')).to.be(true);
+            expect(engine.contains('foobar', 'oba')).to.be(true);
             done();
         });
 
@@ -112,6 +113,7 @@ describe('Engine', function() {
             expect(engine.contains(propNums, '1')).to.be(false);
             expect(engine.contains(propNums, 4)).to.be(false);
             expect(engine.contains(propStrs, '')).to.be(false);
+            expect(engine.contains('foobar', 'baz')).to.be(false);
             done();
         });
     });
@@ -278,7 +280,7 @@ describe('Engine', function() {
             expect(engine.not_equal('5', 5)).to.be(true);
             done();
         });
-    });     
+    });
 
     describe('not_equal_property', function() {
         it('should return false if first and second are equal', function(done) {
@@ -349,7 +351,7 @@ describe('Engine', function() {
             expect(engine.greater_than_property('5', 'cat')).to.be(false);
             done();
         });
-    });   
+    });
 
     describe('less_than', function() {
         it('should return true if property is < value', function(done) {
@@ -520,6 +522,58 @@ describe('Engine', function() {
             expect(engine.between('cat', '5', 7)).to.be(false);
             expect(engine.between(5.4, 'cat', 9)).to.be(false);
             expect(engine.between(3, '4.5', 'cat')).to.be(false);
+            done();
+        });
+    });
+
+    describe('starts_with', function() {
+        it('should return true if the property starts with value', function(done) {
+            expect(engine.starts_with('foobar', 'foo')).to.be(true);
+            done();
+        });
+
+        it('should return false if the property does not start with value', function(done) {
+            expect(engine.starts_with('foobar', 'bar')).to.be(false);
+            done();
+        });
+    });
+
+    describe('ends_with', function() {
+        it('should return true if the property ends with value', function(done) {
+            expect(engine.ends_with('foobar', 'bar')).to.be(true);
+            done();
+        });
+
+        it('should return false if the property does not end with value', function(done) {
+            expect(engine.ends_with('foobar', 'foo')).to.be(false);
+            done();
+        });
+    });
+
+    describe('is_empty', function() {
+        it('should return true if the property is empty', function(done) {
+            expect(engine.is_empty('')).to.be(true);
+            expect(engine.is_empty('   ')).to.be(true);
+            done();
+        });
+
+        it('should return false if the property is not empty', function(done) {
+            expect(engine.is_empty('foo')).to.be(false);
+            expect(engine.is_empty(' o ')).to.be(false);
+            done();
+        });
+    });
+
+    describe('not_empty', function() {
+        it('should return true if the property is not empty', function(done) {
+            expect(engine.not_empty('foo')).to.be(true);
+            expect(engine.not_empty(' o ')).to.be(true);
+            done();
+        });
+
+        it('should return false if the property is empty', function(done) {
+            expect(engine.not_empty('')).to.be(false);
+            expect(engine.not_empty('   ')).to.be(false);
             done();
         });
     });
