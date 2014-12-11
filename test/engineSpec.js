@@ -166,6 +166,21 @@ describe('Engine', function() {
         });
     });
 
+    describe('yyyy', function() {
+        it('should return true if property is a valid year', function(done) {
+            expect(engine.yyyy('2014')).to.be(true);
+            expect(engine.yyyy('1997')).to.be(true);
+            done();
+        });
+
+        it('should return false if property is not a valid year', function(done) {
+            expect(engine.yyyy('    ')).to.be(false);
+            expect(engine.yyyy('cats')).to.be(false);           // No cats allowed
+            expect(engine.yyyy('205')).to.be(false);
+            done();
+        });
+    });
+
     describe('is_true', function() {
         it('should return false if the argument is false', function(done) {
             expect(engine.is_true(0)).to.be(false);
