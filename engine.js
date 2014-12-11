@@ -40,6 +40,7 @@ var hmdajson = require('./lib/hmdajson'),
     HMDAEngine.is_true = function(property) {
         return !!property;
     };
+
     HMDAEngine.is_false = function(property) {
         return !property;
     };
@@ -70,6 +71,66 @@ var hmdajson = require('./lib/hmdajson'),
         return _.every(values, function(value) {
             return ! _.contains(property, value);
         });
+    };
+
+    HMDAEngine.is_integer = function(property) {
+        return !isNaN(+property) && +property === parseInt(property);
+    };
+
+    HMDAEngine.is_float = function(property) {
+        return !isNaN(+property) && +property !== parseInt(property);
+    };
+
+    HMDAEngine.equal = function(property, value) {
+        return property === value;
+    };
+
+    HMDAEngine.equal_property = function(first, second) {
+        return first === second;
+    };
+
+    HMDAEngine.not_equal = function(property, value) {
+        return property !== value;
+    };
+
+    HMDAEngine.not_equal_property = function(first, second) {
+        return first !== second;
+    };
+
+    HMDAEngine.greater_than = function(property, value) {
+        return !isNaN(+property) && !isNaN(+value) && +property > +value;
+    };
+
+    HMDAEngine.greater_than_property = function(first, second) {
+        return !isNaN(+first) && !isNaN(+second) && +first > +second;
+    };
+
+    HMDAEngine.less_than = function(property, value) {
+        return !isNaN(+property) && !isNaN(+value) && +property < +value;
+    };
+
+    HMDAEngine.less_than_property = function(first, second) {
+        return !isNaN(+first) && !isNaN(+second) && +first < +second;
+    };
+
+    HMDAEngine.greater_than_or_equal = function(property, value) {
+        return !isNaN(+property) && !isNaN(+value) && +property >= +value;
+    };
+
+    HMDAEngine.greater_than_or_equal_property = function(first, second) {
+        return !isNaN(+first) && !isNaN(+second) && +first >= +second;
+    };
+
+    HMDAEngine.less_than_or_equal = function(property, value) {
+        return !isNaN(+property) && !isNaN(+value) && +property <= +value;
+    };
+
+    HMDAEngine.less_than_or_equal_property = function(first, second) {
+        return !isNaN(+first) && !isNaN(+second) && +first <= +second;
+    };
+
+    HMDAEngine.between = function(property, start, end) {
+        return !isNaN(+property) && !isNaN(+start) && !isNaN(+end) && +property > +start && +property < +end;
     };
 
     HMDAEngine.hasRecordIdentifiersForEachRow = function(hmdaFile) {
