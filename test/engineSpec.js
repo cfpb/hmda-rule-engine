@@ -195,6 +195,21 @@ describe('Engine', function() {
         });
     });
 
+    describe('hh_mm_ss', function() {
+        it('should return true for a valid time', function(done) {
+            expect(engine.hh_mm_ss('051255')).to.be(true);
+            done();
+        });
+
+        it('should return false for a malformed time', function(done) {
+            expect(engine.hh_mm_ss('241205')).to.be(false);     // Invalid hours
+            expect(engine.hh_mm_ss('018651')).to.be(false);     // Invalid minutes
+            expect(engine.hh_mm_ss('041794')).to.be(false);     // Invalid seconds
+            expect(engine.hh_mm_ss('cats52')).to.be(false);     // No cats allowed
+            done();
+        });
+    });
+
     describe('is_true', function() {
         it('should return false if the argument is false', function(done) {
             expect(engine.is_true(0)).to.be(false);
