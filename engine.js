@@ -37,6 +37,24 @@ var hmdajson = require('./lib/hmdajson'),
      * -----------------------------------------------------
      */
 
+    HMDAEngine.yyyy_mm_dd_hh_mm = function(property) {
+        var regex = /^(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})$/;
+        var tokens = property.match(regex);
+
+        if (tokens !== null) {
+            var year = +tokens[1];
+            var month = (+tokens[2] >= 1 && +tokens[2] <= 12) ? +tokens[2] - 1 : null;
+            var day = (+tokens[3] >= 1 && +tokens[3] <= 31) ? +tokens[3] : null;
+            var hours = (+tokens[4] >= 0 && +tokens[4] < 24) ? +tokens[4] : null;
+            var minutes = (+tokens[5] >= 0 && +tokens[5] < 60) ? +tokens[5] : null;
+
+            var date = new Date(year, month, day, hours, minutes);
+            return (date.getFullYear() === year && date.getMonth() === month && date.getHours() === hours && date.getMinutes() === minutes);
+        }
+
+        return false;
+    };
+
     HMDAEngine.is_true = function(property) {
         return !!property;
     };

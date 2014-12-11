@@ -24,6 +24,31 @@ describe('Engine', function() {
 
     });
 
+    describe('yyyy_mm_dd_hh_mm', function() {
+        it('should return true if property is a valid date', function(done) {
+            expect(engine.yyyy_mm_dd_hh_mm('201403051127')).to.be(true);
+            expect(engine.yyyy_mm_dd_hh_mm('201312312359')).to.be(true);
+            expect(engine.yyyy_mm_dd_hh_mm('201501010000')).to.be(true);
+            done();
+        });
+
+        it('should return false if property is not a valid date', function(done) {
+            expect(engine.yyyy_mm_dd_hh_mm('201413151232')).to.be(false);   // Invalid month
+            expect(engine.yyyy_mm_dd_hh_mm('201400151232')).to.be(false);   // Invalid month
+            expect(engine.yyyy_mm_dd_hh_mm('201402311232')).to.be(false);   // Invalid day (Feb 31)
+            expect(engine.yyyy_mm_dd_hh_mm('201402252417')).to.be(false);   // Invalid hour
+            expect(engine.yyyy_mm_dd_hh_mm('201402252078')).to.be(false);   // Invalid minutes
+            done();
+        });
+
+        it('should return false if property is malformed', function(done) {
+            expect(engine.yyyy_mm_dd_hh_mm('20141005')).to.be(false);       // Too short
+            expect(engine.yyyy_mm_dd_hh_mm('20140101010101')).to.be(false); // Too long
+            expect(engine.yyyy_mm_dd_hh_mm('2014cat05115')).to.be(false);   // No cats allowed
+            done();
+        });
+    });
+
     describe('is_true', function() {
         it('should return false if the argument is false', function(done) {
             expect(engine.is_true(0)).to.be(false);
