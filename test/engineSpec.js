@@ -23,6 +23,35 @@ describe('Engine', function() {
         });
     });
 
+    describe('email_address', function() {
+        it('should return true if property is a valid email address', function(done) {
+            var test_addresses = [
+                'test@test.com                                                     ',
+                'test15.cat@test.testing                                           ',
+                'test15.cat@test.cat.testing                                       '
+            ];
+            for (var i = 0; i < test_addresses.length; i++) {
+                expect(engine.email_address(test_addresses[i])).to.be(true);
+            }
+            done();
+        });
+
+        it('should return false if property is a malformed email address', function(done) {
+            var test_addresses = [
+                'test@.test.com                                                    ', // @.
+                'test.@test.com                                                    ', // .@
+                'test@test.com                                     ',                 // Too short
+                'te st@test.com                                                    ', // Space in address
+                'te@st@test.com                                                    ', // Double '@''
+                'test@test..com                                                    '  // Double '.'
+            ];
+            for (var i = 0; i < test_addresses.length; i++) {
+                expect(engine.email_address(test_addresses[i])).to.be(false);
+            }
+            done();
+        });
+    });
+
     describe('zipcode', function() {
         it('should return true if property is a valid zipcode', function(done) {
             expect(engine.zipcode('55555     ')).to.be(true);
