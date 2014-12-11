@@ -210,6 +210,23 @@ describe('Engine', function() {
         });
     });
 
+    describe('matches_regex', function() {
+        it('should return true if property matches regexStr', function(done) {
+            expect(engine.matches_regex('cat', '^cat$')).to.be(true);
+            done();
+        });
+
+        it('should return false if property does not match regexStr', function(done) {
+            expect(engine.matches_regex('cat', '^dog$')).to.be(false);
+            done();
+        });
+
+        it('should return false if regexStr is a malformed regex', function(done) {
+            expect(engine.matches_regex('cat', '^[0-9+$')).to.be(false);
+            done();
+        });
+    });
+
     describe('is_true', function() {
         it('should return false if the argument is false', function(done) {
             expect(engine.is_true(0)).to.be(false);
