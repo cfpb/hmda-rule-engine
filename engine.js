@@ -76,6 +76,11 @@ var hmdajson = require('./lib/hmdajson'),
         return HMDAEngine.yyyy_mm_dd_hh_mm_ss(property + '000000');
     };
 
+    HMDAEngine.mm_dd_yyyy = function(property) {
+        var dateStr = property.slice(4,8) + property.slice(0,2) + property.slice(2,4) + property.slice(8);
+        return HMDAEngine.yyyy_mm_dd(dateStr);
+    };
+
     HMDAEngine.is_true = function(property) {
         return !!property;
     };
