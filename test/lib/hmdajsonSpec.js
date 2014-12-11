@@ -130,7 +130,6 @@ describe('lib/hmdajson', function() {
             });
         });
 
-
         it('should return error when hmda file has issue with transmittalSheet', function(done) {
             HMDAJson.process('test/testdata/incomplete-ts.dat', FILE_SPEC, function(err, result) {
                 expect(result).to.be.null();
@@ -143,6 +142,14 @@ describe('lib/hmdajson', function() {
             HMDAJson.process('test/testdata/incomplete-lar.dat', FILE_SPEC, function(err, result) {
                 expect(result).to.be.null();
                 expect(err).to.be('Error parsing loanApplicationRegister at line: 3');
+                done();
+            });
+        });
+
+        it('should return error when hmda file has invalid format for a field', function(done) {
+            HMDAJson.process('test/testdata/bad-formatting.dat', FILE_SPEC, function(err, result) {
+                expect(result).to.be.null();
+                expect(err).to.be('Error parsing transmittalSheet at line: 1');
                 done();
             });
         });
