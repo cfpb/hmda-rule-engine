@@ -37,6 +37,12 @@ var hmdajson = require('./lib/hmdajson'),
      * -----------------------------------------------------
      */
 
+    HMDAEngine.zipcode = function(property) {
+        var regex = /^(\d{5})(\s{5}|-\d{4})$/;
+        
+        return regex.test(property);
+    };
+
     HMDAEngine.yyyy_mm_dd_hh_mm_ss = function(property) {
         var regex = /^(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})$/;
         var tokens = property.match(regex);

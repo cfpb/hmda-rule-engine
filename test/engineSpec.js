@@ -21,7 +21,23 @@ describe('Engine', function() {
                 done();
             });
         });
+    });
 
+    describe('zipcode', function() {
+        it('should return true if property is a valid zipcode', function(done) {
+            expect(engine.zipcode('55555     ')).to.be(true);
+            expect(engine.zipcode('55555-5555')).to.be(true);
+            done();
+        });
+
+        it('should return false if property is a malformed zipcode', function(done) {
+            expect(engine.zipcode('55cat     ')).to.be(false);      // No cats allowed
+            expect(engine.zipcode('55555 ')).to.be(false);          // Not enough whitespace
+            expect(engine.zipcode('5555      ')).to.be(false);      // Too short
+            expect(engine.zipcode('55555-55  ')).to.be(false);      // Too short
+            expect(engine.zipcode('55555 5555')).to.be(false);      // Missing '-'
+            done();
+        });
     });
 
     describe('yyyy_mm_dd_hh_mm_ss', function() {
