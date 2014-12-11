@@ -58,13 +58,13 @@ describe('lib/hmdajson', function() {
         it('should return empty record if no fields in line spec', function(done) {
             var line = '';
             var line_spec = {};
-            var result = HMDAJson.parseLine(line_spec, line);
+            var result = HMDAJson.parseLine(line_spec, line).record;
             expect(typeof result).to.be('object');
             expect(Object.keys(result).length).to.be(0);
             done();
         });
 
-        it('should return false if line is not long enough for field end', function(done) {
+        it('should return an error with the field if line is not long enough for field end', function(done) {
             var line = '1234567890';
             var line_spec = {
                 'foo': {
@@ -73,7 +73,7 @@ describe('lib/hmdajson', function() {
                 }
             };
             var result = HMDAJson.parseLine(line_spec, line);
-            expect(result).to.be.false();
+            expect(result.error).to.be('foo');
             done();
         });
 
@@ -93,7 +93,7 @@ describe('lib/hmdajson', function() {
                     'end': 10
                 }
             };
-            var result = HMDAJson.parseLine(line_spec, line);
+            var result = HMDAJson.parseLine(line_spec, line).record;
             expect(result).to.have.property('one');
             expect(result.one).to.be.equal('1');
             expect(result).to.have.property('middle');
@@ -103,6 +103,19 @@ describe('lib/hmdajson', function() {
             done();
         });
 
+        it('should return an error with the field if field is not properly formatted', function(done) {
+            var line = '123ABC7890';
+            var line_spec = {
+                'foo': {
+                    'start': 1,
+                    'end': 10,
+                    'dataType': 'N'
+                }
+            };
+            var result = HMDAJson.parseLine(line_spec, line);
+            expect(result.error).to.be('foo');
+            done();
+        });
     });
 
     describe('process', function() {
@@ -133,7 +146,7 @@ describe('lib/hmdajson', function() {
         it('should return error when hmda file has issue with transmittalSheet', function(done) {
             HMDAJson.process('test/testdata/incomplete-ts.dat', FILE_SPEC, function(err, result) {
                 expect(result).to.be.null();
-                expect(err).to.be('Error parsing transmittalSheet at line: 1');
+                expect(err).to.be('Error parsing transmittalSheet at line: 1, field: respondentEmail');
                 done();
             });
         });
@@ -141,7 +154,7 @@ describe('lib/hmdajson', function() {
         it('should return error when hmda file has issue with loanApplicationRegister', function(done) {
             HMDAJson.process('test/testdata/incomplete-lar.dat', FILE_SPEC, function(err, result) {
                 expect(result).to.be.null();
-                expect(err).to.be('Error parsing loanApplicationRegister at line: 3');
+                expect(err).to.be('Error parsing loanApplicationRegister at line: 3, field: filler');
                 done();
             });
         });
@@ -149,7 +162,7 @@ describe('lib/hmdajson', function() {
         it('should return error when hmda file has invalid format for a field', function(done) {
             HMDAJson.process('test/testdata/bad-formatting.dat', FILE_SPEC, function(err, result) {
                 expect(result).to.be.null();
-                expect(err).to.be('Error parsing transmittalSheet at line: 1');
+                expect(err).to.be('Error parsing transmittalSheet at line: 1, field: timestamp');
                 done();
             });
         });
