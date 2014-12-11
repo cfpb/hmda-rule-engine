@@ -465,7 +465,7 @@
                "dataType":"AN",
                "description":"Values are 1, 2, 3, 4, 5, or blank"
           },
-          "cpplicantSex":{
+          "applicantSex":{
                "element":"30",
                "label":"Applicant Sex",
                "start":"94",
