@@ -1,0 +1,568 @@
+{
+     "metadata": {
+          "src":"http://www.ffiec.gov/hmda/pdf/spec2013.pdf",
+          "year":"2013"
+     },
+     "transmittalSheet": {
+          "recordID":{
+               "element":"01",
+               "label":"Record Identifier",
+               "start":"1",
+               "end":"1",
+               "length":"1",
+               "dataType":"N",
+               "description":"Value is 1"
+          },
+          "respondentID":{
+               "element":"02",
+               "label":"Respondent-ID",
+               "start":"2",
+               "end":"11",
+               "length":"10",
+               "dataType":"AN",
+               "description":"Assigned by your federal regulatory agency. Format is right-justified and zero filled."
+          },
+          "agencyCode":{
+               "element":"03",
+               "label":"Agency Code",
+               "start":"12",
+               "end":"12",
+               "length":"1",
+               "dataType":"N",
+               "description":"Values are 1=OCC, 2=FRS, 3=FDIC, 5=NCUA, 7=HUD, or 9=CFPB"
+          },
+          "timestamp":{
+               "element":"04",
+               "label":"Timestamp",
+               "start":"13",
+               "end":"24",
+               "length":"12",
+               "dataType":"N",
+               "description":"Format is century, year, month, day, hour, minute (e.g., Jan. 17, 2013, at 1:30 pm would be 201301171330)"
+          },
+          "filler":{
+               "element":"05",
+               "label":"Filler",
+               "start":"25",
+               "end":"25",
+               "length":"1",
+               "dataType":"AN",
+               "description":"Blank"
+          },
+          "activityYear":{
+               "element":"06",
+               "label":"Activity Year",
+               "start":"26",
+               "end":"29",
+               "length":"4",
+               "dataType":"N",
+               "description":"Four digit year (e.g., 2013)"
+          },
+          "taxID":{
+               "element":"07",
+               "label":"Tax ID",
+               "start":"30",
+               "end":"39",
+               "length":"10",
+               "dataType":"AN",
+               "description":"Format is 99-9999999"
+          },
+          "totalLineEntries":{
+               "element":"08",
+               "label":"Total Line Entries",
+               "start":"40",
+               "end":"46",
+               "length":"7",
+               "dataType":"N",
+               "description":"The number of line entries contained in the accompanying Loan/Application Register"
+          },
+          "institutionName":{
+               "element":"09",
+               "label":"Respondent Name",
+               "start":"47",
+               "end":"76",
+               "length":"30",
+               "dataType":"AN",
+               "description":"Left-justified and upper case"
+          },
+          "respondentAddress":{
+               "element":"10",
+               "label":"Respondent Address",
+               "start":"77",
+               "end":"116",
+               "length":"40",
+               "dataType":"AN",
+               "description":"Left-justified"
+          },
+          "respondentCity":{
+               "element":"11",
+               "label":"Respondent City",
+               "start":"117",
+               "end":"141",
+               "length":"25",
+               "dataType":"AN",
+               "description":"Left-justified"
+          },
+          "respondentState":{
+               "element":"12",
+               "label":"Respondent State",
+               "start":"142",
+               "end":"143",
+               "length":"2",
+               "dataType":"AN",
+               "description":"Postal Code abbreviation"
+          },
+          "respondentZip":{
+               "element":"13",
+               "label":"Respondent Zip",
+               "start":"144",
+               "end":"153",
+               "length":"10",
+               "dataType":"AN",
+               "description":"Format is 99999 left-justified or Code 99999-9999"
+          },
+          "parentName":{
+               "element":"14",
+               "label":"Parent Name",
+               "start":"154",
+               "end":"183",
+               "length":"30",
+               "dataType":"AN",
+               "description":"If applicable"
+          },
+          "parentAddress":{
+               "element":"15",
+               "label":"Parent Address",
+               "start":"184",
+               "end":"223",
+               "length":"40",
+               "dataType":"AN",
+               "description":"If applicable"
+          },
+          "parentCity":{
+               "element":"16",
+               "label":"Parent City",
+               "start":"224",
+               "end":"248",
+               "length":"25",
+               "dataType":"AN",
+               "description":"If applicable"
+          },
+          "parentState":{
+               "element":"17",
+               "label":"Parent State",
+               "start":"249",
+               "end":"250",
+               "length":"2",
+               "dataType":"AN",
+               "description":"If applicable"
+          },
+          "parentZip":{
+               "element":"18",
+               "label":"Parent Zip Code",
+               "start":"251",
+               "end":"260",
+               "length":"10",
+               "dataType":"AN",
+               "description":"If applicable; format is 99999 left-justified or 99999-9999"
+          },
+          "contactName":{
+               "element":"19",
+               "label":"Contact Person's Name",
+               "start":"261",
+               "end":"290",
+               "length":"30",
+               "dataType":"AN",
+               "description":"For questionable data, reports, or other issues that may arise during an annual processing cycle."
+          },
+          "contactPhone":{
+               "element":"20",
+               "label":"Contact Person's Phone Number",
+               "start":"291",
+               "end":"302",
+               "length":"12",
+               "dataType":"AN",
+               "description":"Format is 999-999-9999"
+          },
+          "contactFax":{
+               "element":"21",
+               "label":"Contact Person's Facsimile Number",
+               "start":"303",
+               "end":"314",
+               "length":"12",
+               "dataType":"AN",
+               "description":"Format is 999-999-9999"
+          },
+          "respondentEmail":{
+               "element":"22",
+               "label":"Contact Person's E-mail Address",
+               "start":"315",
+               "end":"380",
+               "length":"66",
+               "dataType":"AN",
+               "description":"Enter only one e-mail address. E-mail address must contain only one @ symbol. Format is left-justified."
+          }
+     },
+     "loanApplicationRegister": {
+          "recordID":{
+               "element":"01",
+               "label":"Record Identifier",
+               "start":"1",
+               "end":"1",
+               "length":"1",
+               "dataType":"N",
+               "description":"Value is 2"
+          },
+          "respondentID":{
+               "element":"02",
+               "label":"Respondent-ID",
+               "start":"2",
+               "end":"11",
+               "length":"10",
+               "dataType":"AN",
+               "description":"Assigned by your federal regulatory agency. Format is right-justified and zero-filled."
+          },
+          "agencyCode":{
+               "element":"03",
+               "label":"Agency Code",
+               "start":"12",
+               "end":"12",
+               "length":"1",
+               "dataType":"N",
+               "description":"Values are 1=OCC, 2=FRS, 3=FDIC, 5=NCUA, 7=HUD, or 9=CFPB"
+          },
+          "loanNumber":{
+               "element":"04",
+               "label":"Loan/Application Number",
+               "start":"13",
+               "end":"37",
+               "length":"25",
+               "dataType":"AN",
+               "description":"Unique identifier across the home office and branch sites"
+          },
+          "applicationReceivedDate":{
+               "element":"05",
+               "label":"Date Application Received",
+               "start":"38",
+               "end":"45",
+               "length":"8",
+               "dataType":"AN",
+               "description":"Format is ccyymmdd or NA left-justified"
+          },
+          "loanType":{
+               "element":"06",
+               "label":"Loan Type",
+               "start":"46",
+               "end":"46",
+               "length":"1",
+               "dataType":"N",
+               "description":"Values are 1, 2, 3, or 4"
+          },
+          "propertyType":{
+               "element":"07",
+               "label":"Property Type",
+               "start":"47",
+               "end":"47",
+               "length":"1",
+               "dataType":"N",
+               "description":"Values are 1, 2, or 3"
+          },
+          "loanPurpose":{
+               "element":"08",
+               "label":"Loan Purpose",
+               "start":"48",
+               "end":"48",
+               "length":"1",
+               "dataType":"N",
+               "description":"Values are 1, 2, or 3"
+          },
+          "ownerOccupancy":{
+               "element":"09",
+               "label":"Owner Occupancy",
+               "start":"49",
+               "end":"49",
+               "length":"1",
+               "dataType":"N",
+               "description":"Values are 1, 2, or 3"
+          },
+          "loanAmount":{
+               "element":"10",
+               "label":"Loan Amount",
+               "start":"50",
+               "end":"54",
+               "length":"5",
+               "dataType":"N",
+               "description":"Report in thousands, round to the nearest thousand with leading zeros and without commas"
+          },
+          "preapprovals":{
+               "element":"11",
+               "label":"Preapprovals",
+               "start":"55",
+               "end":"55",
+               "length":"1",
+               "dataType":"N",
+               "description":"Values are 1, 2, or 3"
+          },
+          "actionTaken":{
+               "element":"12",
+               "label":"Type of Action Taken",
+               "start":"56",
+               "end":"56",
+               "length":"1",
+               "dataType":"N",
+               "description":"Values are 1, 2, 3, 4, 5, 6, 7, OR 8"
+          },
+          "actionDate":{
+               "element":"13",
+               "label":"Date of Action",
+               "start":"57",
+               "end":"64",
+               "length":"8",
+               "dataType":"N",
+               "description":"Format is ccyymmdd"
+          },
+          "metroArea":{
+               "element":"14",
+               "label":"Metropolitan Statistical Area/Metropolitan Division",
+               "start":"65",
+               "end":"69",
+               "length":"5",
+               "dataType":"AN",
+               "description":"Metropolitan Statistical Area or Metropolitan Division (if appropriate) code or NA left-justified"
+          },
+          "fipsState":{
+               "element":"15",
+               "label":"State Code",
+               "start":"70",
+               "end":"71",
+               "length":"2",
+               "dataType":"AN",
+               "description":"FIPS code with leading zerosor NA left-justified"
+          },
+          "fipsCounty":{
+               "element":"16",
+               "label":"County Code",
+               "start":"72",
+               "end":"74",
+               "length":"3",
+               "dataType":"AN",
+               "description":"FIPS code with leading zeros or NA left-justified"
+          },
+          "censusTract":{
+               "element":"17",
+               "label":"Census Tract",
+               "start":"75",
+               "end":"81",
+               "length":"7",
+               "dataType":"AN",
+               "description":"Include decimal point and any leading or trailing zeros or NA left-justified"
+          },
+          "applicantEthnicity":{
+               "element":"18",
+               "label":"Applicant Ethnicity",
+               "start":"82",
+               "end":"82",
+               "length":"1",
+               "dataType":"N",
+               "description":"Values are 1, 2, 3, or 4"
+          },
+          "coapplicantEthnicity":{
+               "element":"19",
+               "label":"Co-applicant Ethnicity",
+               "start":"83",
+               "end":"83",
+               "length":"1",
+               "dataType":"N",
+               "description":"Values are 1, 2, 3, 4, or 5"
+          },
+          "applicantRace1":{
+               "element":"20",
+               "label":"Applicant Race: 1",
+               "start":"84",
+               "end":"84",
+               "length":"1",
+               "dataType":"N",
+               "description":"Values are 1, 2, 3, 4, 5, 6, or 7"
+          },
+          "applicantRace2":{
+               "element":"21",
+               "label":"Applicant Race: 2",
+               "start":"85",
+               "end":"85",
+               "length":"1",
+               "dataType":"AN",
+               "description":"Values are 1, 2, 3, 4, 5, or blank"
+          },
+          "applicantRace3":{
+               "element":"22",
+               "label":"Applicant Race: 3",
+               "start":"86",
+               "end":"86",
+               "length":"1",
+               "dataType":"AN",
+               "description":"Values are 1, 2, 3, 4, 5, or blank"
+          },
+          "applicantRace4":{
+               "element":"23",
+               "label":"Applicant Race: 4",
+               "start":"87",
+               "end":"87",
+               "length":"1",
+               "dataType":"AN",
+               "description":"Values are 1, 2, 3, 4, 5, or blank"
+          },
+          "applicantRace5":{
+               "element":"24",
+               "label":"Applicant Race: 5",
+               "start":"88",
+               "end":"88",
+               "length":"1",
+               "dataType":"AN",
+               "description":"Values are 1, 2, 3, 4, 5, or blank"
+          },
+          "coapplicantRace1":{
+               "element":"25",
+               "label":"Co-applicant Race: 1",
+               "start":"89",
+               "end":"89",
+               "length":"1",
+               "dataType":"N",
+               "description":"Values are 1, 2, 3, 4, 5, 6, 7, or 8"
+          },
+          "coapplicantRace2":{
+               "element":"26",
+               "label":"Co-applicant Race: 2",
+               "start":"90",
+               "end":"90",
+               "length":"1",
+               "dataType":"AN",
+               "description":"Values are 1, 2, 3, 4, 5, or blank"
+          },
+          "coapplicantRace3":{
+               "element":"27",
+               "label":"Co-applicant Race: 3",
+               "start":"91",
+               "end":"91",
+               "length":"1",
+               "dataType":"AN",
+               "description":"Values are 1, 2, 3, 4, 5, or blank"
+          },
+          "coapplicantRace4":{
+               "element":"28",
+               "label":"Co-applicant Race: 4",
+               "start":"92",
+               "end":"92",
+               "length":"1",
+               "dataType":"AN",
+               "description":"Values are 1, 2, 3, 4, 5, or blank"
+          },
+          "coapplicantRace5":{
+               "element":"29",
+               "label":"Co-applicant Race: 5",
+               "start":"93",
+               "end":"93",
+               "length":"1",
+               "dataType":"AN",
+               "description":"Values are 1, 2, 3, 4, 5, or blank"
+          },
+          "applicantSex":{
+               "element":"30",
+               "label":"Applicant Sex",
+               "start":"94",
+               "end":"94",
+               "length":"1",
+               "dataType":"N",
+               "description":"Values are 1, 2, 3, or 4"
+          },
+          "coapplicantSex":{
+               "element":"31",
+               "label":"Co-applicant Sex",
+               "start":"95",
+               "end":"95",
+               "length":"1",
+               "dataType":"N",
+               "description":"Values are 1, 2, 3, 4, or 5"
+          },
+          "applicantIncome":{
+               "element":"32",
+               "label":"Applicant Income",
+               "start":"96",
+               "end":"99",
+               "length":"4",
+               "dataType":"AN",
+               "description":"Report in thousands, round to the nearest thousand with leading zeros and without commas or NA left-justified"
+          },
+          "purchaserType":{
+               "element":"33",
+               "label":"Type of Purchaser",
+               "start":"100",
+               "end":"100",
+               "length":"1",
+               "dataType":"N",
+               "description":"Values are 0, 1, 2, 3, 4, 5, 6, 7, 8, or 9"
+          },
+          "denialReason1":{
+               "element":"34",
+               "label":"Denial Reason: 1",
+               "start":"101",
+               "end":"101",
+               "length":"1",
+               "dataType":"AN",
+               "description":"Values are 1, 2, 3, 4, 5, 6, 7, 8, 9, or blank"
+          },
+          "denialReason2":{
+               "element":"35",
+               "label":"Denial Reason: 2",
+               "start":"102",
+               "end":"102",
+               "length":"1",
+               "dataType":"AN",
+               "description":"Values are 1, 2, 3, 4, 5, 6, 7, 8, 9, or blank"
+          },
+          "denialReason3":{
+               "element":"36",
+               "label":"Denial Reason: 3",
+               "start":"103",
+               "end":"103",
+               "length":"1",
+               "dataType":"AN",
+               "description":"Values are 1, 2, 3, 4, 5, 6, 7, 8, 9, or blank"
+          },
+          "rateSpread":{
+               "element":"37",
+               "label":"Rate Spread",
+               "start":"104",
+               "end":"108",
+               "length":"5",
+               "dataType":"AN",
+               "description":"Enter the rate spread to two decimal places. Include the decimal point and any leading or trailing zeros or NA left-justified"
+          },
+          "hoepaStatus":{
+               "element":"38",
+               "label":"HOEPA Status",
+               "start":"109",
+               "end":"109",
+               "length":"1",
+               "dataType":"N",
+               "description":"Values are 1 or 2"
+          },
+          "lienStatus":{
+               "element":"39",
+               "label":"Lien Status",
+               "start":"110",
+               "end":"110",
+               "length":"1",
+               "dataType":"N",
+               "description":"Values are 1, 2, 3, or 4"
+          },
+          "filler":{
+               "element":"40",
+               "label":"Filler",
+               "start":"111",
+               "end":"111",
+               "length":"1",
+               "dataType":"AN",
+               "description":"Blank"
+          }
+     }
+}

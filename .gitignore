@@ -11,26 +11,13 @@ Thumbs.db
 ##################
 *.swp
 
-# Python #
-#################
-*.pyc
-*.egg-info/
-__pycache__/
-*.py[cod]
-
-# Django #
-#################
-*.egg-info
-.installed.cfg
-
 # Unit test / coverage reports
 #################
-htmlcov/
-.tox/
-.coverage
-.cache
-nosetests.xml
-coverage.xml
+coverage
+
+node_modules/
+.build/
+
 
 
 
