@@ -73,7 +73,7 @@ describe('lib/hmdajson', function() {
                 }
             };
             var result = HMDAJson.parseLine(line_spec, line);
-            expect(result.error).to.be('foo');
+            expect(result.error).to.be('Line is not long enough to contain \'foo\'');
             done();
         });
 
@@ -113,7 +113,7 @@ describe('lib/hmdajson', function() {
                 }
             };
             var result = HMDAJson.parseLine(line_spec, line);
-            expect(result.error).to.be('foo');
+            expect(result.error).to.be('\'foo\' must be a number');
             done();
         });
     });
@@ -146,7 +146,7 @@ describe('lib/hmdajson', function() {
         it('should return error when hmda file has issue with transmittalSheet', function(done) {
             HMDAJson.process('test/testdata/incomplete-ts.dat', FILE_SPEC, function(err, result) {
                 expect(result).to.be.null();
-                expect(err).to.be('Error parsing transmittalSheet at line: 1, field: respondentEmail');
+                expect(err).to.be('Error parsing transmittalSheet at line: 1 - Line is not long enough to contain \'contactFax\'');
                 done();
             });
         });
@@ -154,7 +154,7 @@ describe('lib/hmdajson', function() {
         it('should return error when hmda file has issue with loanApplicationRegister', function(done) {
             HMDAJson.process('test/testdata/incomplete-lar.dat', FILE_SPEC, function(err, result) {
                 expect(result).to.be.null();
-                expect(err).to.be('Error parsing loanApplicationRegister at line: 3, field: filler');
+                expect(err).to.be('Error parsing loanApplicationRegister at line: 3 - Line is not long enough to contain \'filler\'');
                 done();
             });
         });
@@ -162,7 +162,7 @@ describe('lib/hmdajson', function() {
         it('should return error when hmda file has invalid format for a field', function(done) {
             HMDAJson.process('test/testdata/bad-formatting.dat', FILE_SPEC, function(err, result) {
                 expect(result).to.be.null();
-                expect(err).to.be('Error parsing transmittalSheet at line: 1, field: timestamp');
+                expect(err).to.be('Error parsing transmittalSheet at line: 1 - \'timestamp\' must be a number');
                 done();
             });
         });
