@@ -37,6 +37,71 @@ var hmdajson = require('./lib/hmdajson'),
      * -----------------------------------------------------
      */
 
+    HMDAEngine.email_address = function(property) {
+        var regex = /^[\w.]*\w+@\w+[\w.]*\w+\.\w+\s*$/;
+
+        return regex.test(property);
+    };
+
+    HMDAEngine.zipcode = function(property) {
+        var regex = /^\d{5}(?:\s*|-\d{4})$/;
+        
+        return regex.test(property);
+    };
+
+    HMDAEngine.yyyy_mm_dd_hh_mm_ss = function(property) {
+        var regex = /^(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})$/;
+        var tokens = property.match(regex);
+
+        if (tokens !== null) {
+            var year = +tokens[1];
+            var month = (+tokens[2] >= 1 && +tokens[2] <= 12) ? +tokens[2] - 1 : null;
+            var day = (+tokens[3] >= 1 && +tokens[3] <= 31) ? +tokens[3] : null;
+            var hours = (+tokens[4] >= 0 && +tokens[4] < 24) ? +tokens[4] : null;
+            var minutes = (+tokens[5] >= 0 && +tokens[5] < 60) ? +tokens[5] : null;
+            var seconds = (+tokens[6] >= 0 && +tokens[6] < 60) ? +tokens[6] : null;
+
+            var date = new Date(year, month, day, hours, minutes, seconds);
+            return (date.getFullYear() === year && date.getMonth() === month && date.getHours() === hours && date.getMinutes() === minutes && date.getSeconds() === seconds);
+        }
+
+        return false;
+    }; 
+
+    HMDAEngine.yyyy_mm_dd_hh_mm = function(property) {
+        return HMDAEngine.yyyy_mm_dd_hh_mm_ss(property + '00');
+    };
+
+    HMDAEngine.yyyy_mm_dd = function(property) {
+        return HMDAEngine.yyyy_mm_dd_hh_mm_ss(property + '000000');
+    };
+
+    HMDAEngine.mm_dd_yyyy = function(property) {
+        var dateStr = property.slice(4,8) + property.slice(0,2) + property.slice(2,4) + property.slice(8);
+        return HMDAEngine.yyyy_mm_dd(dateStr);
+    };
+
+    HMDAEngine.yyyy = function(property) {
+        return HMDAEngine.yyyy_mm_dd(property + '0101');
+    };
+
+    HMDAEngine.hh_mm = function(property) {
+        return HMDAEngine.yyyy_mm_dd_hh_mm('20140101' + property);
+    };
+
+    HMDAEngine.hh_mm_ss = function(property) {
+        return HMDAEngine.yyyy_mm_dd_hh_mm_ss('20140101' + property);
+    };
+
+    HMDAEngine.matches_regex = function(property, regexStr) {
+        try {
+            var regex = new RegExp(regexStr);
+            return regex.test(property);    
+        } catch (error) {
+            return false;
+        }
+    };
+
     HMDAEngine.is_true = function(property) {
         return !!property;
     };

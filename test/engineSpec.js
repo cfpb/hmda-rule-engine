@@ -21,7 +21,209 @@ describe('Engine', function() {
                 done();
             });
         });
+    });
 
+    describe('email_address', function() {
+        it('should return true if property is a valid email address', function(done) {
+            var test_addresses = [
+                'test@test.com                                                     ',
+                'test15.cat@test.testing                                           ',
+                'test15.cat@test.cat.testing                                       '
+            ];
+            for (var i = 0; i < test_addresses.length; i++) {
+                expect(engine.email_address(test_addresses[i])).to.be(true);
+            }
+            done();
+        });
+
+        it('should return false if property is a malformed email address', function(done) {
+            var test_addresses = [
+                'test@.test.com                                                    ', // @.
+                'test.@test.com                                                    ', // .@
+                'te st@test.com                                                    ', // Space in address
+                'te@st@test.com                                                    ', // Double '@''
+                'test@test..com                                                    '  // Double '.'
+            ];
+            for (var i = 0; i < test_addresses.length; i++) {
+                expect(engine.email_address(test_addresses[i])).to.be(false);
+            }
+            done();
+        });
+    });
+
+    describe('zipcode', function() {
+        it('should return true if property is a valid zipcode', function(done) {
+            expect(engine.zipcode('55555     ')).to.be(true);
+            expect(engine.zipcode('55555')).to.be(true);
+            expect(engine.zipcode('55555-5555')).to.be(true);
+            done();
+        });
+
+        it('should return false if property is a malformed zipcode', function(done) {
+            expect(engine.zipcode('55cat     ')).to.be(false);      // No cats allowed
+            expect(engine.zipcode('5555      ')).to.be(false);      // Too short
+            expect(engine.zipcode('55555-55  ')).to.be(false);      // Too short
+            expect(engine.zipcode('55555 5555')).to.be(false);      // Missing '-'
+            done();
+        });
+    });
+
+    describe('yyyy_mm_dd_hh_mm_ss', function() {
+        it('should return true if property is a valid date', function(done) {
+            expect(engine.yyyy_mm_dd_hh_mm_ss('20140305112715')).to.be(true);
+            expect(engine.yyyy_mm_dd_hh_mm_ss('20131231235923')).to.be(true);
+            expect(engine.yyyy_mm_dd_hh_mm_ss('20150101000000')).to.be(true);
+            done();
+        });
+
+        it('should return false if property is not a valid date', function(done) {
+            expect(engine.yyyy_mm_dd_hh_mm_ss('20141315123215')).to.be(false);   // Invalid month
+            expect(engine.yyyy_mm_dd_hh_mm_ss('20140015123215')).to.be(false);   // Invalid month
+            expect(engine.yyyy_mm_dd_hh_mm_ss('20140231123215')).to.be(false);   // Invalid day (Feb 31)
+            expect(engine.yyyy_mm_dd_hh_mm_ss('20140225241715')).to.be(false);   // Invalid hour
+            expect(engine.yyyy_mm_dd_hh_mm_ss('20140225207815')).to.be(false);   // Invalid minutes
+            expect(engine.yyyy_mm_dd_hh_mm_ss('20140225203278')).to.be(false);   // Invalid seconds
+            done();
+        });
+
+        it('should return false if property is malformed', function(done) {
+            expect(engine.yyyy_mm_dd_hh_mm_ss('20141005')).to.be(false);         // Too short
+            expect(engine.yyyy_mm_dd_hh_mm_ss('2014010101010101')).to.be(false); // Too long
+            expect(engine.yyyy_mm_dd_hh_mm_ss('2014cat0511542')).to.be(false);   // No cats allowed
+            done();
+        });
+    });
+
+    describe('yyyy_mm_dd_hh_mm', function() {
+        it('should return true if property is a valid date', function(done) {
+            expect(engine.yyyy_mm_dd_hh_mm('201403051127')).to.be(true);
+            expect(engine.yyyy_mm_dd_hh_mm('201312312359')).to.be(true);
+            expect(engine.yyyy_mm_dd_hh_mm('201501010000')).to.be(true);
+            done();
+        });
+
+        it('should return false if property is not a valid date', function(done) {
+            expect(engine.yyyy_mm_dd_hh_mm('201413151232')).to.be(false);   // Invalid month
+            expect(engine.yyyy_mm_dd_hh_mm('201400151232')).to.be(false);   // Invalid month
+            expect(engine.yyyy_mm_dd_hh_mm('201402311232')).to.be(false);   // Invalid day (Feb 31)
+            expect(engine.yyyy_mm_dd_hh_mm('201402252417')).to.be(false);   // Invalid hour
+            expect(engine.yyyy_mm_dd_hh_mm('201402252078')).to.be(false);   // Invalid minutes
+            done();
+        });
+
+        it('should return false if property is malformed', function(done) {
+            expect(engine.yyyy_mm_dd_hh_mm('20141005')).to.be(false);       // Too short
+            expect(engine.yyyy_mm_dd_hh_mm('20140101010101')).to.be(false); // Too long
+            expect(engine.yyyy_mm_dd_hh_mm('2014cat05115')).to.be(false);   // No cats allowed
+            done();
+        });
+    });
+
+    describe('yyyy_mm_dd', function() {
+        it('should return true if property is a valid date', function(done) {
+            expect(engine.yyyy_mm_dd('20140305')).to.be(true);
+            expect(engine.yyyy_mm_dd('20131231')).to.be(true);
+            expect(engine.yyyy_mm_dd('20150101')).to.be(true);
+            done();
+        });
+
+        it('should return false if property is not a valid date', function(done) {
+            expect(engine.yyyy_mm_dd('20141315')).to.be(false);   // Invalid month
+            expect(engine.yyyy_mm_dd('20140015')).to.be(false);   // Invalid month
+            expect(engine.yyyy_mm_dd('20140231')).to.be(false);   // Invalid day (Feb 31)
+            done();
+        });
+
+        it('should return false if property is malformed', function(done) {
+            expect(engine.yyyy_mm_dd('201410')).to.be(false);       // Too short
+            expect(engine.yyyy_mm_dd('20140101010101')).to.be(false); // Too long
+            expect(engine.yyyy_mm_dd('2014cat0')).to.be(false);   // No cats allowed
+            done();
+        });
+    });
+
+    describe('mm_dd_yyyy', function() {
+        it('should return true if property is a valid date', function(done) {
+            expect(engine.mm_dd_yyyy('03052014')).to.be(true);
+            expect(engine.mm_dd_yyyy('12312013')).to.be(true);
+            expect(engine.mm_dd_yyyy('01012015')).to.be(true);
+            done();
+        });
+
+        it('should return false if property is not a valid date', function(done) {
+            expect(engine.mm_dd_yyyy('15132014')).to.be(false);   // Invalid month
+            expect(engine.mm_dd_yyyy('15002014')).to.be(false);   // Invalid month
+            expect(engine.mm_dd_yyyy('32022014')).to.be(false);   // Invalid day (Feb 31)
+            done();
+        });
+
+        it('should return false if property is malformed', function(done) {
+            expect(engine.mm_dd_yyyy('102014')).to.be(false);       // Too short
+            expect(engine.mm_dd_yyyy('01010101012014')).to.be(false); // Too long
+            expect(engine.mm_dd_yyyy('0cat2014')).to.be(false);   // No cats allowed
+            done();
+        });
+    });
+
+    describe('yyyy', function() {
+        it('should return true if property is a valid year', function(done) {
+            expect(engine.yyyy('2014')).to.be(true);
+            expect(engine.yyyy('1997')).to.be(true);
+            done();
+        });
+
+        it('should return false if property is not a valid year', function(done) {
+            expect(engine.yyyy('    ')).to.be(false);
+            expect(engine.yyyy('cats')).to.be(false);           // No cats allowed
+            expect(engine.yyyy('205')).to.be(false);
+            done();
+        });
+    });
+
+    describe('hh_mm', function() {
+        it('should return true for a valid time', function(done) {
+            expect(engine.hh_mm('0512')).to.be(true);
+            done();
+        });
+
+        it('should return false for a malformed time', function(done) {
+            expect(engine.hh_mm('2412')).to.be(false);          // Invalid hours
+            expect(engine.hh_mm('0186')).to.be(false);          // Invalid minutes
+            expect(engine.hh_mm('cats')).to.be(false);          // No cats allowed
+            done();
+        });
+    });
+
+    describe('hh_mm_ss', function() {
+        it('should return true for a valid time', function(done) {
+            expect(engine.hh_mm_ss('051255')).to.be(true);
+            done();
+        });
+
+        it('should return false for a malformed time', function(done) {
+            expect(engine.hh_mm_ss('241205')).to.be(false);     // Invalid hours
+            expect(engine.hh_mm_ss('018651')).to.be(false);     // Invalid minutes
+            expect(engine.hh_mm_ss('041794')).to.be(false);     // Invalid seconds
+            expect(engine.hh_mm_ss('cats52')).to.be(false);     // No cats allowed
+            done();
+        });
+    });
+
+    describe('matches_regex', function() {
+        it('should return true if property matches regexStr', function(done) {
+            expect(engine.matches_regex('cat', '^cat$')).to.be(true);
+            done();
+        });
+
+        it('should return false if property does not match regexStr', function(done) {
+            expect(engine.matches_regex('cat', '^dog$')).to.be(false);
+            done();
+        });
+
+        it('should return false if regexStr is a malformed regex', function(done) {
+            expect(engine.matches_regex('cat', '^[0-9+$')).to.be(false);
+            done();
+        });
     });
 
     describe('is_true', function() {
