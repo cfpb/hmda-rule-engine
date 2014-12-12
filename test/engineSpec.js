@@ -40,7 +40,6 @@ describe('Engine', function() {
             var test_addresses = [
                 'test@.test.com                                                    ', // @.
                 'test.@test.com                                                    ', // .@
-                'test@test.com                                     ',                 // Too short
                 'te st@test.com                                                    ', // Space in address
                 'te@st@test.com                                                    ', // Double '@''
                 'test@test..com                                                    '  // Double '.'

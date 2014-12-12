@@ -40,7 +40,7 @@ var hmdajson = require('./lib/hmdajson'),
     HMDAEngine.email_address = function(property) {
         var regex = /^[\w.]*\w+@\w+[\w.]*\w+\.\w+\s*$/;
 
-        return (regex.test(property) && property.length === 66);
+        return regex.test(property);
     };
 
     HMDAEngine.zipcode = function(property) {
