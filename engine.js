@@ -38,13 +38,13 @@ var hmdajson = require('./lib/hmdajson'),
      */
 
     HMDAEngine.email_address = function(property) {
-        var regex = /^([\w.]*)(\w+)@(\w+)([\w.]*)(\w+)\.(\w+)(\s*)$/;
+        var regex = /^(?:[\w.])*(?:\w)+@(?:\w)+(?:[\w.])*(?:\w)+\.(?:\w)+(?:\s)*$/;
 
         return (regex.test(property) && property.length === 66);
     };
 
     HMDAEngine.zipcode = function(property) {
-        var regex = /^(\d{5})(\s{5}|-\d{4})$/;
+        var regex = /^(?:\d){5}(?:\s{5}|-\d{4})$/;
         
         return regex.test(property);
     };
