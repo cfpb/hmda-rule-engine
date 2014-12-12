@@ -31,13 +31,15 @@ describe('lib/filespecvalidator', function() {
                 metadata: {},
                 transmittalSheet: {
                     foo: {
-                        end: 1
+                        end: 1,
+                        dataType: 'N'
                     }
                 },
                 loanApplicationRegister: {
                     bar: {
                         start: 1,
-                        end: 1
+                        end: 1,
+                        dataType: 'N'
                     }
                 }
             };
@@ -51,13 +53,15 @@ describe('lib/filespecvalidator', function() {
                 metadata: {},
                 transmittalSheet: {
                     foo: {
-                        start: 1
+                        start: 1,
+                        dataType: 'N'
                     }
                 },
                 loanApplicationRegister: {
                     bar: {
                         start: 1,
-                        end: 1
+                        end: 1,
+                        dataType: 'N'
                     }
                 }
             };
@@ -72,12 +76,14 @@ describe('lib/filespecvalidator', function() {
                 transmittalSheet: {
                     foo: {
                         start: 1,
-                        end: 1
+                        end: 1,
+                        dataType: 'N'
                     }
                 },
                 loanApplicationRegister: {
                     bar: {
-                        end: 1
+                        end: 1,
+                        dataType: 'N'
                     }
                 }
             };
@@ -92,17 +98,63 @@ describe('lib/filespecvalidator', function() {
                 transmittalSheet: {
                     foo: {
                         start: 1,
-                        end: 1
+                        end: 1,
+                        dataType: 'N'
                     }
                 },
                 loanApplicationRegister: {
                     bar: {
-                        start: 1
+                        start: 1,
+                        dataType: 'N'
                     }
                 }
             };
             var result = validator.validate(tmpFileSpec);
             expect(result).to.be('Field "bar" in loanApplicationRegister missing required "end" property');
+            done();
+        });
+
+        it('should return error when missing dataType property for transmittalSheet field', function(done) {
+            var tmpFileSpec = {
+                metadata: {},
+                transmittalSheet: {
+                    foo: {
+                        start: 1,
+                        end: 1
+                    }
+                },
+                loanApplicationRegister: {
+                    bar: {
+                        start: 1,
+                        end: 1,
+                        dataType: 'N'
+                    }
+                }
+            };
+            var result = validator.validate(tmpFileSpec);
+            expect(result).to.be('Field "foo" in transmittalSheet missing required "dataType" property');
+            done();
+        });
+
+        it('should return error when missing dataType property for loanApplicationRegister field', function(done) {
+            var tmpFileSpec = {
+                metadata: {},
+                transmittalSheet: {
+                    foo: {
+                        start: 1,
+                        end: 1,
+                        dataType: 'N'
+                    }
+                },
+                loanApplicationRegister: {
+                    bar: {
+                        start: 1,
+                        end: 1
+                    }
+                }
+            };
+            var result = validator.validate(tmpFileSpec);
+            expect(result).to.be('Field "bar" in loanApplicationRegister missing required "dataType" property');
             done();
         });
     });
