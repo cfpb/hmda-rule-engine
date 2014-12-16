@@ -926,7 +926,7 @@ describe('Engine', function() {
                 }
             };
             engine.parseRule(rule, result);
-            expect(result.body).to.be('if (HMDAEngine.is_true(arguments[0])) { return HMDAEngine.is_false(arguments[1]); } return false;');
+            expect(result.body).to.be('if (HMDAEngine.is_true(arguments[0])) { return HMDAEngine.is_false(arguments[1]); } return true;');
             done();
         });
 
@@ -1002,7 +1002,7 @@ describe('Engine', function() {
                 }
             }
             engine.parseRule(rule, result);
-            expect(result.body).to.be('if (HMDAEngine.is_true(arguments[0]) && HMDAEngine.is_false(arguments[1])) { return HMDAEngine.equal(arguments[2], "3"); } return false;');
+            expect(result.body).to.be('if (HMDAEngine.is_true(arguments[0]) && HMDAEngine.is_false(arguments[1])) { return HMDAEngine.equal(arguments[2], "3"); } return true;');
             done();
         });
     });

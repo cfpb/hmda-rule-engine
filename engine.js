@@ -274,7 +274,7 @@ var hmdajson = require('./lib/hmdajson'),
             HMDAEngine.parseRule(rule.if, result);
             result.body += ') { return ';
             HMDAEngine.parseRule(rule.then, result);
-            result.body += '; } return false;';
+            result.body += '; } return true;';
         }
 
         if (rule.hasOwnProperty('and')) {
