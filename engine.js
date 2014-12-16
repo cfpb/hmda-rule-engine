@@ -1,8 +1,10 @@
+/*jshint evil:true*/
 /*global window:false*/
 'use strict';
 
 var hmdajson = require('./lib/hmdajson'),
-    _ = require('underscore');
+    _ = require('underscore'),
+    brijSpec = require('brij-spec/validate');
 
 (function() {
 
@@ -45,7 +47,7 @@ var hmdajson = require('./lib/hmdajson'),
 
     HMDAEngine.zipcode = function(property) {
         var regex = /^\d{5}(?:\s*|-\d{4})$/;
-        
+
         return regex.test(property);
     };
 
@@ -66,7 +68,7 @@ var hmdajson = require('./lib/hmdajson'),
         }
 
         return false;
-    }; 
+    };
 
     HMDAEngine.yyyy_mm_dd_hh_mm = function(property) {
         return HMDAEngine.yyyy_mm_dd_hh_mm_ss(property + '00');
@@ -96,7 +98,7 @@ var hmdajson = require('./lib/hmdajson'),
     HMDAEngine.matches_regex = function(property, regexStr) {
         try {
             var regex = new RegExp(regexStr);
-            return regex.test(property);    
+            return regex.test(property);
         } catch (error) {
             return false;
         }
@@ -271,6 +273,33 @@ var hmdajson = require('./lib/hmdajson'),
             }
             next(err, root._HMDA_JSON);
         });
+    };
+
+    HMDAEngine.parseRule = function(rule, result) {
+        if (rule.hasOwnProperty('condition')) {
+            result.body += 'HMDAEngine.' + rule.condition + '(arguments[' + result.argIndex++ + ']';
+            result.args.push(rule.property);
+            if (brijSpec.VALID_CONDITIONS[rule.condition].additionalFields && brijSpec.VALID_CONDITIONS[rule.condition].additionalFields.length === 1) {
+                if (HMDAEngine.ends_with(rule.condition, '_property')) {
+                    result.body += ', arguments[' + result.argIndex++ + ']';
+                    result.args.push(rule.value);
+                } else {
+                    result.body += ', "' + rule.value + '"';
+                }
+            } else if (brijSpec.VALID_CONDITIONS[rule.condition].additionalFields && brijSpec.VALID_CONDITIONS[rule.condition].additionalFields.length === 2) {
+                // Between
+                result.body += ', "' + rule.start + '", "' + rule.end + '"';
+            }
+            result.body += ')';
+        }
+
+        if (rule.hasOwnProperty('if')) {
+            result.body += 'if (';
+            HMDAEngine.parseRule(rule.if, result);
+            result.body += ') { return ';
+            HMDAEngine.parseRule(rule.then, result);
+            result.body += '; } return false;';
+        }
     };
 
     /*

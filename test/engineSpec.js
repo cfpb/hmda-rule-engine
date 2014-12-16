@@ -954,4 +954,91 @@ describe('Engine', function() {
         });
     });
 
+    describe('parseRule', function() {
+        it('should parse a rule with a simple property test into a function string', function(done) {
+            var result = {
+                argIndex: 0,
+                args: [],
+                body: ''
+            };
+            var rule = {
+                "property": "foo",
+                "condition": "is_true"
+            };
+            engine.parseRule(rule, result);
+            expect(result.body).to.be('HMDAEngine.is_true(arguments[0])');
+            done();
+        });
+
+        it('should parse a rule with a property-value test into a function string', function(done) {
+            var result = {
+                argIndex: 0,
+                args: [],
+                body: ''
+            };
+            var rule = {
+                "property": "foo",
+                "condition": "equal",
+                "value": "1"
+            };
+            engine.parseRule(rule, result);
+            expect(result.body).to.be('HMDAEngine.equal(arguments[0], "1")');
+            done();
+        });
+
+        it('should parse a rule with a property-property test into a function string', function(done) {
+            var result = {
+                argIndex: 0,
+                args: [],
+                body: ''
+            };
+            var rule = {
+                "property": "foo",
+                "condition": "equal_property",
+                "value": "bar"
+            };
+            engine.parseRule(rule, result);
+            expect(result.body).to.be('HMDAEngine.equal_property(arguments[0], arguments[1])');
+            done();
+        });
+
+        it('should parse a rule with a property-value-value test into a function string', function(done) {
+            var result = {
+                argIndex: 0,
+                args: [],
+                body: ''
+            };
+            var rule = {
+                "property": "foo",
+                "condition": "between",
+                "start": "1",
+                "end": "9"
+            };
+            engine.parseRule(rule, result);
+            expect(result.body).to.be('HMDAEngine.between(arguments[0], "1", "9")');
+            done();
+        });
+
+        it('should parse a rule with an if-then test into a function string', function(done) {
+            var result = {
+                argIndex: 0,
+                args: [],
+                body: ''
+            };
+            var rule = {
+                "if": {
+                    "property": "foo",
+                    "condition": "is_true"
+                },
+                "then": {
+                    "property": "bar",
+                    "condition": "is_false"
+                }
+            };
+            engine.parseRule(rule, result);
+            expect(result.body).to.be('if (HMDAEngine.is_true(arguments[0])) { return HMDAEngine.is_false(arguments[1]); } return false;');
+            done();
+        });
+    });
+
 });
