@@ -1,4 +1,4 @@
-/*jshint evil:true*/
+/*jshint multistr:true, evil:true*/
 /*global window:false*/
 'use strict';
 
@@ -153,52 +153,28 @@ var hmdajson = require('./lib/hmdajson'),
         return !isNaN(+property) && +property !== parseInt(property);
     };
 
-    HMDAEngine.equal = function(property, value) {
+    HMDAEngine.equal = HMDAEngine.equal_property = function(property, value) {
         return property === value;
     };
 
-    HMDAEngine.equal_property = function(first, second) {
-        return first === second;
-    };
-
-    HMDAEngine.not_equal = function(property, value) {
+    HMDAEngine.not_equal = HMDAEngine.not_equal_property = function(property, value) {
         return property !== value;
     };
 
-    HMDAEngine.not_equal_property = function(first, second) {
-        return first !== second;
-    };
-
-    HMDAEngine.greater_than = function(property, value) {
+    HMDAEngine.greater_than = HMDAEngine.greater_than_property = function(property, value) {
         return !isNaN(+property) && !isNaN(+value) && +property > +value;
     };
 
-    HMDAEngine.greater_than_property = function(first, second) {
-        return !isNaN(+first) && !isNaN(+second) && +first > +second;
-    };
-
-    HMDAEngine.less_than = function(property, value) {
+    HMDAEngine.less_than = HMDAEngine.less_than_property = function(property, value) {
         return !isNaN(+property) && !isNaN(+value) && +property < +value;
     };
 
-    HMDAEngine.less_than_property = function(first, second) {
-        return !isNaN(+first) && !isNaN(+second) && +first < +second;
-    };
-
-    HMDAEngine.greater_than_or_equal = function(property, value) {
+    HMDAEngine.greater_than_or_equal = HMDAEngine.greater_than_or_equal_property = function(property, value) {
         return !isNaN(+property) && !isNaN(+value) && +property >= +value;
     };
 
-    HMDAEngine.greater_than_or_equal_property = function(first, second) {
-        return !isNaN(+first) && !isNaN(+second) && +first >= +second;
-    };
-
-    HMDAEngine.less_than_or_equal = function(property, value) {
+    HMDAEngine.less_than_or_equal = HMDAEngine.less_than_or_equal_property = function(property, value) {
         return !isNaN(+property) && !isNaN(+value) && +property <= +value;
-    };
-
-    HMDAEngine.less_than_or_equal_property = function(first, second) {
-        return !isNaN(+first) && !isNaN(+second) && +first <= +second;
     };
 
     HMDAEngine.between = function(property, start, end) {

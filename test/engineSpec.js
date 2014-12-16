@@ -442,27 +442,6 @@ describe('Engine', function() {
         });
     });
 
-    describe('equal_property', function() {
-        it('should return true if first and second are equal', function(done) {
-            expect(engine.equal_property('5', '5')).to.be(true);
-            expect(engine.equal_property(5, 5)).to.be(true);
-            expect(engine.equal_property(5.5, 5.5)).to.be(true);
-            done();
-        });
-
-        it('should return false if first and second are not equal', function(done) {
-            expect(engine.equal_property('5', '6')).to.be(false);
-            expect(engine.equal_property(5, 6)).to.be(false);
-            expect(engine.equal_property(5.5, 6.5)).to.be(false);
-            done();
-        });
-
-        it('should return false if first and second are equivalent but different types', function(done) {
-            expect(engine.equal_property('5', 5)).to.be(false);
-            done();
-        });
-    });
-
     describe('not_equal', function() {
         it('should return false if property and value are equal', function(done) {
             expect(engine.not_equal('5', '5')).to.be(false);
@@ -480,27 +459,6 @@ describe('Engine', function() {
 
         it('should return true if property and value are equivalent but different types', function(done) {
             expect(engine.not_equal('5', 5)).to.be(true);
-            done();
-        });
-    });
-
-    describe('not_equal_property', function() {
-        it('should return false if first and second are equal', function(done) {
-            expect(engine.not_equal_property('5', '5')).to.be(false);
-            expect(engine.not_equal_property(5, 5)).to.be(false);
-            expect(engine.not_equal_property(5.5, 5.5)).to.be(false);
-            done();
-        });
-
-        it('should return true if first and second are not equal', function(done) {
-            expect(engine.not_equal_property('5', '6')).to.be(true);
-            expect(engine.not_equal_property(5, 6)).to.be(true);
-            expect(engine.not_equal_property(5.5, 6.5)).to.be(true);
-            done();
-        });
-
-        it('should return true if first and second are equivalent but different types', function(done) {
-            expect(engine.not_equal_property('5', 5)).to.be(true);
             done();
         });
     });
@@ -530,31 +488,6 @@ describe('Engine', function() {
         });
     });
 
-    describe('greater_than_property', function() {
-        it('should return true if first is > second', function(done) {
-            expect(engine.greater_than_property('5', '4')).to.be(true);
-            expect(engine.greater_than_property('5.5', '4.2')).to.be(true);
-            expect(engine.greater_than_property('5.5', '4')).to.be(true);
-            expect(engine.greater_than_property('5', 4)).to.be(true);
-            expect(engine.greater_than_property(5, 4.2)).to.be(true);
-            done();
-        });
-
-        it('should return false if first is <= second', function(done) {
-            expect(engine.greater_than_property('5', '6')).to.be(false);
-            expect(engine.greater_than_property('5', '6.4')).to.be(false);
-            expect(engine.greater_than_property(5.2, '6')).to.be(false);
-            expect(engine.greater_than_property(5.2, 5.2)).to.be(false);
-            done();
-        });
-
-        it('should return false if first or second are NaN', function(done) {
-            expect(engine.greater_than_property('cat', '6')).to.be(false);
-            expect(engine.greater_than_property('5', 'cat')).to.be(false);
-            done();
-        });
-    });
-
     describe('less_than', function() {
         it('should return true if property is < value', function(done) {
             expect(engine.less_than('4', '5')).to.be(true);
@@ -576,31 +509,6 @@ describe('Engine', function() {
         it('should return false if property or value is NaN', function(done) {
             expect(engine.less_than('cat', '6')).to.be(false);
             expect(engine.less_than('5', 'cat')).to.be(false);
-            done();
-        });
-    });
-
-    describe('less_than_property', function() {
-        it('should return true if first is < second', function(done) {
-            expect(engine.less_than_property('4', '5')).to.be(true);
-            expect(engine.less_than_property('4.2', '5.5')).to.be(true);
-            expect(engine.less_than_property('4', '5.5')).to.be(true);
-            expect(engine.less_than_property('4', 5)).to.be(true);
-            expect(engine.less_than_property(4, 5.2)).to.be(true);
-            done();
-        });
-
-        it('should return false if first is >= second', function(done) {
-            expect(engine.less_than_property('6', '5')).to.be(false);
-            expect(engine.less_than_property('6.4', '5')).to.be(false);
-            expect(engine.less_than_property('6', 5.2)).to.be(false);
-            expect(engine.less_than_property(5.2, 5.2)).to.be(false);
-            done();
-        });
-
-        it('should return false if first or second is NaN', function(done) {
-            expect(engine.less_than_property('cat', '6')).to.be(false);
-            expect(engine.less_than_property('5', 'cat')).to.be(false);
             done();
         });
     });
@@ -630,31 +538,6 @@ describe('Engine', function() {
         });
     });
 
-    describe('greater_than_or_equal_property', function() {
-        it('should return true if first is >= second', function(done) {
-            expect(engine.greater_than_or_equal_property('5', '4')).to.be(true);
-            expect(engine.greater_than_or_equal_property('5.5', '4.2')).to.be(true);
-            expect(engine.greater_than_or_equal_property('5.5', '4')).to.be(true);
-            expect(engine.greater_than_or_equal_property('5', 4)).to.be(true);
-            expect(engine.greater_than_or_equal_property(5, 4.2)).to.be(true);
-            expect(engine.greater_than_or_equal_property(5.2, 5.2)).to.be(true);
-            done();
-        });
-
-        it('should return false if first is < second', function(done) {
-            expect(engine.greater_than_or_equal_property('5', '6')).to.be(false);
-            expect(engine.greater_than_or_equal_property('5', '6.4')).to.be(false);
-            expect(engine.greater_than_or_equal_property(5.2, '6')).to.be(false);
-            done();
-        });
-
-        it('should return false if first or second are NaN', function(done) {
-            expect(engine.greater_than_or_equal_property('cat', '6')).to.be(false);
-            expect(engine.greater_than_or_equal_property('5', 'cat')).to.be(false);
-            done();
-        });
-    });
-
     describe('less_than_or_equal', function() {
         it('should return true if property is <= value', function(done) {
             expect(engine.less_than_or_equal('4', '5')).to.be(true);
@@ -676,31 +559,6 @@ describe('Engine', function() {
         it('should return false if property or value is NaN', function(done) {
             expect(engine.less_than_or_equal('cat', '6')).to.be(false);
             expect(engine.less_than_or_equal('5', 'cat')).to.be(false);
-            done();
-        });
-    });
-
-    describe('less_than_or_equal_property', function() {
-        it('should return true if first is <= second', function(done) {
-            expect(engine.less_than_or_equal_property('4', '5')).to.be(true);
-            expect(engine.less_than_or_equal_property('4.2', '5.5')).to.be(true);
-            expect(engine.less_than_or_equal_property('4', '5.5')).to.be(true);
-            expect(engine.less_than_or_equal_property('4', 5)).to.be(true);
-            expect(engine.less_than_or_equal_property(4, 5.2)).to.be(true);
-            expect(engine.less_than_or_equal_property(5.2, 5.2)).to.be(true);
-            done();
-        });
-
-        it('should return false if first is > second', function(done) {
-            expect(engine.less_than_or_equal_property('6', '5')).to.be(false);
-            expect(engine.less_than_or_equal_property('6.4', '5')).to.be(false);
-            expect(engine.less_than_or_equal_property('6', 5.2)).to.be(false);
-            done();
-        });
-
-        it('should return false if first or second is NaN', function(done) {
-            expect(engine.less_than_or_equal_property('cat', '6')).to.be(false);
-            expect(engine.less_than_or_equal_property('5', 'cat')).to.be(false);
             done();
         });
     });
