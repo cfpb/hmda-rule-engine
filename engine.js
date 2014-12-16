@@ -1,4 +1,4 @@
-/*jshint multistr:true, evil:true*/
+/*jshint evil:true, maxcomplexity: 15*/
 /*global window:false*/
 'use strict';
 
@@ -275,6 +275,24 @@ var hmdajson = require('./lib/hmdajson'),
             result.body += ') { return ';
             HMDAEngine.parseRule(rule.then, result);
             result.body += '; } return false;';
+        }
+
+        if (rule.hasOwnProperty('and')) {
+            for (var j=0; j < rule.and.length; j++) {
+                HMDAEngine.parseRule(rule.and[j], result);
+                if (j !== rule.and.length-1) {
+                    result.body += ' && ';
+                }
+            }
+        }
+
+        if (rule.hasOwnProperty('or')) {
+            for (var k=0; k < rule.or.length; k++) {
+                HMDAEngine.parseRule(rule.or[k], result);
+                if (k !== rule.or.length-1) {
+                    result.body += ' || ';
+                }
+            }
         }
     };
 

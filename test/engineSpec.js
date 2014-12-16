@@ -929,6 +929,82 @@ describe('Engine', function() {
             expect(result.body).to.be('if (HMDAEngine.is_true(arguments[0])) { return HMDAEngine.is_false(arguments[1]); } return false;');
             done();
         });
+
+        it('should parse a rule with an and grouping into a function string', function(done) {
+            var result = {
+                argIndex: 0,
+                args: [],
+                body: ''
+            };
+            var rule = {
+                "and": [
+                    {
+                        "property": "foo",
+                        "condition": "is_true"
+                    },
+                    {
+                        "property": "bar",
+                        "condition": "is_false"
+                    }
+                ]
+            };
+            engine.parseRule(rule, result);
+            expect(result.body).to.be('HMDAEngine.is_true(arguments[0]) && HMDAEngine.is_false(arguments[1])');
+            done();
+        });
+
+        it('should parse a rule with an or grouping into a function string', function(done) {
+            var result = {
+                argIndex: 0,
+                args: [],
+                body: ''
+            };
+            var rule = {
+                "or": [
+                    {
+                        "property": "foo",
+                        "condition": "is_true"
+                    },
+                    {
+                        "property": "bar",
+                        "condition": "is_false"
+                    }
+                ]
+            };
+            engine.parseRule(rule, result);
+            expect(result.body).to.be('HMDAEngine.is_true(arguments[0]) || HMDAEngine.is_false(arguments[1])');
+            done();
+        });
+
+        it('should parse a complex rule with an if-then and an and grouping into a string', function(done) {
+            var result = {
+                argIndex: 0,
+                args: [],
+                body: ''
+            };
+            var rule = {
+                "if": {
+                    "and": [
+                        {
+                            "property": "foo",
+                            "condition": "is_true"
+                        },
+                        {
+                            "property": "bar",
+                            "condition": "is_false"
+                        }
+                    ]
+                },
+                "then": {
+                    "property": "baz",
+                    "condition": "equal",
+                    "value": "3"
+                }
+            }
+            engine.parseRule(rule, result);
+            expect(result.body).to.be('if (HMDAEngine.is_true(arguments[0]) && HMDAEngine.is_false(arguments[1])) { return HMDAEngine.equal(arguments[2], "3"); } return false;');
+            done();
+        });
     });
 
 });
