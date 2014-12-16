@@ -828,7 +828,7 @@ describe('Engine', function() {
             done();
         });
 
-        it('should parse a rule with a property-value test into a function string', function(done) {
+        it('should parse a rule with a property-value string test into a function string', function(done) {
             var result = {
                 argIndex: 0,
                 args: [],
@@ -841,6 +841,38 @@ describe('Engine', function() {
             };
             engine.parseRule(rule, result);
             expect(result.body).to.be('HMDAEngine.equal(arguments[0], "1")');
+            done();
+        });
+
+        it('should parse a rule with a property-value number test into a function string', function(done) {
+            var result = {
+                argIndex: 0,
+                args: [],
+                body: ''
+            };
+            var rule = {
+                "property": "foo",
+                "condition": "equal",
+                "value": 1
+            };
+            engine.parseRule(rule, result);
+            expect(result.body).to.be('HMDAEngine.equal(arguments[0], 1)');
+            done();
+        });
+
+        it('should parse a rule with a property-value array test into a function string', function(done) {
+            var result = {
+                argIndex: 0,
+                args: [],
+                body: ''
+            };
+            var rule = {
+                "property": "foo",
+                "condition": "in",
+                "values": ['1', '2', '3']
+            };
+            engine.parseRule(rule, result);
+            expect(result.body).to.be('HMDAEngine.in(arguments[0], ["1","2","3"])');
             done();
         });
 

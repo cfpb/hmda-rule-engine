@@ -255,16 +255,16 @@ var hmdajson = require('./lib/hmdajson'),
         if (rule.hasOwnProperty('condition')) {
             result.body += 'HMDAEngine.' + rule.condition + '(arguments[' + result.argIndex++ + ']';
             result.args.push(rule.property);
-            if (brijSpec.VALID_CONDITIONS[rule.condition].additionalFields && brijSpec.VALID_CONDITIONS[rule.condition].additionalFields.length === 1) {
+            var fields = brijSpec.VALID_CONDITIONS[rule.condition].additionalFields;
+            if (fields) {
                 if (HMDAEngine.ends_with(rule.condition, '_property')) {
                     result.body += ', arguments[' + result.argIndex++ + ']';
-                    result.args.push(rule.value);
+                    result.args.push(rule[fields[0]]);
                 } else {
-                    result.body += ', "' + rule.value + '"';
+                    for (var i=0; i < fields.length; i++) {
+                        result.body += ', ' + JSON.stringify(rule[fields[i]]);
+                    }
                 }
-            } else if (brijSpec.VALID_CONDITIONS[rule.condition].additionalFields && brijSpec.VALID_CONDITIONS[rule.condition].additionalFields.length === 2) {
-                // Between
-                result.body += ', "' + rule.start + '", "' + rule.end + '"';
             }
             result.body += ')';
         }
