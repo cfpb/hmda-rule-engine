@@ -1,4 +1,4 @@
-/*jshint evil:true, maxcomplexity: 15*/
+/*jshint evil:true*/
 /*global window:false*/
 'use strict';
 
@@ -251,22 +251,47 @@ var hmdajson = require('./lib/hmdajson'),
         });
     };
 
-    HMDAEngine.parseRule = function(rule, result) {
-        if (rule.hasOwnProperty('condition')) {
-            result.body += 'HMDAEngine.' + rule.condition + '(arguments[' + result.argIndex++ + ']';
+    HMDAEngine.parseRuleCustomCall = function(rule, result) {
+        result.body += 'HMDAEngine.' + rule.function + '(';
+        if (rule.args) {
+            for (var i=0; i < rule.args.length; i++) {
+                result.body += 'arguments[' + result.argIndex++ + ']';
+                if (i !== rule.args.length-1) {
+                    result.body += ', ';
+                }
+                result.args.push(rule.args[i]);
+            }
+        } else {
+            result.body += 'arguments[' + result.argIndex++ + ']';
             result.args.push(rule.property);
-            var fields = brijSpec.VALID_CONDITIONS[rule.condition].additionalFields;
-            if (fields) {
-                if (HMDAEngine.ends_with(rule.condition, '_property')) {
-                    result.body += ', arguments[' + result.argIndex++ + ']';
-                    result.args.push(rule[fields[0]]);
-                } else {
-                    for (var i=0; i < fields.length; i++) {
-                        result.body += ', ' + JSON.stringify(rule[fields[i]]);
-                    }
+        }
+        result.body += ')';
+    };
+
+    HMDAEngine.parseRuleCondition = function(rule, result) {
+        result.body += 'HMDAEngine.' + rule.condition + '(arguments[' + result.argIndex++ + ']';
+        result.args.push(rule.property);
+        var fields = brijSpec.VALID_CONDITIONS[rule.condition].additionalFields;
+        if (fields) {
+            if (HMDAEngine.ends_with(rule.condition, '_property')) {
+                result.body += ', arguments[' + result.argIndex++ + ']';
+                result.args.push(rule[fields[0]]);
+            } else {
+                for (var i=0; i < fields.length; i++) {
+                    result.body += ', ' + JSON.stringify(rule[fields[i]]);
                 }
             }
-            result.body += ')';
+        }
+        result.body += ')';
+    };
+
+    HMDAEngine.parseRule = function(rule, result) {
+        if (rule.hasOwnProperty('condition')) {
+            if (rule.condition === 'call') {
+                HMDAEngine.parseRuleCustomCall(rule, result);
+            } else {
+                HMDAEngine.parseRuleCondition(rule, result);
+            }
         }
 
         if (rule.hasOwnProperty('if')) {
@@ -278,18 +303,18 @@ var hmdajson = require('./lib/hmdajson'),
         }
 
         if (rule.hasOwnProperty('and')) {
-            for (var j=0; j < rule.and.length; j++) {
-                HMDAEngine.parseRule(rule.and[j], result);
-                if (j !== rule.and.length-1) {
+            for (var i=0; i < rule.and.length; i++) {
+                HMDAEngine.parseRule(rule.and[i], result);
+                if (i !== rule.and.length-1) {
                     result.body += ' && ';
                 }
             }
         }
 
         if (rule.hasOwnProperty('or')) {
-            for (var k=0; k < rule.or.length; k++) {
-                HMDAEngine.parseRule(rule.or[k], result);
-                if (k !== rule.or.length-1) {
+            for (var j=0; j < rule.or.length; j++) {
+                HMDAEngine.parseRule(rule.or[j], result);
+                if (j !== rule.or.length-1) {
                     result.body += ' || ';
                 }
             }

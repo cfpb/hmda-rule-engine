@@ -1005,6 +1005,39 @@ describe('Engine', function() {
             expect(result.body).to.be('if (HMDAEngine.is_true(arguments[0]) && HMDAEngine.is_false(arguments[1])) { return HMDAEngine.equal(arguments[2], "3"); } return true;');
             done();
         });
+
+        it('should parse a rule with a custom function call into a function string', function(done) {
+            var result = {
+                argIndex: 0,
+                args: [],
+                body: ''
+            };
+            var rule = {
+                "property": "foo",
+                "condition": "call",
+                "function": "isFooValid"
+            };
+            engine.parseRule(rule, result);
+            expect(result.body).to.be('HMDAEngine.isFooValid(arguments[0])');
+            done();
+        });
+
+        it('should parse a rule with a custom function call and list of args into a function string', function(done) {
+            var result = {
+                argIndex: 0,
+                args: [],
+                body: ''
+            };
+            var rule = {
+                "property": "foo",
+                "condition": "call",
+                "function": "isFooValid",
+                "args": ["foo", "bar", "baz"]
+            };
+            engine.parseRule(rule, result);
+            expect(result.body).to.be('HMDAEngine.isFooValid(arguments[0], arguments[1], arguments[2])');
+            done();
+        });
     });
 
 });
