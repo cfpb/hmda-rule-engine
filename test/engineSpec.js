@@ -949,7 +949,7 @@ describe('Engine', function() {
                 ]
             };
             engine.parseRule(rule, result);
-            expect(result.body).to.be('HMDAEngine.is_true(arguments[0]) && HMDAEngine.is_false(arguments[1])');
+            expect(result.body).to.be('(HMDAEngine.is_true(arguments[0]) && HMDAEngine.is_false(arguments[1]))');
             done();
         });
 
@@ -972,7 +972,48 @@ describe('Engine', function() {
                 ]
             };
             engine.parseRule(rule, result);
-            expect(result.body).to.be('HMDAEngine.is_true(arguments[0]) || HMDAEngine.is_false(arguments[1])');
+            expect(result.body).to.be('(HMDAEngine.is_true(arguments[0]) || HMDAEngine.is_false(arguments[1]))');
+            done();
+        });
+
+        it('should parse a rule with a complex and/or grouping into a function string', function(done) {
+            var result = {
+                argIndex: 0,
+                args: [],
+                body: ''
+            };
+            var rule = {
+                "and": [
+                    {
+                        "or": [
+                            {
+                                "property": "foo",
+                                "condition": "is_true"
+                            },
+                            {
+                                "property": "bar",
+                                "condition": "is_false"
+                            }
+                        ]
+                    },
+                    {
+                        "or": [
+                            {
+                                "property": "animal",
+                                "condition": "equal",
+                                "value": "cow"
+                            },
+                            {
+                                "property": "fruit",
+                                "condition": "equal",
+                                "value": "banana"
+                            }
+                        ]
+                    }
+                ]
+            };
+            engine.parseRule(rule, result);
+            expect(result.body).to.be('((HMDAEngine.is_true(arguments[0]) || HMDAEngine.is_false(arguments[1])) && (HMDAEngine.equal(arguments[2], "cow") || HMDAEngine.equal(arguments[3], "banana")))');
             done();
         });
 
@@ -1002,7 +1043,7 @@ describe('Engine', function() {
                 }
             }
             engine.parseRule(rule, result);
-            expect(result.body).to.be('if (HMDAEngine.is_true(arguments[0]) && HMDAEngine.is_false(arguments[1])) { return HMDAEngine.equal(arguments[2], "3"); } return true;');
+            expect(result.body).to.be('if ((HMDAEngine.is_true(arguments[0]) && HMDAEngine.is_false(arguments[1]))) { return HMDAEngine.equal(arguments[2], "3"); } return true;');
             done();
         });
 

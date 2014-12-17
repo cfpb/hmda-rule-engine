@@ -303,21 +303,25 @@ var hmdajson = require('./lib/hmdajson'),
         }
 
         if (rule.hasOwnProperty('and')) {
+            result.body += '(';
             for (var i=0; i < rule.and.length; i++) {
                 HMDAEngine.parseRule(rule.and[i], result);
                 if (i !== rule.and.length-1) {
                     result.body += ' && ';
                 }
             }
+            result.body += ')';
         }
 
         if (rule.hasOwnProperty('or')) {
+            result.body += '(';
             for (var j=0; j < rule.or.length; j++) {
                 HMDAEngine.parseRule(rule.or[j], result);
                 if (j !== rule.or.length-1) {
                     result.body += ' || ';
                 }
             }
+            result.body += ')';
         }
     };
 
