@@ -442,27 +442,6 @@ describe('Engine', function() {
         });
     });
 
-    describe('equal_property', function() {
-        it('should return true if first and second are equal', function(done) {
-            expect(engine.equal_property('5', '5')).to.be(true);
-            expect(engine.equal_property(5, 5)).to.be(true);
-            expect(engine.equal_property(5.5, 5.5)).to.be(true);
-            done();
-        });
-
-        it('should return false if first and second are not equal', function(done) {
-            expect(engine.equal_property('5', '6')).to.be(false);
-            expect(engine.equal_property(5, 6)).to.be(false);
-            expect(engine.equal_property(5.5, 6.5)).to.be(false);
-            done();
-        });
-
-        it('should return false if first and second are equivalent but different types', function(done) {
-            expect(engine.equal_property('5', 5)).to.be(false);
-            done();
-        });
-    });
-
     describe('not_equal', function() {
         it('should return false if property and value are equal', function(done) {
             expect(engine.not_equal('5', '5')).to.be(false);
@@ -480,27 +459,6 @@ describe('Engine', function() {
 
         it('should return true if property and value are equivalent but different types', function(done) {
             expect(engine.not_equal('5', 5)).to.be(true);
-            done();
-        });
-    });
-
-    describe('not_equal_property', function() {
-        it('should return false if first and second are equal', function(done) {
-            expect(engine.not_equal_property('5', '5')).to.be(false);
-            expect(engine.not_equal_property(5, 5)).to.be(false);
-            expect(engine.not_equal_property(5.5, 5.5)).to.be(false);
-            done();
-        });
-
-        it('should return true if first and second are not equal', function(done) {
-            expect(engine.not_equal_property('5', '6')).to.be(true);
-            expect(engine.not_equal_property(5, 6)).to.be(true);
-            expect(engine.not_equal_property(5.5, 6.5)).to.be(true);
-            done();
-        });
-
-        it('should return true if first and second are equivalent but different types', function(done) {
-            expect(engine.not_equal_property('5', 5)).to.be(true);
             done();
         });
     });
@@ -530,31 +488,6 @@ describe('Engine', function() {
         });
     });
 
-    describe('greater_than_property', function() {
-        it('should return true if first is > second', function(done) {
-            expect(engine.greater_than_property('5', '4')).to.be(true);
-            expect(engine.greater_than_property('5.5', '4.2')).to.be(true);
-            expect(engine.greater_than_property('5.5', '4')).to.be(true);
-            expect(engine.greater_than_property('5', 4)).to.be(true);
-            expect(engine.greater_than_property(5, 4.2)).to.be(true);
-            done();
-        });
-
-        it('should return false if first is <= second', function(done) {
-            expect(engine.greater_than_property('5', '6')).to.be(false);
-            expect(engine.greater_than_property('5', '6.4')).to.be(false);
-            expect(engine.greater_than_property(5.2, '6')).to.be(false);
-            expect(engine.greater_than_property(5.2, 5.2)).to.be(false);
-            done();
-        });
-
-        it('should return false if first or second are NaN', function(done) {
-            expect(engine.greater_than_property('cat', '6')).to.be(false);
-            expect(engine.greater_than_property('5', 'cat')).to.be(false);
-            done();
-        });
-    });
-
     describe('less_than', function() {
         it('should return true if property is < value', function(done) {
             expect(engine.less_than('4', '5')).to.be(true);
@@ -576,31 +509,6 @@ describe('Engine', function() {
         it('should return false if property or value is NaN', function(done) {
             expect(engine.less_than('cat', '6')).to.be(false);
             expect(engine.less_than('5', 'cat')).to.be(false);
-            done();
-        });
-    });
-
-    describe('less_than_property', function() {
-        it('should return true if first is < second', function(done) {
-            expect(engine.less_than_property('4', '5')).to.be(true);
-            expect(engine.less_than_property('4.2', '5.5')).to.be(true);
-            expect(engine.less_than_property('4', '5.5')).to.be(true);
-            expect(engine.less_than_property('4', 5)).to.be(true);
-            expect(engine.less_than_property(4, 5.2)).to.be(true);
-            done();
-        });
-
-        it('should return false if first is >= second', function(done) {
-            expect(engine.less_than_property('6', '5')).to.be(false);
-            expect(engine.less_than_property('6.4', '5')).to.be(false);
-            expect(engine.less_than_property('6', 5.2)).to.be(false);
-            expect(engine.less_than_property(5.2, 5.2)).to.be(false);
-            done();
-        });
-
-        it('should return false if first or second is NaN', function(done) {
-            expect(engine.less_than_property('cat', '6')).to.be(false);
-            expect(engine.less_than_property('5', 'cat')).to.be(false);
             done();
         });
     });
@@ -630,31 +538,6 @@ describe('Engine', function() {
         });
     });
 
-    describe('greater_than_or_equal_property', function() {
-        it('should return true if first is >= second', function(done) {
-            expect(engine.greater_than_or_equal_property('5', '4')).to.be(true);
-            expect(engine.greater_than_or_equal_property('5.5', '4.2')).to.be(true);
-            expect(engine.greater_than_or_equal_property('5.5', '4')).to.be(true);
-            expect(engine.greater_than_or_equal_property('5', 4)).to.be(true);
-            expect(engine.greater_than_or_equal_property(5, 4.2)).to.be(true);
-            expect(engine.greater_than_or_equal_property(5.2, 5.2)).to.be(true);
-            done();
-        });
-
-        it('should return false if first is < second', function(done) {
-            expect(engine.greater_than_or_equal_property('5', '6')).to.be(false);
-            expect(engine.greater_than_or_equal_property('5', '6.4')).to.be(false);
-            expect(engine.greater_than_or_equal_property(5.2, '6')).to.be(false);
-            done();
-        });
-
-        it('should return false if first or second are NaN', function(done) {
-            expect(engine.greater_than_or_equal_property('cat', '6')).to.be(false);
-            expect(engine.greater_than_or_equal_property('5', 'cat')).to.be(false);
-            done();
-        });
-    });
-
     describe('less_than_or_equal', function() {
         it('should return true if property is <= value', function(done) {
             expect(engine.less_than_or_equal('4', '5')).to.be(true);
@@ -676,31 +559,6 @@ describe('Engine', function() {
         it('should return false if property or value is NaN', function(done) {
             expect(engine.less_than_or_equal('cat', '6')).to.be(false);
             expect(engine.less_than_or_equal('5', 'cat')).to.be(false);
-            done();
-        });
-    });
-
-    describe('less_than_or_equal_property', function() {
-        it('should return true if first is <= second', function(done) {
-            expect(engine.less_than_or_equal_property('4', '5')).to.be(true);
-            expect(engine.less_than_or_equal_property('4.2', '5.5')).to.be(true);
-            expect(engine.less_than_or_equal_property('4', '5.5')).to.be(true);
-            expect(engine.less_than_or_equal_property('4', 5)).to.be(true);
-            expect(engine.less_than_or_equal_property(4, 5.2)).to.be(true);
-            expect(engine.less_than_or_equal_property(5.2, 5.2)).to.be(true);
-            done();
-        });
-
-        it('should return false if first is > second', function(done) {
-            expect(engine.less_than_or_equal_property('6', '5')).to.be(false);
-            expect(engine.less_than_or_equal_property('6.4', '5')).to.be(false);
-            expect(engine.less_than_or_equal_property('6', 5.2)).to.be(false);
-            done();
-        });
-
-        it('should return false if first or second is NaN', function(done) {
-            expect(engine.less_than_or_equal_property('cat', '6')).to.be(false);
-            expect(engine.less_than_or_equal_property('5', 'cat')).to.be(false);
             done();
         });
     });
@@ -950,6 +808,275 @@ describe('Engine', function() {
             };
             var result = engine.hasUniqueLoanNumbers(hmdaFile);
             expect(result).to.be(true);
+            done();
+        });
+    });
+
+    describe('parseRule', function() {
+        it('should parse a rule with a simple property test into a function string', function(done) {
+            var result = {
+                argIndex: 0,
+                args: [],
+                body: ''
+            };
+            var rule = {
+                "property": "foo",
+                "condition": "is_true"
+            };
+            engine.parseRule(rule, result);
+            expect(result.body).to.be('HMDAEngine.is_true(arguments[0])');
+            done();
+        });
+
+        it('should parse a rule with a property-value string test into a function string', function(done) {
+            var result = {
+                argIndex: 0,
+                args: [],
+                body: ''
+            };
+            var rule = {
+                "property": "foo",
+                "condition": "equal",
+                "value": "1"
+            };
+            engine.parseRule(rule, result);
+            expect(result.body).to.be('HMDAEngine.equal(arguments[0], "1")');
+            done();
+        });
+
+        it('should parse a rule with a property-value number test into a function string', function(done) {
+            var result = {
+                argIndex: 0,
+                args: [],
+                body: ''
+            };
+            var rule = {
+                "property": "foo",
+                "condition": "equal",
+                "value": 1
+            };
+            engine.parseRule(rule, result);
+            expect(result.body).to.be('HMDAEngine.equal(arguments[0], 1)');
+            done();
+        });
+
+        it('should parse a rule with a property-value array test into a function string', function(done) {
+            var result = {
+                argIndex: 0,
+                args: [],
+                body: ''
+            };
+            var rule = {
+                "property": "foo",
+                "condition": "in",
+                "values": ['1', '2', '3']
+            };
+            engine.parseRule(rule, result);
+            expect(result.body).to.be('HMDAEngine.in(arguments[0], ["1","2","3"])');
+            done();
+        });
+
+        it('should parse a rule with a property-property test into a function string', function(done) {
+            var result = {
+                argIndex: 0,
+                args: [],
+                body: ''
+            };
+            var rule = {
+                "property": "foo",
+                "condition": "equal_property",
+                "value": "bar"
+            };
+            engine.parseRule(rule, result);
+            expect(result.body).to.be('HMDAEngine.equal_property(arguments[0], arguments[1])');
+            done();
+        });
+
+        it('should parse a rule with a property-value-value test into a function string', function(done) {
+            var result = {
+                argIndex: 0,
+                args: [],
+                body: ''
+            };
+            var rule = {
+                "property": "foo",
+                "condition": "between",
+                "start": "1",
+                "end": "9"
+            };
+            engine.parseRule(rule, result);
+            expect(result.body).to.be('HMDAEngine.between(arguments[0], "1", "9")');
+            done();
+        });
+
+        it('should parse a rule with an if-then test into a function string', function(done) {
+            var result = {
+                argIndex: 0,
+                args: [],
+                body: ''
+            };
+            var rule = {
+                "if": {
+                    "property": "foo",
+                    "condition": "is_true"
+                },
+                "then": {
+                    "property": "bar",
+                    "condition": "is_false"
+                }
+            };
+            engine.parseRule(rule, result);
+            expect(result.body).to.be('if (HMDAEngine.is_true(arguments[0])) { return HMDAEngine.is_false(arguments[1]); } return true;');
+            done();
+        });
+
+        it('should parse a rule with an and grouping into a function string', function(done) {
+            var result = {
+                argIndex: 0,
+                args: [],
+                body: ''
+            };
+            var rule = {
+                "and": [
+                    {
+                        "property": "foo",
+                        "condition": "is_true"
+                    },
+                    {
+                        "property": "bar",
+                        "condition": "is_false"
+                    }
+                ]
+            };
+            engine.parseRule(rule, result);
+            expect(result.body).to.be('(HMDAEngine.is_true(arguments[0]) && HMDAEngine.is_false(arguments[1]))');
+            done();
+        });
+
+        it('should parse a rule with an or grouping into a function string', function(done) {
+            var result = {
+                argIndex: 0,
+                args: [],
+                body: ''
+            };
+            var rule = {
+                "or": [
+                    {
+                        "property": "foo",
+                        "condition": "is_true"
+                    },
+                    {
+                        "property": "bar",
+                        "condition": "is_false"
+                    }
+                ]
+            };
+            engine.parseRule(rule, result);
+            expect(result.body).to.be('(HMDAEngine.is_true(arguments[0]) || HMDAEngine.is_false(arguments[1]))');
+            done();
+        });
+
+        it('should parse a rule with a complex and/or grouping into a function string', function(done) {
+            var result = {
+                argIndex: 0,
+                args: [],
+                body: ''
+            };
+            var rule = {
+                "and": [
+                    {
+                        "or": [
+                            {
+                                "property": "foo",
+                                "condition": "is_true"
+                            },
+                            {
+                                "property": "bar",
+                                "condition": "is_false"
+                            }
+                        ]
+                    },
+                    {
+                        "or": [
+                            {
+                                "property": "animal",
+                                "condition": "equal",
+                                "value": "cow"
+                            },
+                            {
+                                "property": "fruit",
+                                "condition": "equal",
+                                "value": "banana"
+                            }
+                        ]
+                    }
+                ]
+            };
+            engine.parseRule(rule, result);
+            expect(result.body).to.be('((HMDAEngine.is_true(arguments[0]) || HMDAEngine.is_false(arguments[1])) && (HMDAEngine.equal(arguments[2], "cow") || HMDAEngine.equal(arguments[3], "banana")))');
+            done();
+        });
+
+        it('should parse a complex rule with an if-then and an and grouping into a string', function(done) {
+            var result = {
+                argIndex: 0,
+                args: [],
+                body: ''
+            };
+            var rule = {
+                "if": {
+                    "and": [
+                        {
+                            "property": "foo",
+                            "condition": "is_true"
+                        },
+                        {
+                            "property": "bar",
+                            "condition": "is_false"
+                        }
+                    ]
+                },
+                "then": {
+                    "property": "baz",
+                    "condition": "equal",
+                    "value": "3"
+                }
+            }
+            engine.parseRule(rule, result);
+            expect(result.body).to.be('if ((HMDAEngine.is_true(arguments[0]) && HMDAEngine.is_false(arguments[1]))) { return HMDAEngine.equal(arguments[2], "3"); } return true;');
+            done();
+        });
+
+        it('should parse a rule with a custom function call into a function string', function(done) {
+            var result = {
+                argIndex: 0,
+                args: [],
+                body: ''
+            };
+            var rule = {
+                "property": "foo",
+                "condition": "call",
+                "function": "isFooValid"
+            };
+            engine.parseRule(rule, result);
+            expect(result.body).to.be('HMDAEngine.isFooValid(arguments[0])');
+            done();
+        });
+
+        it('should parse a rule with a custom function call and list of args into a function string', function(done) {
+            var result = {
+                argIndex: 0,
+                args: [],
+                body: ''
+            };
+            var rule = {
+                "property": "foo",
+                "condition": "call",
+                "function": "isFooValid",
+                "args": ["foo", "bar", "baz"]
+            };
+            engine.parseRule(rule, result);
+            expect(result.body).to.be('HMDAEngine.isFooValid(arguments[0], arguments[1], arguments[2])');
             done();
         });
     });
