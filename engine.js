@@ -323,6 +323,10 @@ var hmdajson = require('./lib/hmdajson'),
             }
             result.body += ')';
         }
+
+        for (var x = 0; x < result.args.length; x++) {
+            result.properties[result.args[x]] = true;
+        }
     };
 
     /*
@@ -331,7 +335,55 @@ var hmdajson = require('./lib/hmdajson'),
      * -----------------------------------------------------
      */
 
-    // TODO
+    HMDAEngine.execRule = function(topLevelObj, rule) {
+        var result = {
+            argIndex: 0,
+            args: [],
+            body: '',
+            properties: {}
+        };
+
+        HMDAEngine.parseRule(rule, result);
+        result.body = 'return ' + result.body + ';';
+
+        var lookup = function(arg, tokens, objList) {
+            for (var i = 0; i < objList.length; i++) {
+                var mappedArg = objList[i];
+
+                for (var j = 0; j < tokens.length; j++) {
+                    mappedArg = mappedArg[tokens[j]];
+                    if (mappedArg === undefined) {
+                        break;
+                    }
+                }
+                
+                if (mappedArg !== undefined) {
+                    return mappedArg;
+                }
+            }
+            return arg;
+        };
+
+        var args = _.map(result.args, function(arg) {
+            if (typeof(arg) === 'string') {
+                var objList = [topLevelObj, root];        // Root object list to search
+                var tokens = arg.split('.');
+                return lookup(arg, tokens, objList);      
+            } else {
+                return arg;
+            }
+        });
+
+        if (new Function(result.body).apply(null, args)) {
+            return true;
+        } else {
+            var properties = {};
+            for (var k = 0; k < result.args.length; k++) {
+                properties[result.args[k]] = args[k];
+            }
+            return properties;
+        }
+    };
 
 }.call((function() {
   return (typeof module !== 'undefined' && module.exports &&

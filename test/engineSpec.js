@@ -817,11 +817,12 @@ describe('Engine', function() {
             var result = {
                 argIndex: 0,
                 args: [],
-                body: ''
+                body: '',
+                properties: {}
             };
             var rule = {
-                "property": "foo",
-                "condition": "is_true"
+                'property': 'foo',
+                'condition': 'is_true'
             };
             engine.parseRule(rule, result);
             expect(result.body).to.be('HMDAEngine.is_true(arguments[0])');
@@ -832,12 +833,13 @@ describe('Engine', function() {
             var result = {
                 argIndex: 0,
                 args: [],
-                body: ''
+                body: '',
+                properties: {}
             };
             var rule = {
-                "property": "foo",
-                "condition": "equal",
-                "value": "1"
+                'property': 'foo',
+                'condition': 'equal',
+                'value': '1'
             };
             engine.parseRule(rule, result);
             expect(result.body).to.be('HMDAEngine.equal(arguments[0], "1")');
@@ -848,12 +850,13 @@ describe('Engine', function() {
             var result = {
                 argIndex: 0,
                 args: [],
-                body: ''
+                body: '',
+                properties: {}
             };
             var rule = {
-                "property": "foo",
-                "condition": "equal",
-                "value": 1
+                'property': 'foo',
+                'condition': 'equal',
+                'value': 1
             };
             engine.parseRule(rule, result);
             expect(result.body).to.be('HMDAEngine.equal(arguments[0], 1)');
@@ -864,12 +867,13 @@ describe('Engine', function() {
             var result = {
                 argIndex: 0,
                 args: [],
-                body: ''
+                body: '',
+                properties: {}
             };
             var rule = {
-                "property": "foo",
-                "condition": "in",
-                "values": ['1', '2', '3']
+                'property': 'foo',
+                'condition': 'in',
+                'values': ['1', '2', '3']
             };
             engine.parseRule(rule, result);
             expect(result.body).to.be('HMDAEngine.in(arguments[0], ["1","2","3"])');
@@ -880,12 +884,13 @@ describe('Engine', function() {
             var result = {
                 argIndex: 0,
                 args: [],
-                body: ''
+                body: '',
+                properties: {}
             };
             var rule = {
-                "property": "foo",
-                "condition": "equal_property",
-                "value": "bar"
+                'property': 'foo',
+                'condition': 'equal_property',
+                'value': 'bar'
             };
             engine.parseRule(rule, result);
             expect(result.body).to.be('HMDAEngine.equal_property(arguments[0], arguments[1])');
@@ -896,13 +901,14 @@ describe('Engine', function() {
             var result = {
                 argIndex: 0,
                 args: [],
-                body: ''
+                body: '',
+                properties: {}
             };
             var rule = {
-                "property": "foo",
-                "condition": "between",
-                "start": "1",
-                "end": "9"
+                'property': 'foo',
+                'condition': 'between',
+                'start': '1',
+                'end': '9'
             };
             engine.parseRule(rule, result);
             expect(result.body).to.be('HMDAEngine.between(arguments[0], "1", "9")');
@@ -913,16 +919,17 @@ describe('Engine', function() {
             var result = {
                 argIndex: 0,
                 args: [],
-                body: ''
+                body: '',
+                properties: {}
             };
             var rule = {
-                "if": {
-                    "property": "foo",
-                    "condition": "is_true"
+                'if': {
+                    'property': 'foo',
+                    'condition': 'is_true'
                 },
-                "then": {
-                    "property": "bar",
-                    "condition": "is_false"
+                'then': {
+                    'property': 'bar',
+                    'condition': 'is_false'
                 }
             };
             engine.parseRule(rule, result);
@@ -934,17 +941,18 @@ describe('Engine', function() {
             var result = {
                 argIndex: 0,
                 args: [],
-                body: ''
+                body: '',
+                properties: {}
             };
             var rule = {
-                "and": [
+                'and': [
                     {
-                        "property": "foo",
-                        "condition": "is_true"
+                        'property': 'foo',
+                        'condition': 'is_true'
                     },
                     {
-                        "property": "bar",
-                        "condition": "is_false"
+                        'property': 'bar',
+                        'condition': 'is_false'
                     }
                 ]
             };
@@ -957,17 +965,18 @@ describe('Engine', function() {
             var result = {
                 argIndex: 0,
                 args: [],
-                body: ''
+                body: '',
+                properties: {}
             };
             var rule = {
-                "or": [
+                'or': [
                     {
-                        "property": "foo",
-                        "condition": "is_true"
+                        'property': 'foo',
+                        'condition': 'is_true'
                     },
                     {
-                        "property": "bar",
-                        "condition": "is_false"
+                        'property': 'bar',
+                        'condition': 'is_false'
                     }
                 ]
             };
@@ -980,33 +989,34 @@ describe('Engine', function() {
             var result = {
                 argIndex: 0,
                 args: [],
-                body: ''
+                body: '',
+                properties: {}
             };
             var rule = {
-                "and": [
+                'and': [
                     {
-                        "or": [
+                        'or': [
                             {
-                                "property": "foo",
-                                "condition": "is_true"
+                                'property': 'foo',
+                                'condition': 'is_true'
                             },
                             {
-                                "property": "bar",
-                                "condition": "is_false"
+                                'property': 'bar',
+                                'condition': 'is_false'
                             }
                         ]
                     },
                     {
-                        "or": [
+                        'or': [
                             {
-                                "property": "animal",
-                                "condition": "equal",
-                                "value": "cow"
+                                'property': 'animal',
+                                'condition': 'equal',
+                                'value': 'cow'
                             },
                             {
-                                "property": "fruit",
-                                "condition": "equal",
-                                "value": "banana"
+                                'property': 'fruit',
+                                'condition': 'equal',
+                                'value': 'banana'
                             }
                         ]
                     }
@@ -1021,27 +1031,28 @@ describe('Engine', function() {
             var result = {
                 argIndex: 0,
                 args: [],
-                body: ''
+                body: '',
+                properties: {}
             };
             var rule = {
-                "if": {
-                    "and": [
+                'if': {
+                    'and': [
                         {
-                            "property": "foo",
-                            "condition": "is_true"
+                            'property': 'foo',
+                            'condition': 'is_true'
                         },
                         {
-                            "property": "bar",
-                            "condition": "is_false"
+                            'property': 'bar',
+                            'condition': 'is_false'
                         }
                     ]
                 },
-                "then": {
-                    "property": "baz",
-                    "condition": "equal",
-                    "value": "3"
+                'then': {
+                    'property': 'baz',
+                    'condition': 'equal',
+                    'value': '3'
                 }
-            }
+            };
             engine.parseRule(rule, result);
             expect(result.body).to.be('if ((HMDAEngine.is_true(arguments[0]) && HMDAEngine.is_false(arguments[1]))) { return HMDAEngine.equal(arguments[2], "3"); } return true;');
             done();
@@ -1051,12 +1062,13 @@ describe('Engine', function() {
             var result = {
                 argIndex: 0,
                 args: [],
-                body: ''
+                body: '',
+                properties: {}
             };
             var rule = {
-                "property": "foo",
-                "condition": "call",
-                "function": "isFooValid"
+                'property': 'foo',
+                'condition': 'call',
+                'function': 'isFooValid'
             };
             engine.parseRule(rule, result);
             expect(result.body).to.be('HMDAEngine.isFooValid(arguments[0])');
@@ -1067,16 +1079,45 @@ describe('Engine', function() {
             var result = {
                 argIndex: 0,
                 args: [],
-                body: ''
+                body: '',
+                properties: {}
             };
             var rule = {
-                "property": "foo",
-                "condition": "call",
-                "function": "isFooValid",
-                "args": ["foo", "bar", "baz"]
+                'property': 'foo',
+                'condition': 'call',
+                'function': 'isFooValid',
+                'args': ['foo', 'bar', 'baz']
             };
             engine.parseRule(rule, result);
             expect(result.body).to.be('HMDAEngine.isFooValid(arguments[0], arguments[1], arguments[2])');
+            done();
+        });
+    });
+
+    describe('execRule', function() {
+        it('should return true for a passing rule', function(done) {
+            var hmdaJson = require('./testdata/complete.json');
+            var topLevelObj = hmdaJson.hmdaFile.loanApplicationRegisters[0];
+            var rule = {
+                'property': 'recordID',
+                'condition': 'equal',
+                'value': '2'
+            };
+            
+            expect(engine.execRule(topLevelObj, rule)).to.be(true);
+            done();
+        });
+
+        it('should return a list of property: value pairs for a non-passing rule', function(done) {
+            var hmdaJson = require('./testdata/complete.json');
+            var topLevelObj = hmdaJson.hmdaFile.loanApplicationRegisters[0];
+            var rule = {
+                'property': 'recordID',
+                'condition': 'equal',
+                'value': '1'
+            };
+
+            console.log(engine.execRule(topLevelObj, rule));
             done();
         });
     });
