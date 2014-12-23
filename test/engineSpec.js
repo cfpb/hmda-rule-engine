@@ -1110,7 +1110,7 @@ describe('Engine', function() {
             done();
         });
 
-        it('should return a list of property: value pairs for a non-passing email_address format condition rule', function(done) {
+        it('should return a set of properties for a non-passing email_address format condition rule', function(done) {
             var hmdaJson = require('./testdata/complete.json');
             hmdaJson.hmdaFile.transmittalSheet.respondentEmail = 'krabapple.@gmail.com';
             var topLevelObj = hmdaJson.hmdaFile.transmittalSheet;
@@ -1125,6 +1125,69 @@ describe('Engine', function() {
             expect(properties).not.to.be(true);
             expect(properties.respondentEmail).to.be('krabapple.@gmail.com');
             done(); 
+        });
+
+        it('should return true for a passing zipcode format condition rule', function(done) {
+            var hmdaJson = require('./testdata/complete.json');
+            var topLevelObj = hmdaJson.hmdaFile.transmittalSheet;
+            global._HMDA_JSON.hmdaJson = hmdaJson;
+
+            var rule = {
+                'property': 'parentZip',
+                'condition': 'zipcode'
+            };
+
+            expect(engine.execRule(topLevelObj, rule)).to.be(true);
+            done();
+        });
+
+        it('should return a set of properties for a non-passing zipcode format condition rule', function(done) {
+            var hmdaJson = require('./testdata/complete.json');
+            hmdaJson.hmdaFile.transmittalSheet.parentZip = '555-1234';
+            var topLevelObj = hmdaJson.hmdaFile.transmittalSheet;
+            global._HMDA_JSON.hmdaJson = hmdaJson;
+
+            var rule = {
+                'property': 'parentZip',
+                'condition': 'zipcode'
+            };
+
+            var properties = engine.execRule(topLevelObj, rule);
+            expect(properties).not.to.be(true);
+            expect(properties.parentZip).to.be('555-1234');
+            done();
+        });
+
+        it('should return true for a passing yyyy_mm_dd_hh_mm_ss format condition rule', function(done) {
+            var hmdaJson = require('./testdata/complete.json');
+            hmdaJson.hmdaFile.transmittalSheet.timestamp += '37';
+            var topLevelObj = hmdaJson.hmdaFile.transmittalSheet;
+            global._HMDA_JSON.hmdaJson = hmdaJson;
+
+            var rule = {
+                'property': 'timestamp',
+                'condition': 'yyyy_mm_dd_hh_mm_ss'
+            };
+
+            expect(engine.execRule(topLevelObj, rule)).to.be(true);
+            done();
+        });
+
+        it('should return a set of properties for a non-passing yyyy_mm_dd_hh_mm_ss format condition rule', function(done) {
+            var hmdaJson = require('./testdata/complete.json');
+            hmdaJson.hmdaFile.transmittalSheet.timestamp = hmdaJson.hmdaFile.transmittalSheet.timestamp.slice(0,12) + '98';
+            var topLevelObj = hmdaJson.hmdaFile.transmittalSheet;
+            global._HMDA_JSON.hmdaJson = hmdaJson;
+
+            var rule = {
+                'property': 'timestamp',
+                'condition': 'yyyy_mm_dd_hh_mm_ss'
+            };
+
+            var properties = engine.execRule(topLevelObj, rule);
+            expect(properties).not.to.be(true);
+            expect(properties.timestamp).to.be('20130117133098');
+            done();
         });
 
         it('should return true for a passing equal rule', function(done) {
@@ -1142,7 +1205,7 @@ describe('Engine', function() {
             done();
         });
 
-        it('should return a list of property: value pairs for a non-passing equal rule', function(done) {
+        it('should return a set of properties for a non-passing equal rule', function(done) {
             var hmdaJson = require('./testdata/complete.json');
             var topLevelObj = hmdaJson.hmdaFile.loanApplicationRegisters[0];
             global._HMDA_JSON.hmdaJson = hmdaJson;
