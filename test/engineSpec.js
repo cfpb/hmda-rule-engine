@@ -1095,9 +1095,43 @@ describe('Engine', function() {
     });
 
     describe('execRule', function() {
-        it('should return true for a passing rule', function(done) {
+        it('should return true for a passing email_address format condition rule', function(done) {
+            var hmdaJson = require('./testdata/complete.json');
+            hmdaJson.hmdaFile.transmittalSheet.respondentEmail = 'krabapple@gmail.com';
+            var topLevelObj = hmdaJson.hmdaFile.transmittalSheet;
+            global._HMDA_JSON.hmdaJson = hmdaJson;
+
+            var rule = {
+                'property': 'respondentEmail',
+                'condition': 'email_address'
+            };
+
+            expect(engine.execRule(topLevelObj, rule)).to.be(true);
+            done();
+        });
+
+        it('should return a list of property: value pairs for a non-passing email_address format condition rule', function(done) {
+            var hmdaJson = require('./testdata/complete.json');
+            hmdaJson.hmdaFile.transmittalSheet.respondentEmail = 'krabapple.@gmail.com';
+            var topLevelObj = hmdaJson.hmdaFile.transmittalSheet;
+            global._HMDA_JSON.hmdaJson = hmdaJson;
+
+            var rule = {
+                'property': 'respondentEmail',
+                'condition': 'email_address'
+            };
+
+            var properties = engine.execRule(topLevelObj, rule);
+            expect(properties).not.to.be(true);
+            expect(properties.respondentEmail).to.be('krabapple.@gmail.com');
+            done(); 
+        });
+
+        it('should return true for a passing equal rule', function(done) {
             var hmdaJson = require('./testdata/complete.json');
             var topLevelObj = hmdaJson.hmdaFile.loanApplicationRegisters[0];
+            global._HMDA_JSON.hmdaJson = hmdaJson;
+
             var rule = {
                 'property': 'recordID',
                 'condition': 'equal',
@@ -1108,16 +1142,20 @@ describe('Engine', function() {
             done();
         });
 
-        it('should return a list of property: value pairs for a non-passing rule', function(done) {
+        it('should return a list of property: value pairs for a non-passing equal rule', function(done) {
             var hmdaJson = require('./testdata/complete.json');
             var topLevelObj = hmdaJson.hmdaFile.loanApplicationRegisters[0];
+            global._HMDA_JSON.hmdaJson = hmdaJson;
+
             var rule = {
                 'property': 'recordID',
                 'condition': 'equal',
                 'value': '1'
             };
 
-            console.log(engine.execRule(topLevelObj, rule));
+            var properties = engine.execRule(topLevelObj, rule);
+            expect(properties).not.to.be(true);
+            expect(properties.recordID).to.be('2');
             done();
         });
     });
