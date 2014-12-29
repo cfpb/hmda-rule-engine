@@ -1,6 +1,7 @@
 /*global describe:false*/
 /*global it:false*/
 /*global expect:false*/
+/*global beforeEach:false*/
 'use strict';
 
 var engine = require('../engine');
@@ -1095,11 +1096,17 @@ describe('Engine', function() {
     });
 
     describe('execRule', function() {
-        it('should return true for a passing email_address format condition rule', function(done) {
-            var hmdaJson = require('./testdata/complete.json');
-            hmdaJson.hmdaFile.transmittalSheet.respondentEmail = 'krabapple@gmail.com';
-            var topLevelObj = hmdaJson.hmdaFile.transmittalSheet;
+        var hmdaJson = {};
+        var topLevelObj = {};
+
+        beforeEach(function() {
+            hmdaJson = JSON.parse(JSON.stringify(require('./testdata/complete.json')));
+            topLevelObj = hmdaJson.hmdaFile.transmittalSheet;
             global._HMDA_JSON.hmdaJson = hmdaJson;
+        });
+
+        it('should return true for a passing email_address format condition rule', function(done) {
+            hmdaJson.hmdaFile.transmittalSheet.respondentEmail = 'krabapple@gmail.com';
 
             var rule = {
                 'property': 'respondentEmail',
@@ -1111,10 +1118,7 @@ describe('Engine', function() {
         });
 
         it('should return a set of properties for a non-passing email_address format condition rule', function(done) {
-            var hmdaJson = require('./testdata/complete.json');
             hmdaJson.hmdaFile.transmittalSheet.respondentEmail = 'krabapple.@gmail.com';
-            var topLevelObj = hmdaJson.hmdaFile.transmittalSheet;
-            global._HMDA_JSON.hmdaJson = hmdaJson;
 
             var rule = {
                 'property': 'respondentEmail',
@@ -1128,10 +1132,6 @@ describe('Engine', function() {
         });
 
         it('should return true for a passing zipcode format condition rule', function(done) {
-            var hmdaJson = require('./testdata/complete.json');
-            var topLevelObj = hmdaJson.hmdaFile.transmittalSheet;
-            global._HMDA_JSON.hmdaJson = hmdaJson;
-
             var rule = {
                 'property': 'parentZip',
                 'condition': 'zipcode'
@@ -1142,10 +1142,7 @@ describe('Engine', function() {
         });
 
         it('should return a set of properties for a non-passing zipcode format condition rule', function(done) {
-            var hmdaJson = require('./testdata/complete.json');
             hmdaJson.hmdaFile.transmittalSheet.parentZip = '555-1234';
-            var topLevelObj = hmdaJson.hmdaFile.transmittalSheet;
-            global._HMDA_JSON.hmdaJson = hmdaJson;
 
             var rule = {
                 'property': 'parentZip',
@@ -1159,10 +1156,7 @@ describe('Engine', function() {
         });
 
         it('should return true for a passing yyyy_mm_dd_hh_mm_ss format condition rule', function(done) {
-            var hmdaJson = require('./testdata/complete.json');
             hmdaJson.hmdaFile.transmittalSheet.timestamp += '37';
-            var topLevelObj = hmdaJson.hmdaFile.transmittalSheet;
-            global._HMDA_JSON.hmdaJson = hmdaJson;
 
             var rule = {
                 'property': 'timestamp',
@@ -1174,10 +1168,7 @@ describe('Engine', function() {
         });
 
         it('should return a set of properties for a non-passing yyyy_mm_dd_hh_mm_ss format condition rule', function(done) {
-            var hmdaJson = require('./testdata/complete.json');
-            hmdaJson.hmdaFile.transmittalSheet.timestamp = hmdaJson.hmdaFile.transmittalSheet.timestamp.slice(0,12) + '98';
-            var topLevelObj = hmdaJson.hmdaFile.transmittalSheet;
-            global._HMDA_JSON.hmdaJson = hmdaJson;
+            hmdaJson.hmdaFile.transmittalSheet.timestamp = hmdaJson.hmdaFile.transmittalSheet.timestamp  + '98';
 
             var rule = {
                 'property': 'timestamp',
@@ -1190,10 +1181,30 @@ describe('Engine', function() {
             done();
         });
 
+        it('should return true for a passing matches_regex rule', function(done) {
+            var rule = {
+                'property': 'timestamp',
+                'condition': 'matches_regex',
+                'value': '[0-9]{12}'
+            };
+
+            expect(engine.execRule(topLevelObj, rule)).to.be(true);
+            done();
+        });
+
+        it('should return a set of properties for a non-passing matches_regex rule', function(done) {
+            var rule = {
+                'property': 'timestamp',
+                'condition': 'matches_regex',
+                'value': '[0-9]{15}'
+            };
+
+            expect(engine.execRule(topLevelObj, rule).timestamp).to.be('201301171330');
+            done();
+        });
+
         it('should return true for a passing equal rule', function(done) {
-            var hmdaJson = require('./testdata/complete.json');
-            var topLevelObj = hmdaJson.hmdaFile.loanApplicationRegisters[0];
-            global._HMDA_JSON.hmdaJson = hmdaJson;
+            topLevelObj = hmdaJson.hmdaFile.loanApplicationRegisters[0];
 
             var rule = {
                 'property': 'recordID',
@@ -1206,9 +1217,7 @@ describe('Engine', function() {
         });
 
         it('should return a set of properties for a non-passing equal rule', function(done) {
-            var hmdaJson = require('./testdata/complete.json');
-            var topLevelObj = hmdaJson.hmdaFile.loanApplicationRegisters[0];
-            global._HMDA_JSON.hmdaJson = hmdaJson;
+            topLevelObj = hmdaJson.hmdaFile.loanApplicationRegisters[0];
 
             var rule = {
                 'property': 'recordID',
