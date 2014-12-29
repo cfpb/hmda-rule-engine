@@ -1105,6 +1105,30 @@ describe('Engine', function() {
             global._HMDA_JSON.hmdaJson = hmdaJson;
         });
 
+        it('should return true for a passing function rule', function(done) {
+            var rule = {
+                'property': 'hmdaFile',
+                'condition': 'call',
+                'function': 'hasRecordIdentifiersForEachRow'
+            };
+
+            expect(engine.execRule(hmdaJson, rule)).to.be(true);
+            done();
+        });
+
+        it('should return false for a non-passing function rule', function(done) {
+            var rule = {
+                'property': 'hmdaFile',
+                'condition': 'call',
+                'function': 'hasRecordIdentifiersForEachRow'
+            };
+
+            hmdaJson.hmdaFile.loanApplicationRegisters[0].recordID = '3';
+
+            expect(engine.execRule(hmdaJson, rule)).to.be(false);
+            done();
+        });
+
         it('should return true for a passing email_address format condition rule', function(done) {
             hmdaJson.hmdaFile.transmittalSheet.respondentEmail = 'krabapple@gmail.com';
 
@@ -1288,6 +1312,299 @@ describe('Engine', function() {
                 'property': 'timestamp',
                 'condition': 'equal_property',
                 'value': 'activityYear'
+            };
+
+            var properties = engine.execRule(topLevelObj, rule);
+            expect(properties.activityYear).to.be('2013');
+            expect(properties.timestamp).to.be('201301171330');
+            done();
+        });
+
+        it('should return true for a passing between rule', function(done) {
+            var rule = {
+                'property': 'activityYear',
+                'condition': 'between',
+                'start': '2012',
+                'end': '2014'
+            };
+
+            expect(engine.execRule(topLevelObj, rule)).to.be(true);
+            done();
+        });
+
+        it('should return a set of properties for a non-passing between rule', function(done) {
+            var rule = {
+                'property': 'activityYear',
+                'condition': 'between',
+                'start': '2012',
+                'end': '2013'
+            };
+
+            expect(engine.execRule(topLevelObj, rule).activityYear).to.be('2013');
+
+            rule.property = 'parentCity';
+            expect(engine.execRule(topLevelObj, rule).parentCity).to.be('San Francisco      XXXXXX');            
+            done();         
+        });
+
+        it('should return true for a passing is_empty rule', function(done) {
+            var rule = {
+                'property': 'filler',
+                'condition': 'is_empty'
+            };
+
+            expect(engine.execRule(topLevelObj, rule)).to.be(true);
+            done();
+        });
+
+        it('should return a set of properties for a non-passing is_empty rule', function(done) {
+            var rule = {
+                'property': 'activityYear',
+                'condition': 'is_empty'
+            };
+
+            expect(engine.execRule(topLevelObj, rule).activityYear).to.be('2013');
+            done();
+        });
+
+        it('should return true for a passing in rule', function(done) {
+            var rule = {
+                'property': 'activityYear',
+                'condition': 'in',
+                'values': ['2012', '2013']
+            };
+
+            expect(engine.execRule(topLevelObj, rule)).to.be(true);
+            done();
+        });
+
+        it('should return a set of properties for a non-passing in rule', function(done) {
+            var rule = {
+                'property': 'activityYear',
+                'condition': 'in',
+                'values': ['2012', '2014']
+            };
+
+            expect(engine.execRule(topLevelObj, rule).activityYear).to.be('2013');
+            done();
+        });
+
+        it('should return true for a passing if-then rule', function(done) {
+            var rule = {
+                'if': {
+                    'property': 'activityYear',
+                    'condition': 'equal',
+                    'value': '2013'
+                },
+                'then': {
+                    'property': 'timestamp',
+                    'condition': 'equal',
+                    'value': '201301171330'
+                }
+            };
+
+            expect(engine.execRule(topLevelObj, rule)).to.be(true);
+
+            rule = {
+                'if': {
+                    'property': 'activityYear',
+                    'condition': 'equal',
+                    'value': '2014'
+                },
+                'then': {
+                    'property': 'timestamp',
+                    'condition': 'equal',
+                    'value': '201301171330'
+                }
+            };
+
+            expect(engine.execRule(topLevelObj, rule)).to.be(true);
+            done();
+        });
+
+        it('should return true for a complex passing if-then rule', function(done) {
+            var rule = {
+                'if': {
+                    'property': 'activityYear',
+                    'condition': 'equal',
+                    'value': '2013'
+                },
+                'then': {
+                    'if': {
+                        'property': 'timestamp',
+                        'condition': 'equal',
+                        'value': '201301171330'
+                    },
+                    'then': {
+                        'property': 'timestamp',
+                        'condition': 'yyyy_mm_dd_hh_mm'
+                    }
+                }
+            };   
+            
+            expect(engine.execRule(topLevelObj, rule)).to.be(true);
+            done();
+        });
+
+        it('should return a set of properties for a non-passing complex if-then rule', function(done) {
+            var rule = {
+                'if': {
+                    'property': 'activityYear',
+                    'condition': 'equal',
+                    'value': '2013'
+                },
+                'then': {
+                    'if': {
+                        'property': 'timestamp',
+                        'condition': 'equal',
+                        'value': '201301171330'
+                    },
+                    'then': {
+                        'property': 'timestamp',
+                        'condition': 'yyyy_mm_dd_hh_mm_ss'
+                    }
+                }
+            };
+
+            var properties = engine.execRule(topLevelObj, rule);
+            expect(properties.activityYear).to.be('2013');
+            expect(properties.timestamp).to.be('201301171330');
+            done();
+        });
+
+        it('should return true for a passing and rule', function(done) {
+            var rule = {
+                'and': [
+                    {
+                        'property': 'activityYear',
+                        'condition': 'equal',
+                        'value': '2013'
+                    },
+                    {
+                        'property': 'timestamp',
+                        'condition': 'equal',
+                        'value': '201301171330'
+                    }
+                ]
+            };
+
+            expect(engine.execRule(topLevelObj, rule)).to.be(true);
+            done();
+        });
+
+        it('should return true for a passing complex and rule', function(done) {
+            var rule = {
+                'if': {
+                    'and': [
+                        {
+                            'property': 'activityYear',
+                            'condition': 'equal',
+                            'value': '2013'
+                        },
+                        {
+                            'property': 'timestamp',
+                            'condition': 'equal',
+                            'value': '201301171330'
+                        }
+                    ]
+                },
+                'then': {
+                    'property': 'timestamp',
+                    'condition': 'yyyy_mm_dd_hh_mm'
+                }
+            };
+
+            expect(engine.execRule(topLevelObj, rule)).to.be(true);
+            done();
+        });
+
+        it('should return a set of properties for a non-passing and rule', function(done) {
+            var rule = {
+                'and': [
+                    {
+                        'property': 'activityYear',
+                        'condition': 'equal',
+                        'value': '2013'
+                    },
+                    {
+                        'property': 'timestamp',
+                        'condition': 'equal',
+                        'value': '201301171330'
+                    },
+                    {
+                        'property': 'taxID',
+                        'condition': 'is_empty'
+                    }
+                ]
+            };
+
+            var properties = engine.execRule(topLevelObj, rule);
+            expect(properties.activityYear).to.be('2013');
+            expect(properties.timestamp).to.be('201301171330');
+            expect(properties.taxID).to.be('99-9999999');
+            done();
+        });
+
+        it('should return a set of properties for a non-passing and rule', function(done) {
+            var rule = {
+                'if': {
+                    'and': [
+                        {
+                            'property': 'activityYear',
+                            'condition': 'equal',
+                            'value': '2013'
+                        },
+                        {
+                            'property': 'timestamp',
+                            'condition': 'equal',
+                            'value': '201301171330'
+                        }
+                    ]
+                },
+                'then': {
+                    'property': 'timestamp',
+                    'condition': 'yyyy_mm_dd_hh_mm_ss'
+                }
+            };
+
+            var properties = engine.execRule(topLevelObj, rule);
+            expect(properties.activityYear).to.be('2013');
+            expect(properties.timestamp).to.be('201301171330');
+            done();
+        });
+
+        it('should return true for a passing or rule', function(done) {
+            var rule = {
+                'or': [
+                    {
+                        'property': 'activityYear',
+                        'condition': 'equal',
+                        'value': '2015'
+                    },
+                    {
+                        'property': 'timestamp',
+                        'condition': 'yyyy_mm_dd_hh_mm'
+                    }
+                ]
+            };
+
+            expect(engine.execRule(topLevelObj, rule)).to.be(true);
+            done();
+        });
+
+        it('should return a set of properties for a non-passing or rule', function(done) {
+            var rule = {
+                'or': [
+                    {
+                        'property': 'activityYear',
+                        'condition': 'equal',
+                        'value': '2015'
+                    },
+                    {
+                        'property': 'timestamp',
+                        'condition': 'yyyy_mm_dd_hh_mm_ss'
+                    }
+                ]
             };
 
             var properties = engine.execRule(topLevelObj, rule);

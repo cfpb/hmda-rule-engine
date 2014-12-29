@@ -295,11 +295,11 @@ var hmdajson = require('./lib/hmdajson'),
         }
 
         if (rule.hasOwnProperty('if')) {
-            result.body += 'if (';
+            result.body += '(';
             HMDAEngine.parseRule(rule.if, result);
-            result.body += ') { return ';
+            result.body += ' ? ';
             HMDAEngine.parseRule(rule.then, result);
-            result.body += '; } return true;';
+            result.body += ' : true)';
         }
 
         if (rule.hasOwnProperty('and')) {
@@ -374,13 +374,20 @@ var hmdajson = require('./lib/hmdajson'),
             }
         });
 
-        if (new Function(result.body).apply(null, args)) {
+        var funcResult = new Function(result.body).apply(null, args);
+        if (funcResult) {
             return true;
         } else {
             var properties = {};
-            for (var k = 0; k < result.args.length; k++) {
-                properties[result.args[k]] = args[k];
+
+            if (rule.condition === 'call') {
+                properties = funcResult;
+            } else {
+                for (var k = 0; k < result.args.length; k++) {
+                   properties[result.args[k]] = args[k];
+                }
             }
+
             return properties;
         }
     };
