@@ -235,6 +235,10 @@ var hmdajson = require('./lib/hmdajson'),
         return _.unique(hmdaFile.loanApplicationRegisters, _.iteratee('loanNumber')).length === hmdaFile.loanApplicationRegisters.length;
     };
 
+    HMDAEngine.isActionDateInActivityYear = function(actionDate, activityYear) {
+        return HMDAEngine.yyyy_mm_dd(actionDate) && HMDAEngine.yyyy(activityYear) && activityYear === actionDate.slice(0,4);
+    };
+
 
     /*
      * -----------------------------------------------------

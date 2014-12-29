@@ -813,6 +813,32 @@ describe('Engine', function() {
         });
     });
 
+    describe('isActionDateInActivityYear', function() {
+        it('should return true for an actionDate with activityYear', function(done) {
+            var actionDate = '20130723';
+            var activityYear = '2013';
+
+            expect(engine.isActionDateInActivityYear(actionDate, activityYear)).to.be(true);
+            done();
+        });
+
+        it('should return false for an actionDate not in activityYear', function(done) {
+            var actionDate = '20140723';
+            var activityYear = '2013';
+
+            expect(engine.isActionDateInActivityYear(actionDate, activityYear)).to.be(false);
+            done();
+        });
+
+        it('should return false for an actionDate that is an invalid date', function(done) {
+            var actionDate = '20142014';    // Invalid month
+            var activityYear = '2014';
+
+            expect(engine.isActionDateInActivityYear(actionDate, activityYear)).to.be(false);
+            done();
+        });
+    });
+
     describe('parseRule', function() {
         it('should parse a rule with a simple property test into a function string', function(done) {
             var result = {
@@ -1610,6 +1636,19 @@ describe('Engine', function() {
             var properties = engine.execRule(topLevelObj, rule);
             expect(properties.activityYear).to.be('2013');
             expect(properties.timestamp).to.be('201301171330');
+            done();
+        });
+
+        it('should return true for a passing S270 rule', function(done) {
+            var rule = {
+                'property': 'actionDate',
+                'condition': 'call',
+                'function': 'isActionDateInActivityYear',
+                'args': ['actionDate', '_HMDA_JSON.hmdaJson.hmdaFile.transmittalSheet.activityYear']
+            };
+
+            topLevelObj = hmdaJson.hmdaFile.loanApplicationRegisters[0];
+            expect(engine.execRule(topLevelObj, rule)).to.be(true);
             done();
         });
     });
