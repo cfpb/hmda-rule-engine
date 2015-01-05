@@ -339,6 +339,24 @@ var hmdajson = require('./lib/hmdajson'),
      * -----------------------------------------------------
      */
 
+    var bindArg = function(arg, tokens, objList) {
+        for (var i = 0; i < objList.length; i++) {
+            var mappedArg = objList[i];
+
+            for (var j = 0; j < tokens.length; j++) {
+                mappedArg = mappedArg[tokens[j]];
+                if (mappedArg === undefined) {
+                    break;
+                }
+            }
+            
+            if (mappedArg !== undefined) {
+                return mappedArg;
+            }
+        }
+        return arg;
+    }; 
+
     HMDAEngine.execRule = function(topLevelObj, rule) {
         var result = {
             argIndex: 0,
@@ -350,49 +368,37 @@ var hmdajson = require('./lib/hmdajson'),
         HMDAEngine.parseRule(rule, result);
         result.body = 'return ' + result.body + ';';
 
-        var lookup = function(arg, tokens, objList) {
-            for (var i = 0; i < objList.length; i++) {
-                var mappedArg = objList[i];
-
-                for (var j = 0; j < tokens.length; j++) {
-                    mappedArg = mappedArg[tokens[j]];
-                    if (mappedArg === undefined) {
-                        break;
-                    }
-                }
-                
-                if (mappedArg !== undefined) {
-                    return mappedArg;
-                }
-            }
-            return arg;
-        };
-
         var args = _.map(result.args, function(arg) {
             if (typeof(arg) === 'string') {
-                var objList = [topLevelObj, root];        // Root object list to search
+                var objList = [topLevelObj, root];        // Context list to search
                 var tokens = arg.split('.');
-                return lookup(arg, tokens, objList);      
+                return bindArg(arg, tokens, objList);
             } else {
                 return arg;
             }
         });
 
         var funcResult = new Function(result.body).apply(null, args);
-        if (funcResult) {
-            return true;
+        
+        if (topLevelObj.hmdaFile) {
+            // Map line numbers / loan application numbers to properties
         } else {
-            var properties = {};
+            if (funcResult) {
+                return false;
+            }
+            var error = {'properties': {}};
 
-            if (rule.condition === 'call') {
-                properties = funcResult;
+            if (topLevelObj.recordID === '1') {
+                error.lineNumber = 1;
             } else {
-                for (var k = 0; k < result.args.length; k++) {
-                   properties[result.args[k]] = args[k];
-                }
+                error.loanNumber = topLevelObj.loanNumber;
             }
 
-            return properties;
+            for (var i = 0; i < args.length; i++) {
+                error.properties[result.args[i]] = args[i];
+            }
+            
+            return error;
         }
     };
 
