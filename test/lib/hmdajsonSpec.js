@@ -183,6 +183,10 @@ describe('lib/hmdajson', function() {
                 expect(result).to.have.property('hmdaFile');
                 expect(result.hmdaFile).to.have.property('loanApplicationRegisters');
                 expect(result.hmdaFile.loanApplicationRegisters.length).to.be(3);
+                expect(result.hmdaFile.transmittalSheet.lineNumber).to.be(1);
+                expect(result.hmdaFile.loanApplicationRegisters[0].lineNumber).to.be(2);
+                expect(result.hmdaFile.loanApplicationRegisters[1].lineNumber).to.be(3);
+                expect(result.hmdaFile.loanApplicationRegisters[2].lineNumber).to.be(4);
                 done();
             });
         });
@@ -195,6 +199,10 @@ describe('lib/hmdajson', function() {
                 expect(result).to.have.property('hmdaFile');
                 expect(result.hmdaFile).to.have.property('loanApplicationRegisters');
                 expect(result.hmdaFile.loanApplicationRegisters.length).to.be(3);
+                expect(result.hmdaFile.transmittalSheet.lineNumber).to.be(1);
+                expect(result.hmdaFile.loanApplicationRegisters[0].lineNumber).to.be(2);
+                expect(result.hmdaFile.loanApplicationRegisters[1].lineNumber).to.be(3);
+                expect(result.hmdaFile.loanApplicationRegisters[2].lineNumber).to.be(4);
                 done();
             });
         });
