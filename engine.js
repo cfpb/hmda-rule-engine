@@ -1,8 +1,10 @@
+/*jshint evil:true*/
 /*global window:false*/
 'use strict';
 
 var hmdajson = require('./lib/hmdajson'),
-    _ = require('underscore');
+    _ = require('underscore'),
+    brijSpec = require('brij-spec/validate');
 
 (function() {
 
@@ -45,7 +47,7 @@ var hmdajson = require('./lib/hmdajson'),
 
     HMDAEngine.zipcode = function(property) {
         var regex = /^\d{5}(?:\s*|-\d{4})$/;
-        
+
         return regex.test(property);
     };
 
@@ -66,7 +68,7 @@ var hmdajson = require('./lib/hmdajson'),
         }
 
         return false;
-    }; 
+    };
 
     HMDAEngine.yyyy_mm_dd_hh_mm = function(property) {
         return HMDAEngine.yyyy_mm_dd_hh_mm_ss(property + '00');
@@ -96,7 +98,7 @@ var hmdajson = require('./lib/hmdajson'),
     HMDAEngine.matches_regex = function(property, regexStr) {
         try {
             var regex = new RegExp(regexStr);
-            return regex.test(property);    
+            return regex.test(property);
         } catch (error) {
             return false;
         }
@@ -151,52 +153,28 @@ var hmdajson = require('./lib/hmdajson'),
         return !isNaN(+property) && +property !== parseInt(property);
     };
 
-    HMDAEngine.equal = function(property, value) {
+    HMDAEngine.equal = HMDAEngine.equal_property = function(property, value) {
         return property === value;
     };
 
-    HMDAEngine.equal_property = function(first, second) {
-        return first === second;
-    };
-
-    HMDAEngine.not_equal = function(property, value) {
+    HMDAEngine.not_equal = HMDAEngine.not_equal_property = function(property, value) {
         return property !== value;
     };
 
-    HMDAEngine.not_equal_property = function(first, second) {
-        return first !== second;
-    };
-
-    HMDAEngine.greater_than = function(property, value) {
+    HMDAEngine.greater_than = HMDAEngine.greater_than_property = function(property, value) {
         return !isNaN(+property) && !isNaN(+value) && +property > +value;
     };
 
-    HMDAEngine.greater_than_property = function(first, second) {
-        return !isNaN(+first) && !isNaN(+second) && +first > +second;
-    };
-
-    HMDAEngine.less_than = function(property, value) {
+    HMDAEngine.less_than = HMDAEngine.less_than_property = function(property, value) {
         return !isNaN(+property) && !isNaN(+value) && +property < +value;
     };
 
-    HMDAEngine.less_than_property = function(first, second) {
-        return !isNaN(+first) && !isNaN(+second) && +first < +second;
-    };
-
-    HMDAEngine.greater_than_or_equal = function(property, value) {
+    HMDAEngine.greater_than_or_equal = HMDAEngine.greater_than_or_equal_property = function(property, value) {
         return !isNaN(+property) && !isNaN(+value) && +property >= +value;
     };
 
-    HMDAEngine.greater_than_or_equal_property = function(first, second) {
-        return !isNaN(+first) && !isNaN(+second) && +first >= +second;
-    };
-
-    HMDAEngine.less_than_or_equal = function(property, value) {
+    HMDAEngine.less_than_or_equal = HMDAEngine.less_than_or_equal_property = function(property, value) {
         return !isNaN(+property) && !isNaN(+value) && +property <= +value;
-    };
-
-    HMDAEngine.less_than_or_equal_property = function(first, second) {
-        return !isNaN(+first) && !isNaN(+second) && +first <= +second;
     };
 
     HMDAEngine.between = function(property, start, end) {
@@ -271,6 +249,80 @@ var hmdajson = require('./lib/hmdajson'),
             }
             next(err, root._HMDA_JSON);
         });
+    };
+
+    HMDAEngine.parseRuleCustomCall = function(rule, result) {
+        result.body += 'HMDAEngine.' + rule.function + '(';
+        if (rule.args) {
+            for (var i=0; i < rule.args.length; i++) {
+                result.body += 'arguments[' + result.argIndex++ + ']';
+                if (i !== rule.args.length-1) {
+                    result.body += ', ';
+                }
+                result.args.push(rule.args[i]);
+            }
+        } else {
+            result.body += 'arguments[' + result.argIndex++ + ']';
+            result.args.push(rule.property);
+        }
+        result.body += ')';
+    };
+
+    HMDAEngine.parseRuleCondition = function(rule, result) {
+        result.body += 'HMDAEngine.' + rule.condition + '(arguments[' + result.argIndex++ + ']';
+        result.args.push(rule.property);
+        var fields = brijSpec.VALID_CONDITIONS[rule.condition].additionalFields;
+        if (fields) {
+            if (HMDAEngine.ends_with(rule.condition, '_property')) {
+                result.body += ', arguments[' + result.argIndex++ + ']';
+                result.args.push(rule[fields[0]]);
+            } else {
+                for (var i=0; i < fields.length; i++) {
+                    result.body += ', ' + JSON.stringify(rule[fields[i]]);
+                }
+            }
+        }
+        result.body += ')';
+    };
+
+    HMDAEngine.parseRule = function(rule, result) {
+        if (rule.hasOwnProperty('condition')) {
+            if (rule.condition === 'call') {
+                HMDAEngine.parseRuleCustomCall(rule, result);
+            } else {
+                HMDAEngine.parseRuleCondition(rule, result);
+            }
+        }
+
+        if (rule.hasOwnProperty('if')) {
+            result.body += 'if (';
+            HMDAEngine.parseRule(rule.if, result);
+            result.body += ') { return ';
+            HMDAEngine.parseRule(rule.then, result);
+            result.body += '; } return true;';
+        }
+
+        if (rule.hasOwnProperty('and')) {
+            result.body += '(';
+            for (var i=0; i < rule.and.length; i++) {
+                HMDAEngine.parseRule(rule.and[i], result);
+                if (i !== rule.and.length-1) {
+                    result.body += ' && ';
+                }
+            }
+            result.body += ')';
+        }
+
+        if (rule.hasOwnProperty('or')) {
+            result.body += '(';
+            for (var j=0; j < rule.or.length; j++) {
+                HMDAEngine.parseRule(rule.or[j], result);
+                if (j !== rule.or.length-1) {
+                    result.body += ' || ';
+                }
+            }
+            result.body += ')';
+        }
     };
 
     /*
