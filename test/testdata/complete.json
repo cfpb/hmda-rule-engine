@@ -22,7 +22,8 @@
       "contactName": "Mrs. Krabappel     XXXXXXXXXXX",
       "contactPhone": "916-999-9999",
       "contactFax": "999-753-9999",
-      "respondentEmail": "krabappel@gmail.comXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+      "respondentEmail": "krabappel@gmail.comXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+      "lineNumber": "1"
     },
     "loanApplicationRegisters": [
       {
@@ -65,7 +66,8 @@
         "rateSpread": "01.05",
         "hoepaStatus": "2",
         "lienStatus": "4",
-        "filler": "B"
+        "filler": "B",
+        "lineNumber": "2"
       },
       {
         "recordID": "2",
@@ -107,7 +109,8 @@
         "rateSpread": "01.05",
         "hoepaStatus": "2",
         "lienStatus": "4",
-        "filler": "B"
+        "filler": "B",
+        "lineNumber": "3"
       },
       {
         "recordID": "2",
@@ -149,7 +152,8 @@
         "rateSpread": "01.05",
         "hoepaStatus": "2",
         "lienStatus": "4",
-        "filler": "B"
+        "filler": "B",
+        "lineNumber": "4"
       }
     ]
   }

@@ -199,17 +199,63 @@ var hmdajson = require('./lib/hmdajson'),
         return property.trim() !== '';
     };
 
+    var retrieveProps = function(error, line, properties) {
+        for (var i = 0; i < properties.length; i++) {
+            var property = properties[i];
+            error.properties[property] = bindArg(property, [line]);
+        }
+    };
+
+    var handleArrayErrors = function(hmdaFile, lines, properties) {
+        var errors = [];
+        for (var i = 0; i < lines.length; i++) {
+            var line = lines[i];
+            var error = {'properties': {}};
+            error.lineNumber = line;
+            if (line === 1) {
+                retrieveProps(error, hmdaFile.transmittalSheet, properties);
+            } else {
+                retrieveProps(error, hmdaFile.loanApplicationRegisters[line-2], properties);
+            }
+            errors.push(error);
+        }
+        return errors;
+    };
+
+    var handleUniqueLoanNumberErrors = function(counts) {
+        var errors = [];
+        var loanNumbers = _.keys(counts);
+        for (var i = 0; i < loanNumbers.length; i++) {
+            var loanNumber = loanNumbers[i];
+            if (counts[loanNumber].length > 1) {
+                var error = {'properties': {}};
+                error.loanNumber = loanNumber;
+                error.properties.lineNumbers = [];
+                for (var j = 0; j < counts[loanNumber].length; j++) {
+                    error.properties.lineNumbers.push(counts[loanNumber][j].lineNumber);
+                }
+                errors.push(error);
+            }
+        }
+        return errors;
+    };
+
     HMDAEngine.hasRecordIdentifiersForEachRow = function(hmdaFile) {
+        var records = [];
         if (hmdaFile.transmittalSheet.recordID !== '1') {
-            return false;
+            records.push(1);
         } else {
             for (var i=0; i < hmdaFile.loanApplicationRegisters.length; i++) {
                 if (hmdaFile.loanApplicationRegisters[i].recordID !== '2') {
-                    return false;
+                    records.push(hmdaFile.loanApplicationRegisters[i].lineNumber);
                 }
             }
         }
-        return true;
+
+        if (!records.length) {
+            return true;
+        }
+        return handleArrayErrors(hmdaFile, records, ['recordID']);
     };
 
     HMDAEngine.hasAtLeastOneLAR = function(hmdaFile) {
@@ -218,21 +264,33 @@ var hmdajson = require('./lib/hmdajson'),
 
     HMDAEngine.isValidAgencyCode = function(hmdaFile) {
         var validAgencies = [1, 2, 3, 5, 7, 9];
+        var records = [];
+
         if (! _.contains(validAgencies, hmdaFile.transmittalSheet.agencyCode)) {
-            return false;
-        } else {
-            var tsAgencyCode = hmdaFile.transmittalSheet.agencyCode;
-            for (var i=0; i < hmdaFile.loanApplicationRegisters.length; i++) {
-                if (hmdaFile.loanApplicationRegisters[i].agencyCode !== tsAgencyCode) {
-                    return false;
-                }
+            return handleArrayErrors(hmdaFile, [1], ['agencyCode']);
+        }
+        var tsAgencyCode = hmdaFile.transmittalSheet.agencyCode;
+        for (var i=0; i < hmdaFile.loanApplicationRegisters.length; i++) {
+            if (hmdaFile.loanApplicationRegisters[i].agencyCode !== tsAgencyCode) {
+                records.push(hmdaFile.loanApplicationRegisters[i].lineNumber);
             }
         }
-        return true;
+        if (!records.length) {
+            return true;
+        }
+        return handleArrayErrors(hmdaFile, records, ['agencyCode']);
     };
 
     HMDAEngine.hasUniqueLoanNumbers = function(hmdaFile) {
-        return _.unique(hmdaFile.loanApplicationRegisters, _.iteratee('loanNumber')).length === hmdaFile.loanApplicationRegisters.length;
+        if (_.unique(hmdaFile.loanApplicationRegisters, _.iteratee('loanNumber')).length === hmdaFile.loanApplicationRegisters.length) {
+            return true;
+        }
+
+        var counts = _.groupBy(hmdaFile.loanApplicationRegisters, function(lar) {
+            return lar.loanNumber;
+        });
+
+        return handleUniqueLoanNumberErrors(counts);
     };
 
     HMDAEngine.isActionDateInActivityYear = function(actionDate, activityYear) {
@@ -339,7 +397,8 @@ var hmdajson = require('./lib/hmdajson'),
      * -----------------------------------------------------
      */
 
-    var bindArg = function(arg, tokens, objList) {
+    var bindArg = function(arg, objList) {
+        var tokens = arg.split('.');
         for (var i = 0; i < objList.length; i++) {
             var mappedArg = objList[i];
 
@@ -371,8 +430,7 @@ var hmdajson = require('./lib/hmdajson'),
         var args = _.map(result.args, function(arg) {
             if (typeof(arg) === 'string') {
                 var objList = [topLevelObj, root];        // Context list to search
-                var tokens = arg.split('.');
-                return bindArg(arg, tokens, objList);
+                return bindArg(arg, objList);
             } else {
                 return arg;
             }
@@ -381,24 +439,23 @@ var hmdajson = require('./lib/hmdajson'),
         var funcResult = new Function(result.body).apply(null, args);
         
         if (topLevelObj.hmdaFile) {
-            // Map line numbers / loan application numbers to properties
+            if (_.isArray(funcResult) || funcResult === true) {
+                return funcResult;
+            } 
+            return [];
         } else {
-            if (funcResult) {
-                return false;
+            if (funcResult === true) {
+                return funcResult;
             }
             var error = {'properties': {}};
 
-            if (topLevelObj.recordID === '1') {
-                error.lineNumber = 1;
-            } else {
-                error.loanNumber = topLevelObj.loanNumber;
-            }
+            error.lineNumber = topLevelObj.lineNumber;
 
             for (var i = 0; i < args.length; i++) {
                 error.properties[result.args[i]] = args[i];
             }
-            
-            return error;
+
+            return [error];
         }
     };
 

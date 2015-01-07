@@ -643,11 +643,13 @@ describe('Engine', function() {
         it('should return true when the HMDA file has correct record identifiers for each row', function(done) {
             var hmdaFile = {
                 transmittalSheet: {
-                    recordID: '1'
+                    recordID: '1',
+                    lineNumber: 1
                 },
                 loanApplicationRegisters: [
                     {
-                        recordID: '2'
+                        recordID: '2',
+                        lineNumber: 2
                     }
                 ]
             };
@@ -656,36 +658,45 @@ describe('Engine', function() {
             done();
         });
 
-        it('should return false when the transmittal sheet does not have a recordID of 1', function(done) {
+        it('should return a list of errors when the transmittal sheet does not have a recordID of 1', function(done) {
             var hmdaFile = {
                 transmittalSheet: {
-                    recordID: '2'
+                    recordID: '2',
+                    lineNumber: 1
                 }
             };
             var result = engine.hasRecordIdentifiersForEachRow(hmdaFile);
-            expect(result).to.be(false);
+            expect(result.length).to.be(1);
+            expect(result[0].properties.recordID).to.be('2');
+            expect(result[0].lineNumber).to.be(1);
             done();
         });
 
-        it('should return false when a loan application register does not have a recordID of 2', function(done) {
+        it('should return a list of errors when a loan application register does not have a recordID of 2', function(done) {
             var hmdaFile = {
                 transmittalSheet: {
-                    recordID: '1'
+                    recordID: '1',
+                    lineNumber: 1
                 },
                 loanApplicationRegisters: [
                     {
-                        recordID: '2'
+                        recordID: '2',
+                        lineNumber: 2
                     },
                     {
-                        recordID: '1'
+                        recordID: '1',
+                        lineNumber: 3
                     },
                     {
-                        recordID: '2'
+                        recordID: '2',
+                        lineNumber: 4
                     }
                 ]
             };
             var result = engine.hasRecordIdentifiersForEachRow(hmdaFile);
-            expect(result).to.be(false);
+            expect(result.length).to.be(1);
+            expect(result[0].properties.recordID).to.be('1');
+            expect(result[0].lineNumber).to.be(3);
             done();
         });
 
@@ -719,57 +730,71 @@ describe('Engine', function() {
         it('should return false if the transmittal sheet has an invalid agency code', function(done) {
             var hmdaFile = {
                 transmittalSheet: {
-                    agencyCode: 11
+                    agencyCode: 11,
+                    lineNumber: 1
                 }
             };
             var result = engine.isValidAgencyCode(hmdaFile);
-            expect(result).to.be(false);
+            expect(result.length).to.be(1);
+            expect(result[0].lineNumber).to.be(1);
+            expect(result[0].properties.agencyCode).to.be(11);
             done();
         });
 
         it('should return false if a LAR has an invalid agency code', function(done) {
             var hmdaFile = {
                 transmittalSheet: {
-                    agencyCode: 1
+                    agencyCode: 1,
+                    lineNumber: 1
                 },
                 loanApplicationRegisters: [
                     {
-                        agencyCode: 11
+                        agencyCode: 11,
+                        lineNumber: 2
                     }
                 ]
             };
             var result = engine.isValidAgencyCode(hmdaFile);
-            expect(result).to.be(false);
+            expect(result.length).to.be(1);
+            expect(result[0].lineNumber).to.be(2);
+            expect(result[0].properties.agencyCode).to.be(11);
             done();
         });
 
         it('should return false if a LAR has an agency code that does not match the transmittal sheet agency code', function(done) {
             var hmdaFile = {
                 transmittalSheet: {
-                    agencyCode: 1
+                    agencyCode: 1,
+                    lineNumber: 1
                 },
                 loanApplicationRegisters: [
                     {
-                        agencyCode: 3
+                        agencyCode: 3,
+                        lineNumber: 2
                     }
                 ]
             };
             var result = engine.isValidAgencyCode(hmdaFile);
-            expect(result).to.be(false);
+            expect(result.length).to.be(1);
+            expect(result[0].lineNumber).to.be(2);
+            expect(result[0].properties.agencyCode).to.be(3);
             done();
         });
 
         it('should return true if all LARs have the same agency code as the transmittal sheet', function(done) {
             var hmdaFile = {
                 transmittalSheet: {
-                    agencyCode: 1
+                    agencyCode: 1,
+                    lineNumber: 1
                 },
                 loanApplicationRegisters: [
                     {
-                        agencyCode: 1
+                        agencyCode: 1,
+                        lineNumber: 2
                     },
                     {
-                        agencyCode: 1
+                        agencyCode: 1,
+                        lineNumber: 3
                     }
                 ]
             };
@@ -784,15 +809,20 @@ describe('Engine', function() {
             var hmdaFile = {
                 loanApplicationRegisters: [
                     {
-                        loanNumber: 1
+                        loanNumber: 1,
+                        lineNumber: 2
                     },
                     {
-                        loanNumber: 1
+                        loanNumber: 1,
+                        lineNumber: 3
                     }
                 ]
             };
             var result = engine.hasUniqueLoanNumbers(hmdaFile);
-            expect(result).to.be(false);
+            expect(result.length).to.be(1);
+            expect(result[0].loanNumber).to.be('1');
+            expect(result[0].properties.lineNumbers.length).to.be(2);
+            expect(result[0].properties.lineNumbers[0]).to.be(2);
             done();
         });
 
@@ -800,10 +830,12 @@ describe('Engine', function() {
             var hmdaFile = {
                 loanApplicationRegisters: [
                     {
-                        loanNumber: 1
+                        loanNumber: 1,
+                        lineNumber: 2
                     },
                     {
-                        loanNumber: 2
+                        loanNumber: 2,
+                        lineNumber: 3
                     }
                 ]
             };
@@ -1131,18 +1163,18 @@ describe('Engine', function() {
             global._HMDA_JSON.hmdaJson = hmdaJson;
         });
 
-        it('should return false for a passing function rule', function(done) {
+        it('should return true for a passing function rule', function(done) {
             var rule = {
                 'property': 'hmdaFile',
                 'condition': 'call',
                 'function': 'hasRecordIdentifiersForEachRow'
             };
 
-            expect(engine.execRule(hmdaJson, rule)).to.be(false);
+            expect(engine.execRule(hmdaJson, rule)).to.be(true);
             done();
         });
 
-        it('should return an error object for a non-passing function rule', function(done) {
+        it('should return list of errors for a non-passing function rule', function(done) {
             var rule = {
                 'property': 'hmdaFile',
                 'condition': 'call',
@@ -1152,11 +1184,14 @@ describe('Engine', function() {
             hmdaJson.hmdaFile.loanApplicationRegisters[0].recordID = '3';
 
             var result = engine.execRule(hmdaJson, rule);
-            expect(result.properties).to.be(true);
+            expect(result.length).to.be(1);
+            expect(result[0].lineNumber).to.be('2');
+            expect(result[0].properties.recordID).to.be('3');
+
             done();
         });
 
-        it('should return false for a passing email_address format condition rule', function(done) {
+        it('should return true for a passing email_address format condition rule', function(done) {
             hmdaJson.hmdaFile.transmittalSheet.respondentEmail = 'krabapple@gmail.com';
 
             var rule = {
@@ -1164,11 +1199,11 @@ describe('Engine', function() {
                 'condition': 'email_address'
             };
 
-            expect(engine.execRule(topLevelObj, rule)).to.be(false);
+            expect(engine.execRule(topLevelObj, rule)).to.be(true);
             done();
         });
 
-        it('should return an error object for a non-passing email_address format condition rule', function(done) {
+        it('should return a list of errors for a non-passing email_address format condition rule', function(done) {
             hmdaJson.hmdaFile.transmittalSheet.respondentEmail = 'krabapple.@gmail.com';
 
             var rule = {
@@ -1177,22 +1212,23 @@ describe('Engine', function() {
             };
 
             var result = engine.execRule(topLevelObj, rule);
-            expect(result.lineNumber).to.be(1);
-            expect(result.properties.respondentEmail).to.be('krabapple.@gmail.com');
+            expect(result.length).to.be(1);
+            expect(result[0].lineNumber).to.be('1');
+            expect(result[0].properties.respondentEmail).to.be('krabapple.@gmail.com');
             done(); 
         });
 
-        it('should return false for a passing zipcode format condition rule', function(done) {
+        it('should return true for a passing zipcode format condition rule', function(done) {
             var rule = {
                 'property': 'parentZip',
                 'condition': 'zipcode'
             };
 
-            expect(engine.execRule(topLevelObj, rule)).to.be(false);
+            expect(engine.execRule(topLevelObj, rule)).to.be(true);
             done();
         });
 
-        it('should return an error object for a non-passing zipcode format condition rule', function(done) {
+        it('should return a list of errors for a non-passing zipcode format condition rule', function(done) {
             hmdaJson.hmdaFile.transmittalSheet.parentZip = '555-1234';
 
             var rule = {
@@ -1201,12 +1237,13 @@ describe('Engine', function() {
             };
 
             var result = engine.execRule(topLevelObj, rule);
-            expect(result.lineNumber).to.be(1);
-            expect(result.properties.parentZip).to.be('555-1234');
+            expect(result.length).to.be(1);
+            expect(result[0].lineNumber).to.be('1');
+            expect(result[0].properties.parentZip).to.be('555-1234');
             done();
         });
 
-        it('should return false for a passing yyyy_mm_dd_hh_mm_ss format condition rule', function(done) {
+        it('should return true for a passing yyyy_mm_dd_hh_mm_ss format condition rule', function(done) {
             hmdaJson.hmdaFile.transmittalSheet.timestamp += '37';
 
             var rule = {
@@ -1214,11 +1251,11 @@ describe('Engine', function() {
                 'condition': 'yyyy_mm_dd_hh_mm_ss'
             };
 
-            expect(engine.execRule(topLevelObj, rule)).to.be(false);
+            expect(engine.execRule(topLevelObj, rule)).to.be(true);
             done();
         });
 
-        it('should return an error object for a non-passing yyyy_mm_dd_hh_mm_ss format condition rule', function(done) {
+        it('should return a list of errors for a non-passing yyyy_mm_dd_hh_mm_ss format condition rule', function(done) {
             hmdaJson.hmdaFile.transmittalSheet.timestamp = hmdaJson.hmdaFile.transmittalSheet.timestamp  + '98';
 
             var rule = {
@@ -1227,23 +1264,24 @@ describe('Engine', function() {
             };
 
             var result = engine.execRule(topLevelObj, rule);
-            expect(result.lineNumber).to.be(1);
-            expect(result.properties.timestamp).to.be('20130117133098');
+            expect(result.length).to.be(1);
+            expect(result[0].lineNumber).to.be('1');
+            expect(result[0].properties.timestamp).to.be('20130117133098');
             done();
         });
 
-        it('should return false for a passing matches_regex rule', function(done) {
+        it('should return true for a passing matches_regex rule', function(done) {
             var rule = {
                 'property': 'timestamp',
                 'condition': 'matches_regex',
                 'value': '[0-9]{12}'
             };
 
-            expect(engine.execRule(topLevelObj, rule)).to.be(false);
+            expect(engine.execRule(topLevelObj, rule)).to.be(true);
             done();
         });
 
-        it('should return an error object for a non-passing matches_regex rule', function(done) {
+        it('should return a list of errors for a non-passing matches_regex rule', function(done) {
             var rule = {
                 'property': 'timestamp',
                 'condition': 'matches_regex',
@@ -1251,22 +1289,23 @@ describe('Engine', function() {
             };
 
             var result = engine.execRule(topLevelObj, rule);
-            expect(result.lineNumber).to.be(1);
-            expect(result.properties.timestamp).to.be('201301171330');
+            expect(result.length).to.be(1);
+            expect(result[0].lineNumber).to.be('1');
+            expect(result[0].properties.timestamp).to.be('201301171330');
             done();
         });
 
-        it('should return false for a passing is_integer rule', function(done) {
+        it('should return true for a passing is_integer rule', function(done) {
             var rule = {
                 'property': 'timestamp',
                 'condition': 'is_integer',
             };
 
-            expect(engine.execRule(topLevelObj, rule)).to.be(false);
+            expect(engine.execRule(topLevelObj, rule)).to.be(true);
             done();
         });
 
-        it('should return an error object for a non-passing is_integer rule', function(done) {
+        it('should return a list of errors for a non-passing is_integer rule', function(done) {
             var rule = {
                 'property': 'timestamp',
                 'condition': 'is_integer'
@@ -1275,45 +1314,37 @@ describe('Engine', function() {
             hmdaJson.hmdaFile.transmittalSheet.timestamp = '2013.01171330';
 
             var result = engine.execRule(topLevelObj, rule);
-            expect(result.lineNumber).to.be(1);
-            expect(result.properties.timestamp).to.be('2013.01171330');
-
-            hmdaJson.hmdaFile.transmittalSheet.timestamp = 'cat';
-            result = engine.execRule(topLevelObj, rule);
-            expect(result.lineNumber).to.be(1);
-            expect(result.properties.timestamp).to.be('cat');            
+            expect(result.length).to.be(1);
+            expect(result[0].lineNumber).to.be('1');
+            expect(result[0].properties.timestamp).to.be('2013.01171330');
             done();
         });
 
-        it('should return false for a passing is_float rule', function(done) {
+        it('should return true for a passing is_float rule', function(done) {
             var rule = {
                 'property': 'timestamp',
                 'condition': 'is_float'
             };
 
             hmdaJson.hmdaFile.transmittalSheet.timestamp = '2013.01171330';
-            expect(engine.execRule(topLevelObj, rule)).to.be(false);
+            expect(engine.execRule(topLevelObj, rule)).to.be(true);
             done();
         });
 
-        it('should return an error object for a non-passing is_float rule', function(done) {
+        it('should return a list of errors for a non-passing is_float rule', function(done) {
             var rule = {
                 'property': 'timestamp',
                 'condition': 'is_float'
             };
 
             var result = engine.execRule(topLevelObj, rule);
-            expect(result.lineNumber).to.be(1);
-            expect(result.properties.timestamp).to.be('201301171330');
-
-            hmdaJson.hmdaFile.transmittalSheet.timestamp = 'cat';
-            result = engine.execRule(topLevelObj, rule);
-            expect(result.lineNumber).to.be(1);
-            expect(result.properties.timestamp).to.be('cat');
+            expect(result.length).to.be(1);
+            expect(result[0].lineNumber).to.be('1');
+            expect(result[0].properties.timestamp).to.be('201301171330');
             done();
         });
 
-        it('should return false for a passing equal rule', function(done) {
+        it('should return true for a passing equal rule', function(done) {
             topLevelObj = hmdaJson.hmdaFile.loanApplicationRegisters[0];
 
             var rule = {
@@ -1322,11 +1353,11 @@ describe('Engine', function() {
                 'value': '2'
             };
             
-            expect(engine.execRule(topLevelObj, rule)).to.be(false);
+            expect(engine.execRule(topLevelObj, rule)).to.be(true);
             done();
         });
 
-        it('should return an error object for a non-passing equal rule', function(done) {
+        it('should return a list of errors for a non-passing equal rule', function(done) {
             topLevelObj = hmdaJson.hmdaFile.loanApplicationRegisters[0];
 
             var rule = {
@@ -1336,12 +1367,13 @@ describe('Engine', function() {
             };
 
             var result = engine.execRule(topLevelObj, rule);
-            expect(result.loanNumber).to.be('ABCDEFGHIJKLMNOPQRSTUVWXY');
-            expect(result.properties.recordID).to.be('2');
+            expect(result.length).to.be(1);
+            expect(result[0].lineNumber).to.be('2');
+            expect(result[0].properties.recordID).to.be('2');
             done();
         });
 
-        it('should return false for a passing equal_property rule', function(done) {
+        it('should return true for a passing equal_property rule', function(done) {
             var rule = {
                 'property': 'timestamp',
                 'condition': 'equal_property',
@@ -1349,11 +1381,11 @@ describe('Engine', function() {
             };
 
             hmdaJson.hmdaFile.transmittalSheet.timestamp = '2013';
-            expect(engine.execRule(topLevelObj, rule)).to.be(false);
+            expect(engine.execRule(topLevelObj, rule)).to.be(true);
             done();
         });
 
-        it('should return an error object for a non-passing equal_property rule', function(done) {
+        it('should return a list of errors for a non-passing equal_property rule', function(done) {
             var rule = {
                 'property': 'timestamp',
                 'condition': 'equal_property',
@@ -1361,13 +1393,14 @@ describe('Engine', function() {
             };
 
             var result = engine.execRule(topLevelObj, rule);
-            expect(result.lineNumber).to.be(1);
-            expect(result.properties.activityYear).to.be('2013');
-            expect(result.properties.timestamp).to.be('201301171330');
+            expect(result.length).to.be(1);
+            expect(result[0].lineNumber).to.be('1');
+            expect(result[0].properties.activityYear).to.be('2013');
+            expect(result[0].properties.timestamp).to.be('201301171330');
             done();
         });
 
-        it('should return false for a passing between rule', function(done) {
+        it('should return true for a passing between rule', function(done) {
             var rule = {
                 'property': 'activityYear',
                 'condition': 'between',
@@ -1375,11 +1408,11 @@ describe('Engine', function() {
                 'end': '2014'
             };
 
-            expect(engine.execRule(topLevelObj, rule)).to.be(false);
+            expect(engine.execRule(topLevelObj, rule)).to.be(true);
             done();
         });
 
-        it('should return an error object for a non-passing between rule', function(done) {
+        it('should return a list of errors for a non-passing between rule', function(done) {
             var rule = {
                 'property': 'activityYear',
                 'condition': 'between',
@@ -1388,50 +1421,47 @@ describe('Engine', function() {
             };
 
             var result = engine.execRule(topLevelObj, rule);
-            expect(result.lineNumber).to.be(1);
-            expect(result.properties.activityYear).to.be('2013');
-
-            rule.property = 'parentCity';
-            result = engine.execRule(topLevelObj, rule);
-            expect(result.lineNumber).to.be(1);
-            expect(result.properties.parentCity).to.be('San Francisco      XXXXXX');            
+            expect(result.length).to.be(1);
+            expect(result[0].lineNumber).to.be('1');
+            expect(result[0].properties.activityYear).to.be('2013');
             done();         
         });
 
-        it('should return false for a passing is_empty rule', function(done) {
+        it('should return true for a passing is_empty rule', function(done) {
             var rule = {
                 'property': 'filler',
                 'condition': 'is_empty'
             };
 
-            expect(engine.execRule(topLevelObj, rule)).to.be(false);
+            expect(engine.execRule(topLevelObj, rule)).to.be(true);
             done();
         });
 
-        it('should return an error object for a non-passing is_empty rule', function(done) {
+        it('should return a list of errors for a non-passing is_empty rule', function(done) {
             var rule = {
                 'property': 'activityYear',
                 'condition': 'is_empty'
             };
 
             var result = engine.execRule(topLevelObj, rule);
-            expect(result.lineNumber).to.be(1);
-            expect(result.properties.activityYear).to.be('2013');
+            expect(result.length).to.be(1);
+            expect(result[0].lineNumber).to.be('1');
+            expect(result[0].properties.activityYear).to.be('2013');
             done();
         });
 
-        it('should return false for a passing in rule', function(done) {
+        it('should return true for a passing in rule', function(done) {
             var rule = {
                 'property': 'activityYear',
                 'condition': 'in',
                 'values': ['2012', '2013']
             };
 
-            expect(engine.execRule(topLevelObj, rule)).to.be(false);
+            expect(engine.execRule(topLevelObj, rule)).to.be(true);
             done();
         });
 
-        it('should return an error object for a non-passing in rule', function(done) {
+        it('should return a list of errors for a non-passing in rule', function(done) {
             var rule = {
                 'property': 'activityYear',
                 'condition': 'in',
@@ -1439,12 +1469,13 @@ describe('Engine', function() {
             };
 
             var result = engine.execRule(topLevelObj, rule);
-            expect(result.lineNumber).to.be(1);
-            expect(result.properties.activityYear).to.be('2013');
+            expect(result.length).to.be(1);
+            expect(result[0].lineNumber).to.be('1');
+            expect(result[0].properties.activityYear).to.be('2013');
             done();
         });
 
-        it('should return false for a passing if-then rule', function(done) {
+        it('should return true for a passing if-then rule', function(done) {
             var rule = {
                 'if': {
                     'property': 'activityYear',
@@ -1458,7 +1489,7 @@ describe('Engine', function() {
                 }
             };
 
-            expect(engine.execRule(topLevelObj, rule)).to.be(false);
+            expect(engine.execRule(topLevelObj, rule)).to.be(true);
 
             rule = {
                 'if': {
@@ -1473,11 +1504,11 @@ describe('Engine', function() {
                 }
             };
 
-            expect(engine.execRule(topLevelObj, rule)).to.be(false);
+            expect(engine.execRule(topLevelObj, rule)).to.be(true);
             done();
         });
 
-        it('should return false for a complex passing if-then rule', function(done) {
+        it('should return true for a complex passing if-then rule', function(done) {
             var rule = {
                 'if': {
                     'property': 'activityYear',
@@ -1497,11 +1528,11 @@ describe('Engine', function() {
                 }
             };   
             
-            expect(engine.execRule(topLevelObj, rule)).to.be(false);
+            expect(engine.execRule(topLevelObj, rule)).to.be(true);
             done();
         });
 
-        it('should return an error object for a non-passing complex if-then rule', function(done) {
+        it('should return a list of errors for a non-passing complex if-then rule', function(done) {
             var rule = {
                 'if': {
                     'property': 'activityYear',
@@ -1522,13 +1553,14 @@ describe('Engine', function() {
             };
 
             var result = engine.execRule(topLevelObj, rule);
-            expect(result.lineNumber).to.be(1);
-            expect(result.properties.activityYear).to.be('2013');
-            expect(result.properties.timestamp).to.be('201301171330');
+            expect(result.length).to.be(1);
+            expect(result[0].lineNumber).to.be('1');
+            expect(result[0].properties.activityYear).to.be('2013');
+            expect(result[0].properties.timestamp).to.be('201301171330');
             done();
         });
 
-        it('should return false for a passing and rule', function(done) {
+        it('should return true for a passing and rule', function(done) {
             var rule = {
                 'and': [
                     {
@@ -1544,11 +1576,11 @@ describe('Engine', function() {
                 ]
             };
 
-            expect(engine.execRule(topLevelObj, rule)).to.be(false);
+            expect(engine.execRule(topLevelObj, rule)).to.be(true);
             done();
         });
 
-        it('should return false for a passing complex and rule', function(done) {
+        it('should return true for a passing complex and rule', function(done) {
             var rule = {
                 'if': {
                     'and': [
@@ -1570,11 +1602,11 @@ describe('Engine', function() {
                 }
             };
 
-            expect(engine.execRule(topLevelObj, rule)).to.be(false);
+            expect(engine.execRule(topLevelObj, rule)).to.be(true);
             done();
         });
 
-        it('should return an error object for a non-passing and rule', function(done) {
+        it('should return a list of errors for a non-passing and rule', function(done) {
             var rule = {
                 'and': [
                     {
@@ -1595,14 +1627,15 @@ describe('Engine', function() {
             };
 
             var result = engine.execRule(topLevelObj, rule);
-            expect(result.lineNumber).to.be(1);
-            expect(result.properties.activityYear).to.be('2013');
-            expect(result.properties.timestamp).to.be('201301171330');
-            expect(result.properties.taxID).to.be('99-9999999');
+            expect(result.length).to.be(1);
+            expect(result[0].lineNumber).to.be('1');
+            expect(result[0].properties.activityYear).to.be('2013');
+            expect(result[0].properties.timestamp).to.be('201301171330');
+            expect(result[0].properties.taxID).to.be('99-9999999');
             done();
         });
 
-        it('should return an error object for a non-passing and rule', function(done) {
+        it('should return a list of errors for a non-passing and rule', function(done) {
             var rule = {
                 'if': {
                     'and': [
@@ -1625,13 +1658,14 @@ describe('Engine', function() {
             };
 
             var result = engine.execRule(topLevelObj, rule);
-            expect(result.lineNumber).to.be(1);
-            expect(result.properties.activityYear).to.be('2013');
-            expect(result.properties.timestamp).to.be('201301171330');
+            expect(result.length).to.be(1);
+            expect(result[0].lineNumber).to.be('1');
+            expect(result[0].properties.activityYear).to.be('2013');
+            expect(result[0].properties.timestamp).to.be('201301171330');
             done();
         });
 
-        it('should return false for a passing or rule', function(done) {
+        it('should return true for a passing or rule', function(done) {
             var rule = {
                 'or': [
                     {
@@ -1646,11 +1680,11 @@ describe('Engine', function() {
                 ]
             };
 
-            expect(engine.execRule(topLevelObj, rule)).to.be(false);
+            expect(engine.execRule(topLevelObj, rule)).to.be(true);
             done();
         });
 
-        it('should return an error object for a non-passing or rule', function(done) {
+        it('should return a list of errors for a non-passing or rule', function(done) {
             var rule = {
                 'or': [
                     {
@@ -1666,13 +1700,14 @@ describe('Engine', function() {
             };
 
             var result = engine.execRule(topLevelObj, rule);
-            expect(result.lineNumber).to.be(1);
-            expect(result.properties.activityYear).to.be('2013');
-            expect(result.properties.timestamp).to.be('201301171330');
+            expect(result.length).to.be(1);
+            expect(result[0].lineNumber).to.be('1');
+            expect(result[0].properties.activityYear).to.be('2013');
+            expect(result[0].properties.timestamp).to.be('201301171330');
             done();
         });
 
-        it('should return false for a passing S270 rule', function(done) {
+        it('should return true for a passing S270 rule', function(done) {
             var rule = {
                 'property': 'actionDate',
                 'condition': 'call',
@@ -1681,7 +1716,7 @@ describe('Engine', function() {
             };
 
             topLevelObj = hmdaJson.hmdaFile.loanApplicationRegisters[0];
-            expect(engine.execRule(topLevelObj, rule)).to.be(false);
+            expect(engine.execRule(topLevelObj, rule)).to.be(true);
             done();
         });
     });
