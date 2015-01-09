@@ -298,11 +298,123 @@ var hmdajson = require('./lib/hmdajson'),
         return HMDAEngine.yyyy_mm_dd(actionDate) && HMDAEngine.yyyy(activityYear) && activityYear === actionDate.slice(0,4);
     };
 
-    /* TODO - Replace with actual impl */
+    /* TODO - Implement this */
+    HMDAEngine.isLoanAmountFiveTimesIncome = function(loanAmount, applicantIncome) {
+        return true;
+    };
+
+    /* TODO - Implement this */
+    HMDAEngine.checkTotalLARCount = function(totalLineEntries) {
+        return true;
+    };
+
+    /* TODO - Implement this */
+    HMDAEngine.compareNumEntriesSingle = function(rule, cond, value) {
+        return true;
+    };
+
+    /* TODO - Implement this */
+    HMDAEngine.compareNumEntries = function(ruleA, ruleB, cond, value) {
+        return true;
+    };
+
+    /*
+     * -----------------------------------------------------
+     * Custom API functions
+     * TODO - Replace with actual impl
+     * -----------------------------------------------------
+     */
+
+    /* ts-syntactical */
     HMDAEngine.isTimestampLaterThanDatabase = function(timestamp) {
         return true;
     };
 
+    /* hmda-syntactical */
+    HMDAEngine.isValidControlNumber = function(hmdaFile) {
+        return true;
+    };
+
+    /* lar-validity */
+    HMDAEngine.isValidMetroArea = function(metroArea) {
+        return true;
+    };
+
+    HMDAEngine.isValidMsaMdStateAndCountyCombo = function(metroArea, fipsState, fipsCounty) {
+        return true;
+    };
+
+    HMDAEngine.isValidStateAndCounty = function(fipsState, fipsCounty) {
+        return true;
+    };
+
+    HMDAEngine.isValidCensusTractCombo = function(censusTract, metroArea, fipsState, fipsCounty) {
+        return true;
+    };
+
+    /* lar-quality */
+    HMDAEngine.isValidLoanAmount = function(loanAmount, applicantIncome) {
+        return true;
+    };
+
+    HMDAEngine.isValidStateCountyCensusTractCombo = function(fipsState, fipsCounty, censusTract, metroArea) {
+        return true;
+    };
+
+    HMDAEngine.isNotIndependentMortgageCoOrMBS = function(respondentID) {
+        return true;
+    };
+
+    HMDAEngine.isMetroAreaOnRespondentPanel = function(metroArea, respondentID) {
+        return true;
+    };
+
+    /* ts-validity */
+    HMDAEngine.isRespondentMBS = function(respondentID) {
+        return true;
+    };
+
+    /* hmda-macro */
+    HMDAEngine.isValidNumMultifamilyLoans = function(hmdaFile) {
+        return true;
+    };
+
+    HMDAEngine.isValidNumLoans = function(hmdaFile) {
+        return true;
+    };
+
+    HMDAEngine.isValidNumFannieMaeLoans = function(hmdaFile) {
+        return true;
+    };
+
+    HMDAEngine.isValidNumGinnieMaeFHALoans = function(hmdaFile) {
+        return true;
+    };
+
+    HMDAEngine.isValidNumGinnieMaeVALoans = function(hmdaFile) {
+        return true;
+    };
+
+    HMDAEngine.isValidNumHomePurchaseLoans = function(hmdaFile) {
+        return true;
+    };
+
+    HMDAEngine.isValidNumRefinanceLoans = function(hmdaFile) {
+        return true;
+    };
+
+    HMDAEngine.isValidMsaMdCountyCensusForNonDepository = function(hmdaFile) {
+        return true;
+    };
+
+    /* ts-quality */
+    HMDAEngine.isChildFI = function(respondentID) {
+        return true;
+    };
+
+    HMDAEngine.isTaxIDTheSameAsLastYear = function(respondentID, taxID) {
+        return true;
+    };
 
     /*
      * -----------------------------------------------------
