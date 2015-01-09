@@ -1170,7 +1170,7 @@ describe('Engine', function() {
                 'function': 'hasRecordIdentifiersForEachRow'
             };
 
-            expect(engine.execRule(hmdaJson, rule)).to.be(true);
+            expect(engine.execRule(hmdaJson, rule).length).to.be(0);
             done();
         });
 
@@ -1199,7 +1199,7 @@ describe('Engine', function() {
                 'condition': 'email_address'
             };
 
-            expect(engine.execRule(topLevelObj, rule)).to.be(true);
+            expect(engine.execRule(topLevelObj, rule).length).to.be(0);
             done();
         });
 
@@ -1224,7 +1224,7 @@ describe('Engine', function() {
                 'condition': 'zipcode'
             };
 
-            expect(engine.execRule(topLevelObj, rule)).to.be(true);
+            expect(engine.execRule(topLevelObj, rule).length).to.be(0);
             done();
         });
 
@@ -1251,7 +1251,7 @@ describe('Engine', function() {
                 'condition': 'yyyy_mm_dd_hh_mm_ss'
             };
 
-            expect(engine.execRule(topLevelObj, rule)).to.be(true);
+            expect(engine.execRule(topLevelObj, rule).length).to.be(0);
             done();
         });
 
@@ -1277,7 +1277,7 @@ describe('Engine', function() {
                 'value': '[0-9]{12}'
             };
 
-            expect(engine.execRule(topLevelObj, rule)).to.be(true);
+            expect(engine.execRule(topLevelObj, rule).length).to.be(0);
             done();
         });
 
@@ -1301,7 +1301,7 @@ describe('Engine', function() {
                 'condition': 'is_integer',
             };
 
-            expect(engine.execRule(topLevelObj, rule)).to.be(true);
+            expect(engine.execRule(topLevelObj, rule).length).to.be(0);
             done();
         });
 
@@ -1327,7 +1327,7 @@ describe('Engine', function() {
             };
 
             hmdaJson.hmdaFile.transmittalSheet.timestamp = '2013.01171330';
-            expect(engine.execRule(topLevelObj, rule)).to.be(true);
+            expect(engine.execRule(topLevelObj, rule).length).to.be(0);
             done();
         });
 
@@ -1353,7 +1353,7 @@ describe('Engine', function() {
                 'value': '2'
             };
             
-            expect(engine.execRule(topLevelObj, rule)).to.be(true);
+            expect(engine.execRule(topLevelObj, rule).length).to.be(0);
             done();
         });
 
@@ -1381,7 +1381,7 @@ describe('Engine', function() {
             };
 
             hmdaJson.hmdaFile.transmittalSheet.timestamp = '2013';
-            expect(engine.execRule(topLevelObj, rule)).to.be(true);
+            expect(engine.execRule(topLevelObj, rule).length).to.be(0);
             done();
         });
 
@@ -1408,7 +1408,7 @@ describe('Engine', function() {
                 'end': '2014'
             };
 
-            expect(engine.execRule(topLevelObj, rule)).to.be(true);
+            expect(engine.execRule(topLevelObj, rule).length).to.be(0);
             done();
         });
 
@@ -1433,7 +1433,7 @@ describe('Engine', function() {
                 'condition': 'is_empty'
             };
 
-            expect(engine.execRule(topLevelObj, rule)).to.be(true);
+            expect(engine.execRule(topLevelObj, rule).length).to.be(0);
             done();
         });
 
@@ -1457,7 +1457,7 @@ describe('Engine', function() {
                 'values': ['2012', '2013']
             };
 
-            expect(engine.execRule(topLevelObj, rule)).to.be(true);
+            expect(engine.execRule(topLevelObj, rule).length).to.be(0);
             done();
         });
 
@@ -1489,7 +1489,7 @@ describe('Engine', function() {
                 }
             };
 
-            expect(engine.execRule(topLevelObj, rule)).to.be(true);
+            expect(engine.execRule(topLevelObj, rule).length).to.be(0);
 
             rule = {
                 'if': {
@@ -1504,7 +1504,7 @@ describe('Engine', function() {
                 }
             };
 
-            expect(engine.execRule(topLevelObj, rule)).to.be(true);
+            expect(engine.execRule(topLevelObj, rule).length).to.be(0);
             done();
         });
 
@@ -1528,7 +1528,7 @@ describe('Engine', function() {
                 }
             };   
             
-            expect(engine.execRule(topLevelObj, rule)).to.be(true);
+            expect(engine.execRule(topLevelObj, rule).length).to.be(0);
             done();
         });
 
@@ -1576,7 +1576,7 @@ describe('Engine', function() {
                 ]
             };
 
-            expect(engine.execRule(topLevelObj, rule)).to.be(true);
+            expect(engine.execRule(topLevelObj, rule).length).to.be(0);
             done();
         });
 
@@ -1602,7 +1602,7 @@ describe('Engine', function() {
                 }
             };
 
-            expect(engine.execRule(topLevelObj, rule)).to.be(true);
+            expect(engine.execRule(topLevelObj, rule).length).to.be(0);
             done();
         });
 
@@ -1680,7 +1680,7 @@ describe('Engine', function() {
                 ]
             };
 
-            expect(engine.execRule(topLevelObj, rule)).to.be(true);
+            expect(engine.execRule(topLevelObj, rule).length).to.be(0);
             done();
         });
 
@@ -1716,7 +1716,7 @@ describe('Engine', function() {
             };
 
             topLevelObj = hmdaJson.hmdaFile.loanApplicationRegisters[0];
-            expect(engine.execRule(topLevelObj, rule)).to.be(true);
+            expect(engine.execRule(topLevelObj, rule).length).to.be(0);
             done();
         });
     });

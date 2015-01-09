@@ -438,15 +438,13 @@ var hmdajson = require('./lib/hmdajson'),
 
         var funcResult = new Function(result.body).apply(null, args);
         
-        if (topLevelObj.hmdaFile) {
-            if (_.isArray(funcResult) || funcResult === true) {
-                return funcResult;
-            } 
+        if (funcResult === true) {
             return [];
+        }
+
+        if (topLevelObj.hmdaFile) {
+            return funcResult;
         } else {
-            if (funcResult === true) {
-                return funcResult;
-            }
             var error = {'properties': {}};
 
             error.lineNumber = topLevelObj.lineNumber;
