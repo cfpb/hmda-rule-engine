@@ -4,7 +4,8 @@
 
 var hmdajson = require('./lib/hmdajson'),
     _ = require('underscore'),
-    brijSpec = require('brij-spec/validate');
+    brijSpec = require('brij-spec/validate'),
+    ruleSpec = require('hmda-rule-spec');
 
 (function() {
 
@@ -297,6 +298,11 @@ var hmdajson = require('./lib/hmdajson'),
         return HMDAEngine.yyyy_mm_dd(actionDate) && HMDAEngine.yyyy(activityYear) && activityYear === actionDate.slice(0,4);
     };
 
+    /* TODO - Replace with actual impl */
+    HMDAEngine.isTimestampLaterThanDatabase = function(timestamp) {
+        return true;
+    };
+
 
     /*
      * -----------------------------------------------------
@@ -458,6 +464,71 @@ var hmdajson = require('./lib/hmdajson'),
             return [error];
         }
     };
+
+    /*
+     * -----------------------------------------------------
+     * API Endpoints
+     * -----------------------------------------------------
+     */
+
+     var addToErrors = function(newErrors, rule, editType, scope, errors) {
+        if (errors[editType][rule.id] === undefined) {
+            errors[editType][rule.id] = {
+                'errors': []
+            };
+            errors[editType][rule.id].description = rule.description;
+            errors[editType][rule.id].explanation = rule.explanation;
+            errors[editType][rule.id].scope = scope;
+        }
+
+        for (var i = 0; i < newErrors.length; i++) {
+            errors[editType][rule.id].errors.push(newErrors[i]);
+        }
+     };
+
+     var runEdits = function(hmdaJson, year, scope, editType, errors) {
+        var rules = ruleSpec.getEdits(year, scope, editType);
+        
+        var topLevelObjs = [];
+        switch (scope) {
+            case 'ts': 
+                topLevelObjs.push(hmdaJson.hmdaFile.transmittalSheet);
+                break;
+            case 'lar': 
+                for (var i = 0; i < hmdaJson.hmdaFile.loanApplicationRegisters.length; i++) {
+                   topLevelObjs.push(hmdaJson.hmdaFile.loanApplicationRegisters[i]);
+                }
+                break;
+            case 'hmda':
+                topLevelObjs.push(hmdaJson.hmdaFile);
+                break;
+        }
+
+        for (var j = 0; j < rules.length; j++) {
+            for (var k = 0; k < topLevelObjs.length; k++) {
+                var result = HMDAEngine.execRule(topLevelObjs[k], rules[j].rule);
+                if (result !== true) {
+                    addToErrors(result, rules[j], editType, scope, errors);
+                }
+            }
+        }
+     };
+
+     HMDAEngine.runSyntactical = function(hmdaJson, year, scope, errors) {
+        return runEdits(hmdaJson, year, scope, 'syntactical', errors);
+     };
+
+     HMDAEngine.runValidity = function(hmdaJson, year, scope, errors) {
+        return runEdits(hmdaJson, year, scope, 'validity', errors);
+     };
+
+     HMDAEngine.runQuality = function(hmdaJson, year, scope, errors) {
+        return runEdits(hmdaJson, year, scope, 'quality', errors);
+     };
+
+     HMDAEngine.runMacro = function(hmdaJson, year, scope, errors) {
+        return runEdits(hmdaJson, year, scope, 'macro', errors);
+     };
 
 }.call((function() {
   return (typeof module !== 'undefined' && module.exports &&

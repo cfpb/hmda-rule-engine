@@ -1721,4 +1721,40 @@ describe('Engine', function() {
         });
     });
 
+    describe('runSyntactical', function() {
+        var hmdaJson = {};
+        var topLevelObj = {};
+
+        beforeEach(function() {
+            hmdaJson = JSON.parse(JSON.stringify(require('./testdata/complete.json')));
+            topLevelObj = hmdaJson.hmdaFile.transmittalSheet;
+            global._HMDA_JSON.hmdaJson = hmdaJson;
+        });
+
+        it('should return an unmodified set of errors for passing syntactical edits', function(done) {
+            var errors = {
+                'syntactical': {}
+            };
+
+            engine.runSyntactical(hmdaJson, '2013', 'ts', errors);
+            expect(Object.keys(errors.syntactical).length).to.be(0);
+            done();
+        });
+
+        it('should return a modified set of errors for failing syntactical edits', function(done) {
+            topLevelObj.timestamp = 'cat';
+            topLevelObj.activityYear = '2014';
+            var errors = {
+                'syntactical': {}
+            };
+
+            engine.runSyntactical(hmdaJson, '2013', 'ts', errors);
+            expect(errors.syntactical.S028.errors[0].properties.timestamp).to.be('cat');
+            expect(errors.syntactical.S028.errors[0].lineNumber).to.be('1');
+            expect(errors.syntactical.S100.errors[0].properties.activityYear).to.be('2014');
+            expect(errors.syntactical.S100.errors[0].lineNumber).to.be('1');
+            done();
+        });
+    });
+
 });
