@@ -297,7 +297,6 @@ var hmdajson = require('./lib/hmdajson'),
         return HMDAEngine.yyyy_mm_dd(actionDate) && HMDAEngine.yyyy(activityYear) && activityYear === actionDate.slice(0,4);
     };
 
-
     /*
      * -----------------------------------------------------
      * Parsing
@@ -397,10 +396,10 @@ var hmdajson = require('./lib/hmdajson'),
      * -----------------------------------------------------
      */
 
-    var bindArg = function(arg, objList) {
+    var bindArg = function(arg, contextList) {
         var tokens = arg.split('.');
-        for (var i = 0; i < objList.length; i++) {
-            var mappedArg = objList[i];
+        for (var i = 0; i < contextList.length; i++) {
+            var mappedArg = contextList[i];
 
             for (var j = 0; j < tokens.length; j++) {
                 mappedArg = mappedArg[tokens[j]];
@@ -429,8 +428,8 @@ var hmdajson = require('./lib/hmdajson'),
 
         var args = _.map(result.args, function(arg) {
             if (typeof(arg) === 'string') {
-                var objList = [topLevelObj, root];        // Context list to search
-                return bindArg(arg, objList);
+                var contextList = [topLevelObj, root];        // Context list to search
+                return bindArg(arg, contextList);
             } else {
                 return arg;
             }
