@@ -309,12 +309,12 @@ var hmdajson = require('./lib/hmdajson'),
     };
 
     /* TODO - Implement this */
-    HMDAEngine.compareNumEntriesSingle = function(rule, cond, value) {
+    HMDAEngine.compareNumEntriesSingle = function(loanApplicationRegisters, rule, cond, value) {
         return true;
     };
 
     /* TODO - Implement this */
-    HMDAEngine.compareNumEntries = function(ruleA, ruleB, cond, value) {
+    HMDAEngine.compareNumEntries = function(loanApplicationRegisters, ruleA, ruleB, cond, value) {
         return true;
     };
 
@@ -583,7 +583,7 @@ var hmdajson = require('./lib/hmdajson'),
      * -----------------------------------------------------
      */
 
-     var addToErrors = function(newErrors, rule, editType, scope, errors) {
+    var addToErrors = function(newErrors, rule, editType, scope, errors) {
         if (errors[editType][rule.id] === undefined) {
             errors[editType][rule.id] = {
                 'errors': []
@@ -596,9 +596,9 @@ var hmdajson = require('./lib/hmdajson'),
         for (var i = 0; i < newErrors.length; i++) {
             errors[editType][rule.id].errors.push(newErrors[i]);
         }
-     };
+    };
 
-     var runEdits = function(hmdaJson, year, scope, editType, errors) {
+    var runEdits = function(hmdaJson, year, scope, editType, errors) {
         var rules = ruleSpec.getEdits(year, scope, editType);
         
         var topLevelObjs = [];
@@ -624,23 +624,23 @@ var hmdajson = require('./lib/hmdajson'),
                 }
             }
         }
-     };
+    };
 
-     HMDAEngine.runSyntactical = function(hmdaJson, year, scope, errors) {
+    HMDAEngine.runSyntactical = function(hmdaJson, year, scope, errors) {
         return runEdits(hmdaJson, year, scope, 'syntactical', errors);
-     };
+    };
 
-     HMDAEngine.runValidity = function(hmdaJson, year, scope, errors) {
+    HMDAEngine.runValidity = function(hmdaJson, year, scope, errors) {
         return runEdits(hmdaJson, year, scope, 'validity', errors);
-     };
+    };
 
-     HMDAEngine.runQuality = function(hmdaJson, year, scope, errors) {
+    HMDAEngine.runQuality = function(hmdaJson, year, scope, errors) {
         return runEdits(hmdaJson, year, scope, 'quality', errors);
-     };
+    };
 
-     HMDAEngine.runMacro = function(hmdaJson, year, scope, errors) {
+    HMDAEngine.runMacro = function(hmdaJson, year, scope, errors) {
         return runEdits(hmdaJson, year, scope, 'macro', errors);
-     };
+    };
 
 }.call((function() {
   return (typeof module !== 'undefined' && module.exports &&

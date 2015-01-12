@@ -1731,7 +1731,7 @@ describe('Engine', function() {
             global._HMDA_JSON.hmdaJson = hmdaJson;
         });
 
-        it('should return an unmodified set of errors for passing syntactical edits', function(done) {
+        it('should return an unmodified set of errors for passing ts syntactical edits', function(done) {
             var errors = {
                 'syntactical': {}
             };
@@ -1741,7 +1741,7 @@ describe('Engine', function() {
             done();
         });
 
-        it('should return a modified set of errors for failing syntactical edits', function(done) {
+        it('should return a modified set of errors for failing ts syntactical edits', function(done) {
             topLevelObj.timestamp = 'cat';
             topLevelObj.activityYear = '2014';
             var errors = {
@@ -1756,5 +1756,142 @@ describe('Engine', function() {
             done();
         });
     });
+
+    describe('runValidity', function() {
+        var hmdaJson = {};
+        var topLevelObj = {};
+
+        beforeEach(function() {
+            hmdaJson = JSON.parse(JSON.stringify(require('./testdata/complete.json')));
+            topLevelObj = hmdaJson.hmdaFile.transmittalSheet;
+            global._HMDA_JSON.hmdaJson = hmdaJson;
+        });
+
+        it('should return a modified set of errors for failing lar-validity edits', function(done) {
+            var errors = {
+                'validity': {}
+            };
+
+            var errors_lar_validity = require('./testdata/errors-lar-validity.json');
+
+            hmdaJson.hmdaFile.loanApplicationRegisters[1].preapprovals = ' ';
+
+            engine.runValidity(hmdaJson, '2013', 'lar', errors);
+            expect(Object.equals(errors, errors_lar_validity)).to.be(true);
+            done();
+        });
+    });
+
+    describe('runQuality', function() {
+        var hmdaJson = {};
+        var topLevelObj = {};
+
+        beforeEach(function() {
+            hmdaJson = JSON.parse(JSON.stringify(require('./testdata/complete.json')));
+            topLevelObj = hmdaJson.hmdaFile.transmittalSheet;
+            global._HMDA_JSON.hmdaJson = hmdaJson;
+        });
+
+        it('should return an unmodified set of errors for passing ts-quality edits', function(done) {
+            var errors = {
+                'quality': {}
+            };
+
+            engine.runQuality(hmdaJson, '2013', 'ts', errors);
+            expect(Object.equals(errors, {'quality': {}})).to.be(true);
+            done();
+        });
+
+        it('should return a modified set of errors for failing ts-quality edits', function(done) {
+            var errors = {
+                'quality': {}
+            };
+
+            hmdaJson.hmdaFile.transmittalSheet.parentName = '                              ';
+
+            engine.runQuality(hmdaJson, '2013', 'ts', errors);
+            var expectedErrors = {
+                'quality': {
+                    'Q033': {
+                        'description': 'If respondent is a bank, savings association, or independent mortgage company, and if any parent company exists, then parent name, address, city, state and zip code should not = blank.',
+                        'explanation': 'Parent name, address, city, state, or zip code is missing.',
+                        'scope': 'ts',
+                        'errors': [
+                            {
+                                'lineNumber': '1',
+                                'properties': {
+                                    'respondentID': '0123456789',
+                                    'parentName': '                              ',
+                                    'parentAddress': '1234 Kearney St    XXXXXXXXXXXXXXXXXXXXX',
+                                    'parentCity': 'San Francisco      XXXXXX',
+                                    'parentState': 'CA',
+                                    'parentZip': '99999-1234'
+                                }
+                            }
+                        ]
+                    }
+                }
+            };
+
+            expect(Object.equals(errors, expectedErrors)).to.be(true);
+            done();
+        });
+    });
+
+    describe('runMacro', function() {
+        var hmdaJson = {};
+        var topLevelObj = {};
+
+        beforeEach(function() {
+            hmdaJson = JSON.parse(JSON.stringify(require('./testdata/complete.json')));
+            topLevelObj = hmdaJson.hmdaFile.transmittalSheet;
+            global._HMDA_JSON.hmdaJson = hmdaJson;
+        });
+
+        it('should return an unmodified set of errors for passing hmda-macro edits', function(done) {
+            var errors = {
+                'macro': {}
+            };
+
+            engine.runMacro(hmdaJson, '2013', 'hmda', errors);
+            expect(Object.equals(errors, {'macro': {}})).to.be(true);
+            done();
+        });
+    });
+
+    Object.equals = function(x, y) {
+        if (x === y) { return true; }
+        // if both x and y are null or undefined and exactly the same
+
+        if (!(x instanceof Object) || !(y instanceof Object)) { return false; }
+        // if they are not strictly equal, they both need to be Objects
+
+        if (x.constructor !== y.constructor) { return false; }
+        // they must have the exact same prototype chain, the closest we can do is
+        // test there constructor.
+
+        for (var p in x) {
+            if (!x.hasOwnProperty(p)) { continue; }
+            // other properties were tested using x.constructor === y.constructor
+
+            if (!y.hasOwnProperty(p)) { return false; }
+            // allows to compare x[p] and y[p] when set to undefined
+
+            if (x[p] === y[p]) { continue; }
+            // if they have the same strict value or identity then they are equal
+
+            if (typeof(x[p]) !== 'object') { return false; }
+            // Numbers, Strings, Functions, Booleans must be strictly equal
+
+            if (!Object.equals(x[p],  y[p])) { return false; }
+            // Objects and Arrays must be tested recursively
+        }
+
+        for (p in y) {
+            if (y.hasOwnProperty(p) && !x.hasOwnProperty(p)) { return false; }
+            // allows x[ p ] to be set to undefined
+        }
+        return true;
+    };
 
 });
