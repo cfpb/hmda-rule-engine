@@ -202,7 +202,7 @@ var hmdajson = require('./lib/hmdajson'),
     var retrieveProps = function(error, line, properties) {
         for (var i = 0; i < properties.length; i++) {
             var property = properties[i];
-            error.properties[property] = bindArg(property, [line]);
+            error.properties[property] = resolveArg(property, [line]);
         }
     };
 
@@ -396,7 +396,7 @@ var hmdajson = require('./lib/hmdajson'),
      * -----------------------------------------------------
      */
 
-    var bindArg = function(arg, contextList) {
+    var resolveArg = function(arg, contextList) {
         var tokens = arg.split('.');
         for (var i = 0; i < contextList.length; i++) {
             var mappedArg = contextList[i];
@@ -429,7 +429,7 @@ var hmdajson = require('./lib/hmdajson'),
         var args = _.map(result.args, function(arg) {
             if (typeof(arg) === 'string') {
                 var contextList = [topLevelObj, root];        // Context list to search
-                return bindArg(arg, contextList);
+                return resolveArg(arg, contextList);
             } else {
                 return arg;
             }
