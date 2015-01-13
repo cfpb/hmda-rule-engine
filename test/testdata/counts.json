@@ -1,0 +1,26 @@
+{
+    "12A": [
+        {
+            "loanNumber": "12A",
+            "lineNumber": "4",
+            "recordID": "2"
+        },
+        {
+            "loanNumber": "12A",
+            "lineNumber": "8",
+            "recordID": "2"
+        }
+    ],
+    "12C": [
+        {
+            "loanNumber": "12C",
+            "lineNumber": "5",
+            "recordID": "2"
+        },
+        {
+            "loanNumber": "12C",
+            "lineNumber": "13",
+            "recordID": "2"
+        }
+    ]
+}

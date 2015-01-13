@@ -37,7 +37,7 @@ var handleArrayErrors = function(hmdaFile, lines, properties) {
     for (var i = 0; i < lines.length; i++) {
         var line = lines[i];
         var error = {'properties': {}};
-        error.lineNumber = line;
+        error.lineNumber = line.toString();
         if (line === 1) {
             retrieveProps(error, hmdaFile.transmittalSheet, properties);
         } else {
@@ -282,7 +282,7 @@ var handleUniqueLoanNumberErrors = function(counts) {
     };
 
     HMDAEngine.isValidAgencyCode = function(hmdaFile) {
-        var validAgencies = [1, 2, 3, 5, 7, 9];
+        var validAgencies = ['1', '2', '3', '5', '7', '9'];
         var records = [];
 
         if (! _.contains(validAgencies, hmdaFile.transmittalSheet.agencyCode)) {
