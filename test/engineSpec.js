@@ -1160,7 +1160,7 @@ describe('Engine', function() {
         beforeEach(function() {
             hmdaJson = JSON.parse(JSON.stringify(require('./testdata/complete.json')));
             topLevelObj = hmdaJson.hmdaFile.transmittalSheet;
-            global._HMDA_JSON.hmdaJson = hmdaJson;
+            global._HMDA_JSON.hmdaFile = hmdaJson.hmdaFile;
         });
 
         it('should return true for a passing function rule', function(done) {
@@ -1712,7 +1712,7 @@ describe('Engine', function() {
                 'property': 'actionDate',
                 'condition': 'call',
                 'function': 'isActionDateInActivityYear',
-                'args': ['actionDate', '_HMDA_JSON.hmdaJson.hmdaFile.transmittalSheet.activityYear']
+                'args': ['actionDate', 'transmittalSheet.activityYear']
             };
 
             topLevelObj = hmdaJson.hmdaFile.loanApplicationRegisters[0];

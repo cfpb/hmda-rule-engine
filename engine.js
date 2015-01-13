@@ -11,7 +11,7 @@ var hmdajson = require('./lib/hmdajson'),
     // Set root (global) scope
     var root = this;
 
-    root._HMDA_JSON = null;
+    root._HMDA_JSON = {};
 
     // Constructor of our HMDAEngine
     var HMDAEngine = function(obj) {
@@ -428,7 +428,7 @@ var hmdajson = require('./lib/hmdajson'),
 
         var args = _.map(result.args, function(arg) {
             if (typeof(arg) === 'string') {
-                var contextList = [topLevelObj, root];        // Context list to search
+                var contextList = [topLevelObj, root._HMDA_JSON.hmdaFile !== undefined ? root._HMDA_JSON.hmdaFile : {}];        // Context list to search
                 return resolveArg(arg, contextList);
             } else {
                 return arg;
