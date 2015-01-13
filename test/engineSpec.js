@@ -1160,7 +1160,7 @@ describe('Engine', function() {
         beforeEach(function() {
             hmdaJson = JSON.parse(JSON.stringify(require('./testdata/complete.json')));
             topLevelObj = hmdaJson.hmdaFile.transmittalSheet;
-            global._HMDA_JSON.hmdaJson = hmdaJson;
+            engine.setHmdaFile(hmdaJson.hmdaFile);
         });
 
         it('should return true for a passing function rule', function(done) {
@@ -1712,7 +1712,7 @@ describe('Engine', function() {
                 'property': 'actionDate',
                 'condition': 'call',
                 'function': 'isActionDateInActivityYear',
-                'args': ['actionDate', '_HMDA_JSON.hmdaJson.hmdaFile.transmittalSheet.activityYear']
+                'args': ['actionDate', 'transmittalSheet.activityYear']
             };
 
             topLevelObj = hmdaJson.hmdaFile.loanApplicationRegisters[0];
@@ -1728,31 +1728,24 @@ describe('Engine', function() {
         beforeEach(function() {
             hmdaJson = JSON.parse(JSON.stringify(require('./testdata/complete.json')));
             topLevelObj = hmdaJson.hmdaFile.transmittalSheet;
-            global._HMDA_JSON.hmdaJson = hmdaJson;
+            engine.setHmdaFile(hmdaJson.hmdaFile);
+            engine.clearErrors();
         });
 
-        it('should return an unmodified set of errors for passing ts syntactical edits', function(done) {
-            var errors = {
-                'syntactical': {}
-            };
-
-            engine.runSyntactical(hmdaJson, '2013', 'ts', errors);
-            expect(Object.keys(errors.syntactical).length).to.be(0);
+        it('should return an unmodified set of errors for passing syntactical edits', function(done) {
+            engine.runSyntactical('2013');
+            expect(Object.keys(engine.getErrors().syntactical).length).to.be(0);
             done();
         });
 
-        it('should return a modified set of errors for failing ts syntactical edits', function(done) {
+        it('should return a modified set of errors for failing syntactical edits', function(done) {
             topLevelObj.timestamp = 'cat';
             topLevelObj.activityYear = '2014';
-            var errors = {
-                'syntactical': {}
-            };
 
-            engine.runSyntactical(hmdaJson, '2013', 'ts', errors);
-            expect(errors.syntactical.S028.errors[0].properties.timestamp).to.be('cat');
-            expect(errors.syntactical.S028.errors[0].lineNumber).to.be('1');
-            expect(errors.syntactical.S100.errors[0].properties.activityYear).to.be('2014');
-            expect(errors.syntactical.S100.errors[0].lineNumber).to.be('1');
+            var errors_syntactical = require('./testdata/errors-syntactical.json');
+
+            engine.runSyntactical('2013');
+            expect(Object.equals(engine.getErrors(), errors_syntactical)).to.be(true);
             done();
         });
     });
@@ -1764,20 +1757,17 @@ describe('Engine', function() {
         beforeEach(function() {
             hmdaJson = JSON.parse(JSON.stringify(require('./testdata/complete.json')));
             topLevelObj = hmdaJson.hmdaFile.transmittalSheet;
-            global._HMDA_JSON.hmdaJson = hmdaJson;
+            engine.setHmdaFile(hmdaJson.hmdaFile);
+            engine.clearErrors();
         });
 
-        it('should return a modified set of errors for failing lar-validity edits', function(done) {
-            var errors = {
-                'validity': {}
-            };
-
-            var errors_lar_validity = require('./testdata/errors-lar-validity.json');
+        it('should return a modified set of errors for failing validity edits', function(done) {
+            var errors_validity = require('./testdata/errors-validity.json');
 
             hmdaJson.hmdaFile.loanApplicationRegisters[1].preapprovals = ' ';
 
-            engine.runValidity(hmdaJson, '2013', 'lar', errors);
-            expect(Object.equals(errors, errors_lar_validity)).to.be(true);
+            engine.runValidity('2013');
+            expect(Object.equals(engine.getErrors(), errors_validity)).to.be(true);
             done();
         });
     });
@@ -1789,51 +1779,17 @@ describe('Engine', function() {
         beforeEach(function() {
             hmdaJson = JSON.parse(JSON.stringify(require('./testdata/complete.json')));
             topLevelObj = hmdaJson.hmdaFile.transmittalSheet;
-            global._HMDA_JSON.hmdaJson = hmdaJson;
+            engine.setHmdaFile(hmdaJson.hmdaFile);
+            engine.clearErrors();
         });
 
-        it('should return an unmodified set of errors for passing ts-quality edits', function(done) {
-            var errors = {
-                'quality': {}
-            };
-
-            engine.runQuality(hmdaJson, '2013', 'ts', errors);
-            expect(Object.equals(errors, {'quality': {}})).to.be(true);
-            done();
-        });
-
-        it('should return a modified set of errors for failing ts-quality edits', function(done) {
-            var errors = {
-                'quality': {}
-            };
-
+        it('should return a modified set of errors for failing quality edits', function(done) {
             hmdaJson.hmdaFile.transmittalSheet.parentName = '                              ';
+            var errors_quality = require('./testdata/errors-quality.json');
 
-            engine.runQuality(hmdaJson, '2013', 'ts', errors);
-            var expectedErrors = {
-                'quality': {
-                    'Q033': {
-                        'description': 'If respondent is a bank, savings association, or independent mortgage company, and if any parent company exists, then parent name, address, city, state and zip code should not = blank.',
-                        'explanation': 'Parent name, address, city, state, or zip code is missing.',
-                        'scope': 'ts',
-                        'errors': [
-                            {
-                                'lineNumber': '1',
-                                'properties': {
-                                    'respondentID': '0123456789',
-                                    'parentName': '                              ',
-                                    'parentAddress': '1234 Kearney St    XXXXXXXXXXXXXXXXXXXXX',
-                                    'parentCity': 'San Francisco      XXXXXX',
-                                    'parentState': 'CA',
-                                    'parentZip': '99999-1234'
-                                }
-                            }
-                        ]
-                    }
-                }
-            };
+            engine.runQuality('2013');
 
-            expect(Object.equals(errors, expectedErrors)).to.be(true);
+            expect(Object.equals(engine.getErrors(), errors_quality)).to.be(true);
             done();
         });
     });
@@ -1845,16 +1801,20 @@ describe('Engine', function() {
         beforeEach(function() {
             hmdaJson = JSON.parse(JSON.stringify(require('./testdata/complete.json')));
             topLevelObj = hmdaJson.hmdaFile.transmittalSheet;
-            global._HMDA_JSON.hmdaJson = hmdaJson;
+            engine.setHmdaFile(hmdaJson.hmdaFile);
+            engine.clearErrors();
         });
 
-        it('should return an unmodified set of errors for passing hmda-macro edits', function(done) {
+        it('should return an unmodified set of errors for passing macro edits', function(done) {
             var errors = {
-                'macro': {}
+                'syntactical': {},
+                'validity': {},
+                'quality': {},
+                'macro': {},
             };
 
-            engine.runMacro(hmdaJson, '2013', 'hmda', errors);
-            expect(Object.equals(errors, {'macro': {}})).to.be(true);
+            engine.runMacro('2013');
+            expect(Object.equals(engine.getErrors(), errors)).to.be(true);
             done();
         });
     });

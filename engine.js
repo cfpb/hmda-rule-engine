@@ -12,7 +12,7 @@ var hmdajson = require('./lib/hmdajson'),
     // Set root (global) scope
     var root = this;
 
-    root._HMDA_JSON = null;
+    root._HMDA_JSON = {};
 
     // Constructor of our HMDAEngine
     var HMDAEngine = function(obj) {
@@ -33,6 +33,45 @@ var hmdajson = require('./lib/hmdajson'),
         exports.HMDAEngine = HMDAEngine;
     }
     root.HMDAEngine = HMDAEngine;
+
+    /*
+     * -----------------------------------------------------
+     * Managed State
+     * -----------------------------------------------------
+     */
+
+    var hmdaFile = {},
+        errors = {
+            syntactical: {},
+            validity: {},
+            quality: {},
+            macro: {}
+        };
+
+    HMDAEngine.clearErrors = function() {
+        errors = {
+            syntactical: {},
+            validity: {},
+            quality: {},
+            macro: {}      
+        };
+    };
+
+    HMDAEngine.getErrors = function() {
+        return errors;
+    };
+
+    HMDAEngine.clearHmdaFile = function() {
+        hmdaFile = {};
+    };
+
+    HMDAEngine.getHmdaFile = function() {
+        return hmdaFile;
+    };
+
+    HMDAEngine.setHmdaFile = function(newFile) {
+        hmdaFile = newFile;
+    };
 
     /*
      * -----------------------------------------------------
@@ -426,6 +465,7 @@ var hmdajson = require('./lib/hmdajson'),
         hmdajson.process(file, spec, function(err, result) {
             if (! err && result) {
                 root._HMDA_JSON = result;
+                hmdaFile = result;
             }
             next(err, root._HMDA_JSON);
         });
@@ -547,7 +587,7 @@ var hmdajson = require('./lib/hmdajson'),
 
         var args = _.map(result.args, function(arg) {
             if (typeof(arg) === 'string') {
-                var objList = [topLevelObj, root];        // Context list to search
+                var objList = [topLevelObj, hmdaFile];        // Context list to search
                 return bindArg(arg, objList);
             } else {
                 return arg;
@@ -583,7 +623,7 @@ var hmdajson = require('./lib/hmdajson'),
      * -----------------------------------------------------
      */
 
-    var addToErrors = function(newErrors, rule, editType, scope, errors) {
+    var addToErrors = function(newErrors, rule, editType, scope) {
         if (errors[editType][rule.id] === undefined) {
             errors[editType][rule.id] = {
                 'errors': []
@@ -598,21 +638,21 @@ var hmdajson = require('./lib/hmdajson'),
         }
     };
 
-    var runEdits = function(hmdaJson, year, scope, editType, errors) {
+    var runEdits = function(year, scope, editType) {
         var rules = ruleSpec.getEdits(year, scope, editType);
         
         var topLevelObjs = [];
         switch (scope) {
             case 'ts': 
-                topLevelObjs.push(hmdaJson.hmdaFile.transmittalSheet);
+                topLevelObjs.push(hmdaFile.transmittalSheet);
                 break;
             case 'lar': 
-                for (var i = 0; i < hmdaJson.hmdaFile.loanApplicationRegisters.length; i++) {
-                   topLevelObjs.push(hmdaJson.hmdaFile.loanApplicationRegisters[i]);
+                for (var i = 0; i < hmdaFile.loanApplicationRegisters.length; i++) {
+                   topLevelObjs.push(hmdaFile.loanApplicationRegisters[i]);
                 }
                 break;
             case 'hmda':
-                topLevelObjs.push(hmdaJson.hmdaFile);
+                topLevelObjs.push(hmdaFile);
                 break;
         }
 
@@ -620,26 +660,34 @@ var hmdajson = require('./lib/hmdajson'),
             for (var k = 0; k < topLevelObjs.length; k++) {
                 var result = HMDAEngine.execRule(topLevelObjs[k], rules[j].rule);
                 if (result !== true) {
-                    addToErrors(result, rules[j], editType, scope, errors);
+                    addToErrors(result, rules[j], editType, scope);
                 }
             }
         }
     };
 
-    HMDAEngine.runSyntactical = function(hmdaJson, year, scope, errors) {
-        return runEdits(hmdaJson, year, scope, 'syntactical', errors);
+    HMDAEngine.runSyntactical = function(year) {
+        runEdits(year, 'ts', 'syntactical');
+        runEdits(year, 'lar', 'syntactical');
+        runEdits(year, 'hmda', 'syntactical');
+        return errors;
     };
 
-    HMDAEngine.runValidity = function(hmdaJson, year, scope, errors) {
-        return runEdits(hmdaJson, year, scope, 'validity', errors);
+    HMDAEngine.runValidity = function(year) {
+        runEdits(year, 'ts', 'validity');
+        runEdits(year, 'lar', 'validity');
+        return errors;
     };
 
-    HMDAEngine.runQuality = function(hmdaJson, year, scope, errors) {
-        return runEdits(hmdaJson, year, scope, 'quality', errors);
+    HMDAEngine.runQuality = function(year) {
+        runEdits(year, 'ts', 'quality');
+        runEdits(year, 'lar', 'quality');
+        return errors;
     };
 
-    HMDAEngine.runMacro = function(hmdaJson, year, scope, errors) {
-        return runEdits(hmdaJson, year, scope, 'macro', errors);
+    HMDAEngine.runMacro = function(year) {
+        runEdits(year, 'hmda', 'macro');
+        return errors;
     };
 
 }.call((function() {

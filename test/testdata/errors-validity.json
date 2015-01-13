@@ -1,5 +1,19 @@
 {
+    "syntactical": {},
     "validity": {
+        "V125": {
+            "description": "Tax ID number must be in NN-NNNNNNN format and not = (99-9999999 or 00-0000000 or blank).",
+            "explanation": "Tax ID number not in valid format or is missing.",
+            "scope": "ts",
+            "errors": [
+                {
+                    "lineNumber": "1",
+                    "properties": {
+                        "taxID": "99-9999999"
+                    }
+                }
+            ]
+        },
         "V415": {
             "description": "Preapproval must = 1, 2, or 3.",
             "explanation": "Preapproval is missing or is not in range 1-3.",
@@ -264,5 +278,7 @@
                 }
             ]
         }
-    }
+    },
+    "quality": {},
+    "macro": {}
 }

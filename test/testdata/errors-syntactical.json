@@ -1,0 +1,61 @@
+{
+    "syntactical": {
+        "S028": {
+            "description": "Timestamp must be numeric and in ccyymmddhhmm format.",
+            "explanation": "Timestamp is missing or nonnumeric (format = ccyymmddhhmm).",
+            "scope": "ts",
+            "errors": [
+                {
+                    "lineNumber": "1",
+                    "properties": {
+                        "timestamp": "cat"
+                    }
+                }
+            ]
+        },
+        "S100": {
+            "description": "Activity year must = year being processed (= 2013).",
+            "explanation": "Invalid activity year.",
+            "scope": "ts",
+            "errors": [
+                {
+                    "lineNumber": "1",
+                    "properties": {
+                        "activityYear": "2014"
+                    }
+                }
+            ]
+        },
+        "S270": {
+            "description": "Century (CC) and Year (YY) of action taken date must = activity century/year (CCYY) for period being processed.",
+            "explanation": "Century and/or year for action taken date does not match activity century/year.",
+            "scope": "lar",
+            "errors": [
+                {
+                    "lineNumber": "2",
+                    "properties": {
+                        "actionDate": "20130119",
+                        "transmittalSheet.activityYear": "2014"
+                    }
+                },
+                {
+                    "lineNumber": "3",
+                    "properties": {
+                        "actionDate": "20130119",
+                        "transmittalSheet.activityYear": "2014"
+                    }
+                },
+                {
+                    "lineNumber": "4",
+                    "properties": {
+                        "actionDate": "20130119",
+                        "transmittalSheet.activityYear": "2014"
+                    }
+                }
+            ]
+        }
+    },
+    "validity": {},
+    "quality": {},
+    "macro": {}
+}
