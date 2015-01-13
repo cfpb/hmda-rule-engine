@@ -2,9 +2,11 @@
 /*global it:false*/
 /*global expect:false*/
 /*global beforeEach:false*/
+/*global rewire:false*/
 'use strict';
 
 var engine = require('../engine');
+var rewiredEngine = rewire('../engine');
 var FILE_SPEC = require('./testdata/2013_file_spec.json');
 
 
@@ -1717,6 +1719,41 @@ describe('Engine', function() {
 
             topLevelObj = hmdaJson.hmdaFile.loanApplicationRegisters[0];
             expect(engine.execRule(topLevelObj, rule).length).to.be(0);
+            done();
+        });
+    });
+
+    describe('resolveArg', function() {
+        var hmdaJson = {};
+        var topLevelObj = {};
+
+        beforeEach(function() {
+            hmdaJson = JSON.parse(JSON.stringify(require('./testdata/complete.json')));
+            topLevelObj = hmdaJson.hmdaFile.transmittalSheet;
+            global._HMDA_JSON.hmdaFile = hmdaJson.hmdaFile;
+        });
+
+        it('should return a value for an existing property in topLevelObj', function(done) {
+            var resolveArg = rewiredEngine.__get__('resolveArg');
+            var contextList = [topLevelObj, hmdaJson.hmdaFile];
+            expect(resolveArg('parentState', contextList)).to.be('CA');
+            done();
+        });
+
+        it('should return a value for an existing property in hmdaFile', function(done) {
+            var resolveArg = rewiredEngine.__get__('resolveArg');
+            var contextList = [topLevelObj, hmdaJson.hmdaFile];
+            expect(resolveArg('transmittalSheet.activityYear', contextList)).to.be('2013');
+            done();
+        });
+
+        it('should throw an exception for a non-existent property', function(done) {
+            var resolveArg = rewiredEngine.__get__('resolveArg');
+            var contextList = [topLevelObj, hmdaJson.hmdaFile];
+
+            expect(function() {
+                resolveArg('transmittalSheet.loanPurpose', contextList);
+            }).to.throw('Failed to resolve argument!');
             done();
         });
     });

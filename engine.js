@@ -6,6 +6,66 @@ var hmdajson = require('./lib/hmdajson'),
     _ = require('underscore'),
     brijSpec = require('brij-spec/validate');
 
+var resolveArg = function(arg, contextList) {
+    var tokens = arg.split('.');
+    for (var i = 0; i < contextList.length; i++) {
+        var mappedArg = contextList[i];
+
+        for (var j = 0; j < tokens.length; j++) {
+            mappedArg = mappedArg[tokens[j]];
+            if (mappedArg === undefined) {
+                break;
+            }
+        }
+        
+        if (mappedArg !== undefined) {
+            return mappedArg;
+        }
+    }
+    throw new Error('Failed to resolve argument!');
+};
+
+var retrieveProps = function(error, line, properties) {
+    for (var i = 0; i < properties.length; i++) {
+        var property = properties[i];
+        error.properties[property] = resolveArg(property, [line]);
+    }
+};
+
+var handleArrayErrors = function(hmdaFile, lines, properties) {
+    var errors = [];
+    for (var i = 0; i < lines.length; i++) {
+        var line = lines[i];
+        var error = {'properties': {}};
+        error.lineNumber = line;
+        if (line === 1) {
+            retrieveProps(error, hmdaFile.transmittalSheet, properties);
+        } else {
+            retrieveProps(error, hmdaFile.loanApplicationRegisters[line-2], properties);
+        }
+        errors.push(error);
+    }
+    return errors;
+};
+
+var handleUniqueLoanNumberErrors = function(counts) {
+    var errors = [];
+    var loanNumbers = _.keys(counts);
+    for (var i = 0; i < loanNumbers.length; i++) {
+        var loanNumber = loanNumbers[i];
+        if (counts[loanNumber].length > 1) {
+            var error = {'properties': {}};
+            error.loanNumber = loanNumber;
+            error.properties.lineNumbers = [];
+            for (var j = 0; j < counts[loanNumber].length; j++) {
+                error.properties.lineNumbers.push(counts[loanNumber][j].lineNumber);
+            }
+            errors.push(error);
+        }
+    }
+    return errors;
+};
+
 (function() {
 
     // Set root (global) scope
@@ -199,47 +259,6 @@ var hmdajson = require('./lib/hmdajson'),
         return property.trim() !== '';
     };
 
-    var retrieveProps = function(error, line, properties) {
-        for (var i = 0; i < properties.length; i++) {
-            var property = properties[i];
-            error.properties[property] = resolveArg(property, [line]);
-        }
-    };
-
-    var handleArrayErrors = function(hmdaFile, lines, properties) {
-        var errors = [];
-        for (var i = 0; i < lines.length; i++) {
-            var line = lines[i];
-            var error = {'properties': {}};
-            error.lineNumber = line;
-            if (line === 1) {
-                retrieveProps(error, hmdaFile.transmittalSheet, properties);
-            } else {
-                retrieveProps(error, hmdaFile.loanApplicationRegisters[line-2], properties);
-            }
-            errors.push(error);
-        }
-        return errors;
-    };
-
-    var handleUniqueLoanNumberErrors = function(counts) {
-        var errors = [];
-        var loanNumbers = _.keys(counts);
-        for (var i = 0; i < loanNumbers.length; i++) {
-            var loanNumber = loanNumbers[i];
-            if (counts[loanNumber].length > 1) {
-                var error = {'properties': {}};
-                error.loanNumber = loanNumber;
-                error.properties.lineNumbers = [];
-                for (var j = 0; j < counts[loanNumber].length; j++) {
-                    error.properties.lineNumbers.push(counts[loanNumber][j].lineNumber);
-                }
-                errors.push(error);
-            }
-        }
-        return errors;
-    };
-
     HMDAEngine.hasRecordIdentifiersForEachRow = function(hmdaFile) {
         var records = [];
         if (hmdaFile.transmittalSheet.recordID !== '1') {
@@ -395,25 +414,6 @@ var hmdajson = require('./lib/hmdajson'),
      * Rule Execution
      * -----------------------------------------------------
      */
-
-    var resolveArg = function(arg, contextList) {
-        var tokens = arg.split('.');
-        for (var i = 0; i < contextList.length; i++) {
-            var mappedArg = contextList[i];
-
-            for (var j = 0; j < tokens.length; j++) {
-                mappedArg = mappedArg[tokens[j]];
-                if (mappedArg === undefined) {
-                    break;
-                }
-            }
-            
-            if (mappedArg !== undefined) {
-                return mappedArg;
-            }
-        }
-        return arg;
-    }; 
 
     HMDAEngine.execRule = function(topLevelObj, rule) {
         var result = {
