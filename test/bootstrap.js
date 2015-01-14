@@ -4,3 +4,4 @@
 
 global.expect = require('must');
 global.rewire = require('rewire');
+global._ = require('underscore');

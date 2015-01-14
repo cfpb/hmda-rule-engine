@@ -3,11 +3,12 @@
 /*global expect:false*/
 /*global beforeEach:false*/
 /*global rewire:false*/
+/*global _:false*/
 'use strict';
 
-var engine = require('../engine');
-var rewiredEngine = rewire('../engine');
-var FILE_SPEC = require('./testdata/2013_file_spec.json');
+var engine = require('../engine'),
+    rewiredEngine = rewire('../engine'),
+    FILE_SPEC = require('./testdata/2013_file_spec.json');
 
 
 describe('Engine', function() {
@@ -1781,7 +1782,7 @@ describe('Engine', function() {
                 }
             };
 
-            expect(Object.equals(error, expectedError)).to.be(true);
+            expect(_.isEqual(error, expectedError)).to.be(true);
             done();
         });
 
@@ -1811,7 +1812,7 @@ describe('Engine', function() {
             var handleArrayErrors = rewiredEngine.__get__('handleArrayErrors');
             var array_errors = require('./testdata/array-errors.json');
 
-            expect(Object.equals(handleArrayErrors(hmdaJson.hmdaFile, [1, 3], ['recordID', 'filler']), array_errors)).to.be(true);
+            expect(_.isEqual(handleArrayErrors(hmdaJson.hmdaFile, [1, 3], ['recordID', 'filler']), array_errors)).to.be(true);
             done();
         });
     });
@@ -1831,44 +1832,9 @@ describe('Engine', function() {
             var counts = require('./testdata/counts.json');
             var errors = require('./testdata/loan-number-errors.json');
 
-            expect(Object.equals(handleUniqueLoanNumberErrors(counts), errors)).to.be(true);
+            expect(_.isEqual(handleUniqueLoanNumberErrors(counts), errors)).to.be(true);
             done();
         });
     });
-
-    Object.equals = function(x, y) {
-        if (x === y) { return true; }
-        // if both x and y are null or undefined and exactly the same
-
-        if (!(x instanceof Object) || !(y instanceof Object)) { return false; }
-        // if they are not strictly equal, they both need to be Objects
-
-        if (x.constructor !== y.constructor) { return false; }
-        // they must have the exact same prototype chain, the closest we can do is
-        // test there constructor.
-
-        for (var p in x) {
-            if (!x.hasOwnProperty(p)) { continue; }
-            // other properties were tested using x.constructor === y.constructor
-
-            if (!y.hasOwnProperty(p)) { return false; }
-            // allows to compare x[p] and y[p] when set to undefined
-
-            if (x[p] === y[p]) { continue; }
-            // if they have the same strict value or identity then they are equal
-
-            if (typeof(x[p]) !== 'object') { return false; }
-            // Numbers, Strings, Functions, Booleans must be strictly equal
-
-            if (!Object.equals(x[p],  y[p])) { return false; }
-            // Objects and Arrays must be tested recursively
-        }
-
-        for (p in y) {
-            if (y.hasOwnProperty(p) && !x.hasOwnProperty(p)) { return false; }
-            // allows x[ p ] to be set to undefined
-        }
-        return true;
-    };
 
 });
