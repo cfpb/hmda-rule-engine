@@ -4,7 +4,6 @@
 'use strict';
 
 var engine = require('../engine');
-var FILE_SPEC = require('./testdata/2013_file_spec.json');
 
 
 describe('Engine', function() {
@@ -13,7 +12,7 @@ describe('Engine', function() {
         it('should return json object when hmda file is valid and provided by stream', function(done) {
             var fs = require('fs');
             var stream = fs.createReadStream('test/testdata/complete.dat');
-            engine.fileToJson(stream, FILE_SPEC, function(err, result) {
+            engine.fileToJson(stream, 2013, function(err, result) {
                 expect(err).to.be.null();
                 expect(result).to.have.property('hmdaFile');
                 expect(result.hmdaFile).to.have.property('loanApplicationRegisters');

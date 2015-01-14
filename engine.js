@@ -3,8 +3,9 @@
 'use strict';
 
 var hmdajson = require('./lib/hmdajson'),
+    hmdaRuleSpec = require('hmda-rule-spec'),
     _ = require('underscore'),
-    brijSpec = require('brij-spec/validate');
+    brijSpec = require('brij-spec');
 
 (function() {
 
@@ -242,7 +243,8 @@ var hmdajson = require('./lib/hmdajson'),
      * -----------------------------------------------------
      */
 
-    HMDAEngine.fileToJson = function(file, spec, next) {
+    HMDAEngine.fileToJson = function(file, year, next) {
+        var spec = hmdaRuleSpec.getFileSpec(year);
         hmdajson.process(file, spec, function(err, result) {
             if (! err && result) {
                 root._HMDA_JSON = result;
