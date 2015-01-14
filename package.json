@@ -33,6 +33,7 @@
   },
   "dependencies": {
     "brij-spec": "0.0.4",
+    "hmda-rule-spec": "cfpb/hmda-rule-spec#milestone3",
     "line-chomper": "^0.4.5",
     "underscore": "^1.7.0"
   }
