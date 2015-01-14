@@ -7,7 +7,7 @@
 'use strict';
 
 var engine = require('../engine'),
-    rewiredEngine = rewire('../engine'),
+    rewiredEngine = rewire('../engine');
 
 
 describe('Engine', function() {
