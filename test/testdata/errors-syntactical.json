@@ -35,21 +35,34 @@
                     "lineNumber": "2",
                     "properties": {
                         "actionDate": "20130119",
-                        "transmittalSheet.activityYear": "2014"
+                        "hmdaFile.transmittalSheet.activityYear": "2014"
                     }
                 },
                 {
                     "lineNumber": "3",
                     "properties": {
                         "actionDate": "20130119",
-                        "transmittalSheet.activityYear": "2014"
+                        "hmdaFile.transmittalSheet.activityYear": "2014"
                     }
                 },
                 {
                     "lineNumber": "4",
                     "properties": {
                         "actionDate": "20130119",
-                        "transmittalSheet.activityYear": "2014"
+                        "hmdaFile.transmittalSheet.activityYear": "2014"
+                    }
+                }
+            ]
+        },
+        "S040": {
+            "description": "Application/loan number must be unique.",
+            "explanation": "Duplicate loan numbers reported; data already in file.",
+            "scope": "hmda",
+            "errors": [
+                {
+                    "loanNumber": "ABCDEFGHIJKLMNOPQRSTUVWXY",
+                    "properties": {
+                        "lineNumbers": ["2", "3", "4"]
                     }
                 }
             ]

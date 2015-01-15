@@ -29,10 +29,12 @@
     "istanbul": "^0.2.10",
     "mocha": "^1.18.0",
     "must": "^0.12.0",
-    "spec-xunit-file": "0.0.1-2"
+    "spec-xunit-file": "0.0.1-2",
+    "rewire": "2.1.3"
   },
   "dependencies": {
     "brij-spec": "0.0.4",
+    // "hmda-rule-spec": "cfpb/hmda-rule-spec#milestone3",
     "line-chomper": "^0.4.5",
     "underscore": "^1.7.0"
   }

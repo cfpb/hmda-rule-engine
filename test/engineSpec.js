@@ -2,10 +2,12 @@
 /*global it:false*/
 /*global expect:false*/
 /*global beforeEach:false*/
+/*global rewire:false*/
+/*global _:false*/
 'use strict';
 
-var engine = require('../engine');
-var FILE_SPEC = require('./testdata/2013_file_spec.json');
+var engine = require('../engine'),
+    rewiredEngine = rewire('../engine');
 
 
 describe('Engine', function() {
@@ -14,7 +16,7 @@ describe('Engine', function() {
         it('should return json object when hmda file is valid and provided by stream', function(done) {
             var fs = require('fs');
             var stream = fs.createReadStream('test/testdata/complete.dat');
-            engine.fileToJson(stream, FILE_SPEC, function(err, result) {
+            engine.fileToJson(stream, 2013, function(err, result) {
                 expect(err).to.be.null();
                 expect(result).to.have.property('hmdaFile');
                 expect(result.hmdaFile).to.have.property('loanApplicationRegisters');
@@ -644,12 +646,12 @@ describe('Engine', function() {
             var hmdaFile = {
                 transmittalSheet: {
                     recordID: '1',
-                    lineNumber: 1
+                    lineNumber: '1'
                 },
                 loanApplicationRegisters: [
                     {
                         recordID: '2',
-                        lineNumber: 2
+                        lineNumber: '2'
                     }
                 ]
             };
@@ -662,13 +664,13 @@ describe('Engine', function() {
             var hmdaFile = {
                 transmittalSheet: {
                     recordID: '2',
-                    lineNumber: 1
+                    lineNumber: '1'
                 }
             };
             var result = engine.hasRecordIdentifiersForEachRow(hmdaFile);
             expect(result.length).to.be(1);
             expect(result[0].properties.recordID).to.be('2');
-            expect(result[0].lineNumber).to.be(1);
+            expect(result[0].lineNumber).to.be('1');
             done();
         });
 
@@ -676,27 +678,27 @@ describe('Engine', function() {
             var hmdaFile = {
                 transmittalSheet: {
                     recordID: '1',
-                    lineNumber: 1
+                    lineNumber: '1'
                 },
                 loanApplicationRegisters: [
                     {
                         recordID: '2',
-                        lineNumber: 2
+                        lineNumber: '2'
                     },
                     {
                         recordID: '1',
-                        lineNumber: 3
+                        lineNumber: '3'
                     },
                     {
                         recordID: '2',
-                        lineNumber: 4
+                        lineNumber: '4'
                     }
                 ]
             };
             var result = engine.hasRecordIdentifiersForEachRow(hmdaFile);
             expect(result.length).to.be(1);
             expect(result[0].properties.recordID).to.be('1');
-            expect(result[0].lineNumber).to.be(3);
+            expect(result[0].lineNumber).to.be('3');
             done();
         });
 
@@ -727,74 +729,74 @@ describe('Engine', function() {
     });
 
     describe('isValidAgencyCode', function() {
-        it('should return false if the transmittal sheet has an invalid agency code', function(done) {
+        it('should return a list of errors if the transmittal sheet has an invalid agency code', function(done) {
             var hmdaFile = {
                 transmittalSheet: {
-                    agencyCode: 11,
-                    lineNumber: 1
+                    agencyCode: '11',
+                    lineNumber: '1'
                 }
             };
             var result = engine.isValidAgencyCode(hmdaFile);
             expect(result.length).to.be(1);
-            expect(result[0].lineNumber).to.be(1);
-            expect(result[0].properties.agencyCode).to.be(11);
+            expect(result[0].lineNumber).to.be('1');
+            expect(result[0].properties.agencyCode).to.be('11');
             done();
         });
 
-        it('should return false if a LAR has an invalid agency code', function(done) {
+        it('should return a list of errors if a LAR has an invalid agency code', function(done) {
             var hmdaFile = {
                 transmittalSheet: {
-                    agencyCode: 1,
-                    lineNumber: 1
+                    agencyCode: '1',
+                    lineNumber: '1'
                 },
                 loanApplicationRegisters: [
                     {
-                        agencyCode: 11,
-                        lineNumber: 2
+                        agencyCode: '11',
+                        lineNumber: '2'
                     }
                 ]
             };
             var result = engine.isValidAgencyCode(hmdaFile);
             expect(result.length).to.be(1);
-            expect(result[0].lineNumber).to.be(2);
-            expect(result[0].properties.agencyCode).to.be(11);
+            expect(result[0].lineNumber).to.be('2');
+            expect(result[0].properties.agencyCode).to.be('11');
             done();
         });
 
-        it('should return false if a LAR has an agency code that does not match the transmittal sheet agency code', function(done) {
+        it('should return a list of errors if a LAR has an agency code that does not match the transmittal sheet agency code', function(done) {
             var hmdaFile = {
                 transmittalSheet: {
-                    agencyCode: 1,
-                    lineNumber: 1
+                    agencyCode: '1',
+                    lineNumber: '1'
                 },
                 loanApplicationRegisters: [
                     {
-                        agencyCode: 3,
-                        lineNumber: 2
+                        agencyCode: '3',
+                        lineNumber: '2'
                     }
                 ]
             };
             var result = engine.isValidAgencyCode(hmdaFile);
             expect(result.length).to.be(1);
-            expect(result[0].lineNumber).to.be(2);
-            expect(result[0].properties.agencyCode).to.be(3);
+            expect(result[0].lineNumber).to.be('2');
+            expect(result[0].properties.agencyCode).to.be('3');
             done();
         });
 
         it('should return true if all LARs have the same agency code as the transmittal sheet', function(done) {
             var hmdaFile = {
                 transmittalSheet: {
-                    agencyCode: 1,
-                    lineNumber: 1
+                    agencyCode: '1',
+                    lineNumber: '1'
                 },
                 loanApplicationRegisters: [
                     {
-                        agencyCode: 1,
-                        lineNumber: 2
+                        agencyCode: '1',
+                        lineNumber: '2'
                     },
                     {
-                        agencyCode: 1,
-                        lineNumber: 3
+                        agencyCode: '1',
+                        lineNumber: '3'
                     }
                 ]
             };
@@ -805,16 +807,16 @@ describe('Engine', function() {
     });
 
     describe('hasUniqueLoanNumbers', function() {
-        it('should return false if any LARS have duplicate loanNumbers', function(done) {
+        it('should return false if any LARs have duplicate loanNumbers', function(done) {
             var hmdaFile = {
                 loanApplicationRegisters: [
                     {
-                        loanNumber: 1,
-                        lineNumber: 2
+                        loanNumber: '1',
+                        lineNumber: '2'
                     },
                     {
-                        loanNumber: 1,
-                        lineNumber: 3
+                        loanNumber: '1',
+                        lineNumber: '3'
                     }
                 ]
             };
@@ -822,20 +824,20 @@ describe('Engine', function() {
             expect(result.length).to.be(1);
             expect(result[0].loanNumber).to.be('1');
             expect(result[0].properties.lineNumbers.length).to.be(2);
-            expect(result[0].properties.lineNumbers[0]).to.be(2);
+            expect(result[0].properties.lineNumbers[0]).to.be('2');
             done();
         });
 
-        it('should return false if any LARS have duplicate loanNumbers', function(done) {
+        it('should return true if no LARs have the same loanNumber', function(done) {
             var hmdaFile = {
                 loanApplicationRegisters: [
                     {
-                        loanNumber: 1,
-                        lineNumber: 2
+                        loanNumber: '1',
+                        lineNumber: '2'
                     },
                     {
-                        loanNumber: 2,
-                        lineNumber: 3
+                        loanNumber: '2',
+                        lineNumber: '3'
                     }
                 ]
             };
@@ -1160,7 +1162,7 @@ describe('Engine', function() {
         beforeEach(function() {
             hmdaJson = JSON.parse(JSON.stringify(require('./testdata/complete.json')));
             topLevelObj = hmdaJson.hmdaFile.transmittalSheet;
-            engine.setHmdaFile(hmdaJson.hmdaFile);
+            engine.setHmdaJson(hmdaJson);
         });
 
         it('should return true for a passing function rule', function(done) {
@@ -1170,7 +1172,7 @@ describe('Engine', function() {
                 'function': 'hasRecordIdentifiersForEachRow'
             };
 
-            expect(engine.execRule(hmdaJson, rule)).to.be(true);
+            expect(engine.execRule(hmdaJson, rule).length).to.be(0);
             done();
         });
 
@@ -1199,7 +1201,7 @@ describe('Engine', function() {
                 'condition': 'email_address'
             };
 
-            expect(engine.execRule(topLevelObj, rule)).to.be(true);
+            expect(engine.execRule(topLevelObj, rule).length).to.be(0);
             done();
         });
 
@@ -1224,7 +1226,7 @@ describe('Engine', function() {
                 'condition': 'zipcode'
             };
 
-            expect(engine.execRule(topLevelObj, rule)).to.be(true);
+            expect(engine.execRule(topLevelObj, rule).length).to.be(0);
             done();
         });
 
@@ -1251,7 +1253,7 @@ describe('Engine', function() {
                 'condition': 'yyyy_mm_dd_hh_mm_ss'
             };
 
-            expect(engine.execRule(topLevelObj, rule)).to.be(true);
+            expect(engine.execRule(topLevelObj, rule).length).to.be(0);
             done();
         });
 
@@ -1277,7 +1279,7 @@ describe('Engine', function() {
                 'value': '[0-9]{12}'
             };
 
-            expect(engine.execRule(topLevelObj, rule)).to.be(true);
+            expect(engine.execRule(topLevelObj, rule).length).to.be(0);
             done();
         });
 
@@ -1301,7 +1303,7 @@ describe('Engine', function() {
                 'condition': 'is_integer',
             };
 
-            expect(engine.execRule(topLevelObj, rule)).to.be(true);
+            expect(engine.execRule(topLevelObj, rule).length).to.be(0);
             done();
         });
 
@@ -1327,7 +1329,7 @@ describe('Engine', function() {
             };
 
             hmdaJson.hmdaFile.transmittalSheet.timestamp = '2013.01171330';
-            expect(engine.execRule(topLevelObj, rule)).to.be(true);
+            expect(engine.execRule(topLevelObj, rule).length).to.be(0);
             done();
         });
 
@@ -1353,7 +1355,7 @@ describe('Engine', function() {
                 'value': '2'
             };
             
-            expect(engine.execRule(topLevelObj, rule)).to.be(true);
+            expect(engine.execRule(topLevelObj, rule).length).to.be(0);
             done();
         });
 
@@ -1381,7 +1383,7 @@ describe('Engine', function() {
             };
 
             hmdaJson.hmdaFile.transmittalSheet.timestamp = '2013';
-            expect(engine.execRule(topLevelObj, rule)).to.be(true);
+            expect(engine.execRule(topLevelObj, rule).length).to.be(0);
             done();
         });
 
@@ -1408,7 +1410,7 @@ describe('Engine', function() {
                 'end': '2014'
             };
 
-            expect(engine.execRule(topLevelObj, rule)).to.be(true);
+            expect(engine.execRule(topLevelObj, rule).length).to.be(0);
             done();
         });
 
@@ -1433,7 +1435,7 @@ describe('Engine', function() {
                 'condition': 'is_empty'
             };
 
-            expect(engine.execRule(topLevelObj, rule)).to.be(true);
+            expect(engine.execRule(topLevelObj, rule).length).to.be(0);
             done();
         });
 
@@ -1457,7 +1459,7 @@ describe('Engine', function() {
                 'values': ['2012', '2013']
             };
 
-            expect(engine.execRule(topLevelObj, rule)).to.be(true);
+            expect(engine.execRule(topLevelObj, rule).length).to.be(0);
             done();
         });
 
@@ -1489,7 +1491,7 @@ describe('Engine', function() {
                 }
             };
 
-            expect(engine.execRule(topLevelObj, rule)).to.be(true);
+            expect(engine.execRule(topLevelObj, rule).length).to.be(0);
 
             rule = {
                 'if': {
@@ -1504,7 +1506,7 @@ describe('Engine', function() {
                 }
             };
 
-            expect(engine.execRule(topLevelObj, rule)).to.be(true);
+            expect(engine.execRule(topLevelObj, rule).length).to.be(0);
             done();
         });
 
@@ -1528,7 +1530,7 @@ describe('Engine', function() {
                 }
             };   
             
-            expect(engine.execRule(topLevelObj, rule)).to.be(true);
+            expect(engine.execRule(topLevelObj, rule).length).to.be(0);
             done();
         });
 
@@ -1576,7 +1578,7 @@ describe('Engine', function() {
                 ]
             };
 
-            expect(engine.execRule(topLevelObj, rule)).to.be(true);
+            expect(engine.execRule(topLevelObj, rule).length).to.be(0);
             done();
         });
 
@@ -1602,7 +1604,7 @@ describe('Engine', function() {
                 }
             };
 
-            expect(engine.execRule(topLevelObj, rule)).to.be(true);
+            expect(engine.execRule(topLevelObj, rule).length).to.be(0);
             done();
         });
 
@@ -1680,7 +1682,7 @@ describe('Engine', function() {
                 ]
             };
 
-            expect(engine.execRule(topLevelObj, rule)).to.be(true);
+            expect(engine.execRule(topLevelObj, rule).length).to.be(0);
             done();
         });
 
@@ -1712,11 +1714,128 @@ describe('Engine', function() {
                 'property': 'actionDate',
                 'condition': 'call',
                 'function': 'isActionDateInActivityYear',
-                'args': ['actionDate', 'transmittalSheet.activityYear']
+                'args': ['actionDate', 'hmdaFile.transmittalSheet.activityYear']
             };
 
             topLevelObj = hmdaJson.hmdaFile.loanApplicationRegisters[0];
-            expect(engine.execRule(topLevelObj, rule)).to.be(true);
+            expect(engine.execRule(topLevelObj, rule).length).to.be(0);
+            done();
+        });
+    });
+
+    describe('resolveArg', function() {
+        var hmdaJson = {};
+        var topLevelObj = {};
+
+        beforeEach(function() {
+            hmdaJson = JSON.parse(JSON.stringify(require('./testdata/complete.json')));
+            topLevelObj = hmdaJson.hmdaFile.transmittalSheet;
+            engine.setHmdaJson(hmdaJson);
+            engine.clearErrors();
+        });
+
+        it('should return a value for an existing property in topLevelObj', function(done) {
+            var resolveArg = rewiredEngine.__get__('resolveArg');
+            var contextList = [topLevelObj, hmdaJson.hmdaFile];
+            expect(resolveArg('parentState', contextList)).to.be('CA');
+            done();
+        });
+
+        it('should return a value for an existing property in hmdaFile', function(done) {
+            var resolveArg = rewiredEngine.__get__('resolveArg');
+            var contextList = [topLevelObj, hmdaJson.hmdaFile];
+            expect(resolveArg('transmittalSheet.activityYear', contextList)).to.be('2013');
+            done();
+        });
+
+        it('should throw an exception for a non-existent property', function(done) {
+            var resolveArg = rewiredEngine.__get__('resolveArg');
+            var contextList = [topLevelObj, hmdaJson.hmdaFile];
+
+            expect(function() {
+                resolveArg('transmittalSheet.loanPurpose', contextList);
+            }).to.throw('Failed to resolve argument!');
+            done();
+        });
+    });
+
+    describe('retrieveProps', function() {
+        var hmdaJson = {};
+        var topLevelObj = {};
+
+        beforeEach(function() {
+            hmdaJson = JSON.parse(JSON.stringify(require('./testdata/complete.json')));
+            topLevelObj = hmdaJson.hmdaFile.transmittalSheet;
+            engine.setHmdaJson(hmdaJson);
+            engine.clearErrors();
+        });
+
+        it('should add properties to the error object', function(done) {
+            var error = {'properties': {}};
+            var retrieveProps = rewiredEngine.__get__('retrieveProps');
+            retrieveProps(error, topLevelObj, ['institutionName', 'respondentZip', 'recordID']);
+
+            var expectedError = {
+                'properties': {
+                    'institutionName': 'MIKES SMALL BANK   XXXXXXXXXXX',
+                    'respondentZip': '99999-9999',
+                    'recordID': '1'
+                }
+            };
+
+            expect(_.isEqual(error, expectedError)).to.be(true);
+            done();
+        });
+
+        it('should return an exception for a non-existent property', function(done) {
+            var error = {'properties': {}};
+            var retrieveProps = rewiredEngine.__get__('retrieveProps');
+
+            expect(function() {
+                retrieveProps(error, topLevelObj, ['loanNumber']);
+            }).to.throw('Failed to resolve argument!');
+            done();
+        });
+
+    });
+
+    describe('handleArrayErrors', function() {
+        var hmdaJson = {};
+        var topLevelObj = {};
+
+        beforeEach(function() {
+            hmdaJson = JSON.parse(JSON.stringify(require('./testdata/complete.json')));
+            topLevelObj = hmdaJson.hmdaFile.transmittalSheet;
+            engine.setHmdaJson(hmdaJson);
+            engine.clearErrors();
+        });
+
+        it('should return a list of errors for a list of line numbers', function(done) {
+            var handleArrayErrors = rewiredEngine.__get__('handleArrayErrors');
+            var array_errors = require('./testdata/array-errors.json');
+
+            expect(_.isEqual(handleArrayErrors(hmdaJson.hmdaFile, [1, 3], ['recordID', 'filler']), array_errors)).to.be(true);
+            done();
+        });
+    });
+
+    describe('handleUniqueLoanNumberErrors', function() {
+        var hmdaJson = {};
+        var topLevelObj = {};
+
+        beforeEach(function() {
+            hmdaJson = JSON.parse(JSON.stringify(require('./testdata/complete.json')));
+            topLevelObj = hmdaJson.hmdaFile.transmittalSheet;
+            engine.setHmdaJson(hmdaJson);
+            engine.clearErrors();
+        });
+
+        it('should return a list of errors for a list of line counts', function(done) {
+            var handleUniqueLoanNumberErrors = rewiredEngine.__get__('handleUniqueLoanNumberErrors');
+            var counts = require('./testdata/counts.json');
+            var errors = require('./testdata/loan-number-errors.json');
+
+            expect(_.isEqual(handleUniqueLoanNumberErrors(counts), errors)).to.be(true);
             done();
         });
     });
@@ -1728,11 +1847,14 @@ describe('Engine', function() {
         beforeEach(function() {
             hmdaJson = JSON.parse(JSON.stringify(require('./testdata/complete.json')));
             topLevelObj = hmdaJson.hmdaFile.transmittalSheet;
-            engine.setHmdaFile(hmdaJson.hmdaFile);
+            engine.setHmdaJson(hmdaJson);
             engine.clearErrors();
         });
 
         it('should return an unmodified set of errors for passing syntactical edits', function(done) {
+            hmdaJson.hmdaFile.loanApplicationRegisters[1].loanNumber = '1000000000000000000000000';
+            hmdaJson.hmdaFile.loanApplicationRegisters[2].loanNumber = '2000000000000000000000000';
+
             engine.runSyntactical('2013');
             expect(Object.keys(engine.getErrors().syntactical).length).to.be(0);
             done();
@@ -1745,7 +1867,7 @@ describe('Engine', function() {
             var errors_syntactical = require('./testdata/errors-syntactical.json');
 
             engine.runSyntactical('2013');
-            expect(Object.equals(engine.getErrors(), errors_syntactical)).to.be(true);
+            expect(_.isEqual(engine.getErrors(), errors_syntactical)).to.be(true);
             done();
         });
     });
@@ -1757,7 +1879,7 @@ describe('Engine', function() {
         beforeEach(function() {
             hmdaJson = JSON.parse(JSON.stringify(require('./testdata/complete.json')));
             topLevelObj = hmdaJson.hmdaFile.transmittalSheet;
-            engine.setHmdaFile(hmdaJson.hmdaFile);
+            engine.setHmdaJson(hmdaJson);
             engine.clearErrors();
         });
 
@@ -1767,7 +1889,7 @@ describe('Engine', function() {
             hmdaJson.hmdaFile.loanApplicationRegisters[1].preapprovals = ' ';
 
             engine.runValidity('2013');
-            expect(Object.equals(engine.getErrors(), errors_validity)).to.be(true);
+            expect(_.isEqual(engine.getErrors(), errors_validity)).to.be(true);
             done();
         });
     });
@@ -1779,7 +1901,7 @@ describe('Engine', function() {
         beforeEach(function() {
             hmdaJson = JSON.parse(JSON.stringify(require('./testdata/complete.json')));
             topLevelObj = hmdaJson.hmdaFile.transmittalSheet;
-            engine.setHmdaFile(hmdaJson.hmdaFile);
+            engine.setHmdaJson(hmdaJson);
             engine.clearErrors();
         });
 
@@ -1789,7 +1911,7 @@ describe('Engine', function() {
 
             engine.runQuality('2013');
 
-            expect(Object.equals(engine.getErrors(), errors_quality)).to.be(true);
+            expect(_.isEqual(engine.getErrors(), errors_quality)).to.be(true);
             done();
         });
     });
@@ -1801,7 +1923,7 @@ describe('Engine', function() {
         beforeEach(function() {
             hmdaJson = JSON.parse(JSON.stringify(require('./testdata/complete.json')));
             topLevelObj = hmdaJson.hmdaFile.transmittalSheet;
-            engine.setHmdaFile(hmdaJson.hmdaFile);
+            engine.setHmdaJson(hmdaJson);
             engine.clearErrors();
         });
 
@@ -1814,44 +1936,8 @@ describe('Engine', function() {
             };
 
             engine.runMacro('2013');
-            expect(Object.equals(engine.getErrors(), errors)).to.be(true);
+            expect(_.isEqual(engine.getErrors(), errors)).to.be(true);
             done();
         });
     });
-
-    Object.equals = function(x, y) {
-        if (x === y) { return true; }
-        // if both x and y are null or undefined and exactly the same
-
-        if (!(x instanceof Object) || !(y instanceof Object)) { return false; }
-        // if they are not strictly equal, they both need to be Objects
-
-        if (x.constructor !== y.constructor) { return false; }
-        // they must have the exact same prototype chain, the closest we can do is
-        // test there constructor.
-
-        for (var p in x) {
-            if (!x.hasOwnProperty(p)) { continue; }
-            // other properties were tested using x.constructor === y.constructor
-
-            if (!y.hasOwnProperty(p)) { return false; }
-            // allows to compare x[p] and y[p] when set to undefined
-
-            if (x[p] === y[p]) { continue; }
-            // if they have the same strict value or identity then they are equal
-
-            if (typeof(x[p]) !== 'object') { return false; }
-            // Numbers, Strings, Functions, Booleans must be strictly equal
-
-            if (!Object.equals(x[p],  y[p])) { return false; }
-            // Objects and Arrays must be tested recursively
-        }
-
-        for (p in y) {
-            if (y.hasOwnProperty(p) && !x.hasOwnProperty(p)) { return false; }
-            // allows x[ p ] to be set to undefined
-        }
-        return true;
-    };
-
 });
