@@ -1,0 +1,284 @@
+{
+    "syntactical": {},
+    "validity": {
+        "V125": {
+            "description": "Tax ID number must be in NN-NNNNNNN format and not = (99-9999999 or 00-0000000 or blank).",
+            "explanation": "Tax ID number not in valid format or is missing.",
+            "scope": "ts",
+            "errors": [
+                {
+                    "lineNumber": "1",
+                    "properties": {
+                        "taxID": "99-9999999"
+                    }
+                }
+            ]
+        },
+        "V415": {
+            "description": "Preapproval must = 1, 2, or 3.",
+            "explanation": "Preapproval is missing or is not in range 1-3.",
+            "scope": "lar",
+            "errors": [
+                {
+                    "lineNumber": "3",
+                    "properties": {
+                        "preapprovals": " "
+                    }
+                }
+            ]
+        },
+        "V430": {
+            "description": "If loan purpose = 2 or 3, then preapproval must = 3.",
+            "explanation": "Loan purpose = 2 or 3 and preapproval is missing or does not = 3.",
+            "scope": "lar",
+            "errors": [
+                {
+                    "lineNumber": "2",
+                    "properties": {
+                        "loanPurpose": "2",
+                        "preapprovals": "1"
+                    }
+                },
+                {
+                    "lineNumber": "3",
+                    "properties": {
+                        "loanPurpose": "2",
+                        "preapprovals": " "
+                    }
+                },
+                {
+                    "lineNumber": "4",
+                    "properties": {
+                        "loanPurpose": "2",
+                        "preapprovals": "1"
+                    }
+                }
+            ]
+        },
+        "V260": {
+            "description": "If reasons for denial are in the range 1-9, then action taken type must = 3 or 7.",
+            "explanation": "Application or preapproval not denied, but denial reasons given.",
+            "scope": "lar",
+            "errors": [
+                {
+                    "lineNumber": "2",
+                    "properties": {
+                        "denialReason1": "9",
+                        "denialReason2": "8",
+                        "denialReason3": "7",
+                        "actionTaken": "5"
+                    }
+                },
+                {
+                    "lineNumber": "3",
+                    "properties": {
+                        "denialReason1": "9",
+                        "denialReason2": "8",
+                        "denialReason3": "7",
+                        "actionTaken": "5"
+                    }
+                },
+                {
+                    "lineNumber": "4",
+                    "properties": {
+                        "denialReason1": "9",
+                        "denialReason2": "8",
+                        "denialReason3": "7",
+                        "actionTaken": "5"
+                    }
+                }
+            ]
+        },
+        "V475": {
+            "description": "If applicant race = 6 or 7 in applicant race field 1, then all other applicant race fields must = blank.",
+            "explanation": "Applicant race field 1= 6 or 7; therefore all other applicant race fields must = blank.",
+            "scope": "lar",
+            "errors": [
+                {
+                    "lineNumber": "2",
+                    "properties": {
+                        "applicantRace1": "7",
+                        "applicantRace2": "4",
+                        "applicantRace3": "3",
+                        "applicantRace4": "2",
+                        "applicantRace5": "1"
+                    }
+                },
+                {
+                    "lineNumber": "3",
+                    "properties": {
+                        "applicantRace1": "7",
+                        "applicantRace2": "4",
+                        "applicantRace3": "3",
+                        "applicantRace4": "2",
+                        "applicantRace5": "1"
+                    }
+                },
+                {
+                    "lineNumber": "4",
+                    "properties": {
+                        "applicantRace1": "7",
+                        "applicantRace2": "4",
+                        "applicantRace3": "3",
+                        "applicantRace4": "2",
+                        "applicantRace5": "1"
+                    }
+                }
+            ]
+        },
+        "V490": {
+            "description": "If co-applicant race = 6, 7, or 8 in co-applicant race field 1, then all other co-applicant race fields must = blank.",
+            "explanation": "Co-Applicant race field 1 = 6, 7, or 8; therefore all other co-applicant race fields must = blank.",
+            "scope": "lar",
+            "errors": [
+                {
+                    "lineNumber": "2",
+                    "properties": {
+                        "coapplicantRace1": "8",
+                        "coapplicantRace2": "7",
+                        "coapplicantRace3": "6",
+                        "coapplicantRace4": "5",
+                        "coapplicantRace5": "4"
+                    }
+                },
+                {
+                    "lineNumber": "3",
+                    "properties": {
+                        "coapplicantRace1": "8",
+                        "coapplicantRace2": "7",
+                        "coapplicantRace3": "6",
+                        "coapplicantRace4": "5",
+                        "coapplicantRace5": "4"
+                    }
+                },
+                {
+                    "lineNumber": "4",
+                    "properties": {
+                        "coapplicantRace1": "8",
+                        "coapplicantRace2": "7",
+                        "coapplicantRace3": "6",
+                        "coapplicantRace4": "5",
+                        "coapplicantRace5": "4"
+                    }
+                }
+            ]
+        },
+        "V326": {
+            "description": "Co-Applicant sex does not = 5; however, co-applicant ethnicity = 5 and/or co-applicant race field 1 = 8.",
+            "explanation": "If no co-applicant, co-applicant sex/ethnicity/race combination invalid.",
+            "scope": "lar",
+            "errors": [
+                {
+                    "lineNumber": "2",
+                    "properties": {
+                        "coapplicantEthnicity": "5",
+                        "coapplicantRace1": "8",
+                        "coapplicantSex": "2"
+                    }
+                },
+                {
+                    "lineNumber": "3",
+                    "properties": {
+                        "coapplicantEthnicity": "5",
+                        "coapplicantRace1": "8",
+                        "coapplicantSex": "2"
+                    }
+                },
+                {
+                    "lineNumber": "4",
+                    "properties": {
+                        "coapplicantEthnicity": "5",
+                        "coapplicantRace1": "8",
+                        "coapplicantSex": "2"
+                    }
+                }    
+            ]
+        },
+        "V335": {
+            "description": "If property type = 3, then income must = NA.",
+            "explanation": "Property type = 3; therefore income must = NA.",
+            "scope": "lar",
+            "errors": [
+                {
+                    "lineNumber": "2",
+                    "properties": {
+                        "propertyType": "3",
+                        "applicantIncome": "9000"
+                    }
+                },
+                {
+                    "lineNumber": "3",
+                    "properties": {
+                        "propertyType": "3",
+                        "applicantIncome": "9000"
+                    }
+                },
+                {
+                    "lineNumber": "4",
+                    "properties": {
+                        "propertyType": "3",
+                        "applicantIncome": "9000"
+                    }
+                }
+            ]
+        },
+        "V505": {
+            "description": "If action taken type = 2-8, then rate spread must = NA.",
+            "explanation": "Action taken type = 2-8; therefore rate spread must = NA.",
+            "scope": "lar",
+            "errors": [
+                {
+                    "lineNumber": "2",
+                    "properties": {
+                        "actionTaken": "5",
+                        "rateSpread": "01.05"
+                    }
+                },
+                {
+                    "lineNumber": "3",
+                    "properties": {
+                        "actionTaken": "5",
+                        "rateSpread": "01.05"
+                    }
+                },
+                {
+                    "lineNumber": "4",
+                    "properties": {
+                        "actionTaken": "5",
+                        "rateSpread": "01.05"
+                    }
+                }
+            ]
+        },
+        "V560": {
+            "description": "If action taken type = 1-5, 7 or 8, then lien status must = 1, 2, or 3.",
+            "explanation": "Action taken type = 1-5, 7 or 8; therefore lien status must = 1, 2, or 3.",
+            "scope": "lar",
+            "errors": [
+                {
+                    "lineNumber": "2",
+                    "properties": {
+                        "actionTaken": "5",
+                        "lienStatus": "4"
+                    }
+                },
+                {
+                    "lineNumber": "3",
+                    "properties": {
+                        "actionTaken": "5",
+                        "lienStatus": "4"
+                    }
+                },
+                {
+                    "lineNumber": "4",
+                    "properties": {
+                        "actionTaken": "5",
+                        "lienStatus": "4"
+                    }
+                }
+            ]
+        }
+    },
+    "quality": {},
+    "macro": {}
+}

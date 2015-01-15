@@ -1170,7 +1170,7 @@ describe('Engine', function() {
         beforeEach(function() {
             hmdaJson = JSON.parse(JSON.stringify(require('./testdata/complete.json')));
             topLevelObj = hmdaJson.hmdaFile.transmittalSheet;
-            global._HMDA_JSON.hmdaFile = hmdaJson.hmdaFile;
+            engine.setHmdaJson(hmdaJson);
         });
 
         it('should return true for a passing function rule', function(done) {
@@ -1722,7 +1722,7 @@ describe('Engine', function() {
                 'property': 'actionDate',
                 'condition': 'call',
                 'function': 'isActionDateInActivityYear',
-                'args': ['actionDate', 'transmittalSheet.activityYear']
+                'args': ['actionDate', 'hmdaFile.transmittalSheet.activityYear']
             };
 
             topLevelObj = hmdaJson.hmdaFile.loanApplicationRegisters[0];
@@ -1738,7 +1738,8 @@ describe('Engine', function() {
         beforeEach(function() {
             hmdaJson = JSON.parse(JSON.stringify(require('./testdata/complete.json')));
             topLevelObj = hmdaJson.hmdaFile.transmittalSheet;
-            global._HMDA_JSON.hmdaFile = hmdaJson.hmdaFile;
+            engine.setHmdaJson(hmdaJson);
+            engine.clearErrors();
         });
 
         it('should return a value for an existing property in topLevelObj', function(done) {
@@ -1773,7 +1774,8 @@ describe('Engine', function() {
         beforeEach(function() {
             hmdaJson = JSON.parse(JSON.stringify(require('./testdata/complete.json')));
             topLevelObj = hmdaJson.hmdaFile.transmittalSheet;
-            global._HMDA_JSON.hmdaFile = hmdaJson.hmdaFile;
+            engine.setHmdaJson(hmdaJson);
+            engine.clearErrors();
         });
 
         it('should add properties to the error object', function(done) {
@@ -1812,7 +1814,8 @@ describe('Engine', function() {
         beforeEach(function() {
             hmdaJson = JSON.parse(JSON.stringify(require('./testdata/complete.json')));
             topLevelObj = hmdaJson.hmdaFile.transmittalSheet;
-            global._HMDA_JSON.hmdaFile = hmdaJson.hmdaFile;
+            engine.setHmdaJson(hmdaJson);
+            engine.clearErrors();
         });
 
         it('should return a list of errors for a list of line numbers', function(done) {
@@ -1831,7 +1834,8 @@ describe('Engine', function() {
         beforeEach(function() {
             hmdaJson = JSON.parse(JSON.stringify(require('./testdata/complete.json')));
             topLevelObj = hmdaJson.hmdaFile.transmittalSheet;
-            global._HMDA_JSON.hmdaFile = hmdaJson.hmdaFile;
+            engine.setHmdaJson(hmdaJson);
+            engine.clearErrors();
         });
 
         it('should return a list of errors for a list of line counts', function(done) {
@@ -1844,4 +1848,104 @@ describe('Engine', function() {
         });
     });
 
+    describe('runSyntactical', function() {
+        var hmdaJson = {};
+        var topLevelObj = {};
+
+        beforeEach(function() {
+            hmdaJson = JSON.parse(JSON.stringify(require('./testdata/complete.json')));
+            topLevelObj = hmdaJson.hmdaFile.transmittalSheet;
+            engine.setHmdaJson(hmdaJson);
+            engine.clearErrors();
+        });
+
+        it('should return an unmodified set of errors for passing syntactical edits', function(done) {
+            hmdaJson.hmdaFile.loanApplicationRegisters[1].loanNumber = '1000000000000000000000000';
+            hmdaJson.hmdaFile.loanApplicationRegisters[2].loanNumber = '2000000000000000000000000';
+
+            engine.runSyntactical('2013');
+            expect(Object.keys(engine.getErrors().syntactical).length).to.be(0);
+            done();
+        });
+
+        it('should return a modified set of errors for failing syntactical edits', function(done) {
+            topLevelObj.timestamp = 'cat';
+            topLevelObj.activityYear = '2014';
+
+            var errors_syntactical = require('./testdata/errors-syntactical.json');
+
+            engine.runSyntactical('2013');
+            expect(_.isEqual(engine.getErrors(), errors_syntactical)).to.be(true);
+            done();
+        });
+    });
+
+    describe('runValidity', function() {
+        var hmdaJson = {};
+        var topLevelObj = {};
+
+        beforeEach(function() {
+            hmdaJson = JSON.parse(JSON.stringify(require('./testdata/complete.json')));
+            topLevelObj = hmdaJson.hmdaFile.transmittalSheet;
+            engine.setHmdaJson(hmdaJson);
+            engine.clearErrors();
+        });
+
+        it('should return a modified set of errors for failing validity edits', function(done) {
+            var errors_validity = require('./testdata/errors-validity.json');
+
+            hmdaJson.hmdaFile.loanApplicationRegisters[1].preapprovals = ' ';
+
+            engine.runValidity('2013');
+            expect(_.isEqual(engine.getErrors(), errors_validity)).to.be(true);
+            done();
+        });
+    });
+
+    describe('runQuality', function() {
+        var hmdaJson = {};
+        var topLevelObj = {};
+
+        beforeEach(function() {
+            hmdaJson = JSON.parse(JSON.stringify(require('./testdata/complete.json')));
+            topLevelObj = hmdaJson.hmdaFile.transmittalSheet;
+            engine.setHmdaJson(hmdaJson);
+            engine.clearErrors();
+        });
+
+        it('should return a modified set of errors for failing quality edits', function(done) {
+            hmdaJson.hmdaFile.transmittalSheet.parentName = '                              ';
+            var errors_quality = require('./testdata/errors-quality.json');
+
+            engine.runQuality('2013');
+
+            expect(_.isEqual(engine.getErrors(), errors_quality)).to.be(true);
+            done();
+        });
+    });
+
+    describe('runMacro', function() {
+        var hmdaJson = {};
+        var topLevelObj = {};
+
+        beforeEach(function() {
+            hmdaJson = JSON.parse(JSON.stringify(require('./testdata/complete.json')));
+            topLevelObj = hmdaJson.hmdaFile.transmittalSheet;
+            engine.setHmdaJson(hmdaJson);
+            engine.clearErrors();
+        });
+
+        it('should return an unmodified set of errors for passing macro edits', function(done) {
+            var errors = {
+                'syntactical': {},
+                'validity': {},
+                'quality': {},
+                'macro': {},
+            };
+
+            engine.runMacro('2013');
+            expect(_.isEqual(engine.getErrors(), errors)).to.be(true);
+            done();
+        });
+    });
 });
