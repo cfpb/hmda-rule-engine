@@ -309,6 +309,13 @@ var handleUniqueLoanNumberErrors = function(counts) {
         return property.trim() !== '';
     };
 
+    /*
+     * -----------------------------------------------------
+     * Custom Non-API functions
+     * -----------------------------------------------------
+     */
+
+    /* hmda-syntactical */
     HMDAEngine.hasRecordIdentifiersForEachRow = function(hmdaFile) {
         var records = [];
         if (hmdaFile.transmittalSheet.recordID !== '1') {
@@ -362,27 +369,41 @@ var handleUniqueLoanNumberErrors = function(counts) {
         return handleUniqueLoanNumberErrors(counts);
     };
 
+    /* lar-syntactical */
     HMDAEngine.isActionDateInActivityYear = function(actionDate, activityYear) {
         return HMDAEngine.yyyy_mm_dd(actionDate) && HMDAEngine.yyyy(activityYear) && activityYear === actionDate.slice(0,4);
     };
 
-    /* TODO - Implement this */
+    /* lar-quality */
+    /* TODO - Replace with actual impl */
     HMDAEngine.isLoanAmountFiveTimesIncome = function(loanAmount, applicantIncome) {
         return true;
     };
 
-    /* TODO - Implement this */
+    /* TODO - Replace with actual impl */
+    HMDAEngine.isValidLoanAmount = function(loanAmount, applicantIncome) {
+        return true;
+    };
+
+    /* ts-quality */
+    /* TODO - Replace with actual impl */
     HMDAEngine.checkTotalLARCount = function(totalLineEntries) {
         return true;
     };
 
-    /* TODO - Implement this */
-    HMDAEngine.compareNumEntriesSingle = function(loanApplicationRegisters, rule, cond, value) {
+    /* hmda-macro */
+    /* TODO - Replace with actual impl */
+    HMDAEngine.compareNumEntriesSingle = function(loanApplicationRegisters, rule, cond) {
         return true;
     };
 
-    /* TODO - Implement this */
-    HMDAEngine.compareNumEntries = function(loanApplicationRegisters, ruleA, ruleB, cond, value) {
+    /* TODO - Replace with actual impl */
+    HMDAEngine.compareNumEntries = function(loanApplicationRegisters, ruleA, ruleB, cond) {
+        return true;
+    };
+
+    /* TODO - Replace with actual impl */
+    HMDAEngine.isValidNumMultifamilyLoans = function(hmdaFile) {
         return true;
     };
 
@@ -421,10 +442,6 @@ var handleUniqueLoanNumberErrors = function(counts) {
     };
 
     /* lar-quality */
-    HMDAEngine.isValidLoanAmount = function(loanAmount, applicantIncome) {
-        return true;
-    };
-
     HMDAEngine.isValidStateCountyCensusTractCombo = function(fipsState, fipsCounty, censusTract, metroArea) {
         return true;
     };
@@ -443,10 +460,6 @@ var handleUniqueLoanNumberErrors = function(counts) {
     };
 
     /* hmda-macro */
-    HMDAEngine.isValidNumMultifamilyLoans = function(hmdaFile) {
-        return true;
-    };
-
     HMDAEngine.isValidNumLoans = function(hmdaFile) {
         return true;
     };
