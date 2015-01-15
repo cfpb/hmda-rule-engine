@@ -11,6 +11,14 @@ var engine = require('../engine'),
 
 
 describe('Engine', function() {
+    describe('getValidYears', function() {
+        it('should return list', function(done) {
+            var years = engine.getValidYears();
+            expect(years).to.not.be.undefined();
+            expect(years).to.not.be.empty();
+            done();
+        });
+    });
 
     describe('fileToJson', function() {
         it('should return json object when hmda file is valid and provided by stream', function(done) {
@@ -1217,7 +1225,7 @@ describe('Engine', function() {
             expect(result.length).to.be(1);
             expect(result[0].lineNumber).to.be('1');
             expect(result[0].properties.respondentEmail).to.be('krabapple.@gmail.com');
-            done(); 
+            done();
         });
 
         it('should return true for a passing zipcode format condition rule', function(done) {
@@ -1354,7 +1362,7 @@ describe('Engine', function() {
                 'condition': 'equal',
                 'value': '2'
             };
-            
+
             expect(engine.execRule(topLevelObj, rule).length).to.be(0);
             done();
         });
@@ -1426,7 +1434,7 @@ describe('Engine', function() {
             expect(result.length).to.be(1);
             expect(result[0].lineNumber).to.be('1');
             expect(result[0].properties.activityYear).to.be('2013');
-            done();         
+            done();
         });
 
         it('should return true for a passing is_empty rule', function(done) {
@@ -1528,8 +1536,8 @@ describe('Engine', function() {
                         'condition': 'yyyy_mm_dd_hh_mm'
                     }
                 }
-            };   
-            
+            };
+
             expect(engine.execRule(topLevelObj, rule).length).to.be(0);
             done();
         });

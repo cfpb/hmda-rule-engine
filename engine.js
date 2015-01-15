@@ -18,7 +18,7 @@ var resolveArg = function(arg, contextList) {
                 break;
             }
         }
-        
+
         if (mappedArg !== undefined) {
             return mappedArg;
         }
@@ -131,6 +131,16 @@ var handleUniqueLoanNumberErrors = function(counts) {
 
     HMDAEngine.setHmdaJson = function(newHmdaJson) {
         hmdaJson = newHmdaJson;
+    };
+
+    /*
+     * -----------------------------------------------------
+     * Convenience
+     * -----------------------------------------------------
+     */
+
+    HMDAEngine.getValidYears = function() {
+        return hmdaRuleSpec.getValidYears();
     };
 
     /*
@@ -596,7 +606,7 @@ var handleUniqueLoanNumberErrors = function(counts) {
         });
 
         var funcResult = new Function(result.body).apply(null, args);
-        
+
         if (funcResult === true) {
             return [];
         }
