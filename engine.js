@@ -365,14 +365,12 @@ var handleUniqueLoanNumberErrors = function(counts) {
         return HMDAEngine.yyyy_mm_dd(actionDate) && HMDAEngine.yyyy(activityYear) && activityYear === actionDate.slice(0,4);
     };
 
-    /* TODO - Implement this */
     HMDAEngine.isLoanAmountFiveTimesIncome = function(loanAmount, applicantIncome) {
-        return true;
+        return loanAmount >= applicantIncome * 5;
     };
 
-    /* TODO - Implement this */
-    HMDAEngine.checkTotalLARCount = function(totalLineEntries) {
-        return true;
+    HMDAEngine.checkTotalLARCount = function(hmdaFile) {
+        return parseInt(hmdaFile.transmittalSheet.totalLineEntries) === hmdaFile.loanApplicationRegisters.length;
     };
 
     /* TODO - Implement this */
@@ -699,6 +697,7 @@ var handleUniqueLoanNumberErrors = function(counts) {
     HMDAEngine.runQuality = function(year) {
         runEdits(year, 'ts', 'quality');
         runEdits(year, 'lar', 'quality');
+        runEdits(year, 'hmda', 'quality');
         return errors;
     };
 
