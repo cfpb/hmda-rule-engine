@@ -365,9 +365,8 @@ var handleUniqueLoanNumberErrors = function(counts) {
         return HMDAEngine.yyyy_mm_dd(actionDate) && HMDAEngine.yyyy(activityYear) && activityYear === actionDate.slice(0,4);
     };
 
-    /* TODO - Implement this */
     HMDAEngine.isLoanAmountFiveTimesIncome = function(loanAmount, applicantIncome) {
-        return true;
+        return loanAmount >= applicantIncome * 5;
     };
 
     /* TODO - Implement this */

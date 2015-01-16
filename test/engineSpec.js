@@ -1963,4 +1963,21 @@ describe('Engine', function() {
             done();
         });
     });
+
+    describe('isLoanAmountFiveTimesIncome', function() {
+        it('should return true if the loan amount is equal to five times the applicant income', function(done) {
+            expect(engine.isLoanAmountFiveTimesIncome(5, 1));
+            done();
+        });
+
+        it('should return true if the loan amount is greater than five times the applicant income', function(done) {
+            expect(engine.isLoanAmountFiveTimesIncome(6, 1));
+            done();
+        });
+
+        it('should return false if the loan amount is less than five times the applicant income', function(done) {
+            expect(engine.isLoanAmountFiveTimesIncome(1, 1));
+            done();
+        });
+    });
 });
