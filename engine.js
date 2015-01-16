@@ -5,7 +5,8 @@
 var hmdajson = require('./lib/hmdajson'),
     hmdaRuleSpec = require('hmda-rule-spec'),
     _ = require('underscore'),
-    brijSpec = require('brij-spec');
+    brijSpec = require('brij-spec'),
+    stream = require('stream');
 
 var resolveArg = function(arg, contextList) {
     var tokens = arg.split('.');
@@ -492,6 +493,16 @@ var handleUniqueLoanNumberErrors = function(counts) {
 
     HMDAEngine.fileToJson = function(file, year, next) {
         var spec = hmdaRuleSpec.getFileSpec(year);
+
+        // If file is not an instance of a stream, make it one!
+        if (typeof file.on !== 'function') { // use duck type checking to see if file is a stream obj or not
+            var s = new stream.Readable();
+            s._read = function noop() {};
+            s.push(file);
+            s.push(null);
+            file = s;
+        }
+
         hmdajson.process(file, spec, function(err, result) {
             if (! err && result) {
                 root._HMDA_JSON = result;

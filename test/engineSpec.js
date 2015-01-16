@@ -32,6 +32,21 @@ describe('Engine', function() {
                 done();
             });
         });
+
+        it('should return json object when hmda file is valid and provided by text', function(done) {
+            var fs = require('fs');
+            var text = fs.readFile('test/testdata/complete.dat', 'utf8', function (err, text) {
+                if (err) { throw err; }
+
+                engine.fileToJson(text, 2013, function(err, result) {
+                    expect(err).to.be.null();
+                    expect(result).to.have.property('hmdaFile');
+                    expect(result.hmdaFile).to.have.property('loanApplicationRegisters');
+                    expect(result.hmdaFile.loanApplicationRegisters.length).to.be(3);
+                    done();
+                });
+            });
+        });
     });
 
     describe('email_address', function() {
