@@ -24,6 +24,21 @@ describe('Engine', function() {
                 done();
             });
         });
+
+        it('should return json object when hmda file is valid and provided by text', function(done) {
+            var fs = require('fs');
+            var text = fs.readFile('test/testdata/complete.dat', 'utf8', function (err, text) {
+                if (err) { throw err; }
+
+                engine.fileToJson(text, 2013, function(err, result) {
+                    expect(err).to.be.null();
+                    expect(result).to.have.property('hmdaFile');
+                    expect(result.hmdaFile).to.have.property('loanApplicationRegisters');
+                    expect(result.hmdaFile.loanApplicationRegisters.length).to.be(3);
+                    done();
+                });
+            });
+        });
     });
 
     describe('email_address', function() {
@@ -1217,7 +1232,7 @@ describe('Engine', function() {
             expect(result.length).to.be(1);
             expect(result[0].lineNumber).to.be('1');
             expect(result[0].properties.respondentEmail).to.be('krabapple.@gmail.com');
-            done(); 
+            done();
         });
 
         it('should return true for a passing zipcode format condition rule', function(done) {
@@ -1354,7 +1369,7 @@ describe('Engine', function() {
                 'condition': 'equal',
                 'value': '2'
             };
-            
+
             expect(engine.execRule(topLevelObj, rule).length).to.be(0);
             done();
         });
@@ -1426,7 +1441,7 @@ describe('Engine', function() {
             expect(result.length).to.be(1);
             expect(result[0].lineNumber).to.be('1');
             expect(result[0].properties.activityYear).to.be('2013');
-            done();         
+            done();
         });
 
         it('should return true for a passing is_empty rule', function(done) {
@@ -1528,8 +1543,8 @@ describe('Engine', function() {
                         'condition': 'yyyy_mm_dd_hh_mm'
                     }
                 }
-            };   
-            
+            };
+
             expect(engine.execRule(topLevelObj, rule).length).to.be(0);
             done();
         });
