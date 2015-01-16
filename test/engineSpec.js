@@ -1980,4 +1980,28 @@ describe('Engine', function() {
             done();
         });
     });
+
+    describe('checkTotalLARCount', function() {
+        it('should return true if total lines from the transmittal sheet equals the total number of loan application registers', function(done) {
+            var hmdaFile = {
+                transmittalSheet: {
+                    totalLineEntries: '1'
+                },
+                loanApplicationRegisters: [ { } ]
+            };
+            expect(engine.checkTotalLARCount(hmdaFile)).to.be.true();
+            done();
+        });
+
+        it('should return false if total lines from the transmittal sheet does not equal the total number of loan application registers', function(done) {
+            var hmdaFile = {
+                transmittalSheet: {
+                    totalLineEntries: '1'
+                },
+                loanApplicationRegisters: [ { }, { } ]
+            };
+            expect(engine.checkTotalLARCount(hmdaFile)).to.be.false();
+            done();
+        });
+    });
 });
