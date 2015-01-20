@@ -3,15 +3,75 @@
 'use strict';
 
 var hmdajson = require('./lib/hmdajson'),
+    hmdaRuleSpec = require('hmda-rule-spec'),
     _ = require('underscore'),
-    brijSpec = require('brij-spec/validate');
+    brijSpec = require('brij-spec'),
+    stream = require('stream');
+
+var resolveArg = function(arg, contextList) {
+    var tokens = arg.split('.');
+    for (var i = 0; i < contextList.length; i++) {
+        var mappedArg = contextList[i];
+
+        for (var j = 0; j < tokens.length; j++) {
+            mappedArg = mappedArg[tokens[j]];
+            if (mappedArg === undefined) {
+                break;
+            }
+        }
+
+        if (mappedArg !== undefined) {
+            return mappedArg;
+        }
+    }
+    throw new Error('Failed to resolve argument!');
+};
+
+var retrieveProps = function(error, line, properties) {
+    for (var i = 0; i < properties.length; i++) {
+        var property = properties[i];
+        error.properties[property] = resolveArg(property, [line]);
+    }
+};
+
+var handleArrayErrors = function(hmdaFile, lines, properties) {
+    var errors = [];
+    for (var i = 0; i < lines.length; i++) {
+        var line = lines[i];
+        var error = {'properties': {}};
+        error.lineNumber = line.toString();
+        if (line === 1) {
+            retrieveProps(error, hmdaFile.transmittalSheet, properties);
+        } else {
+            retrieveProps(error, hmdaFile.loanApplicationRegisters[line-2], properties);
+        }
+        errors.push(error);
+    }
+    return errors;
+};
+
+var handleUniqueLoanNumberErrors = function(counts) {
+    var errors = [];
+    var loanNumbers = _.keys(counts);
+    for (var i = 0; i < loanNumbers.length; i++) {
+        var loanNumber = loanNumbers[i];
+        if (counts[loanNumber].length > 1) {
+            var error = {'properties': {}};
+            error.loanNumber = loanNumber;
+            error.properties.lineNumbers = [];
+            for (var j = 0; j < counts[loanNumber].length; j++) {
+                error.properties.lineNumbers.push(counts[loanNumber][j].lineNumber);
+            }
+            errors.push(error);
+        }
+    }
+    return errors;
+};
 
 (function() {
 
     // Set root (global) scope
     var root = this;
-
-    root._HMDA_JSON = null;
 
     // Constructor of our HMDAEngine
     var HMDAEngine = function(obj) {
@@ -32,6 +92,55 @@ var hmdajson = require('./lib/hmdajson'),
         exports.HMDAEngine = HMDAEngine;
     }
     root.HMDAEngine = HMDAEngine;
+
+    /*
+     * -----------------------------------------------------
+     * Managed State
+     * -----------------------------------------------------
+     */
+
+    var _HMDA_JSON = {},
+        errors = {
+            syntactical: {},
+            validity: {},
+            quality: {},
+            macro: {}
+        };
+
+    HMDAEngine.clearErrors = function() {
+        errors = {
+            syntactical: {},
+            validity: {},
+            quality: {},
+            macro: {}
+        };
+    };
+
+    HMDAEngine.getErrors = function() {
+        return errors;
+    };
+
+    HMDAEngine.clearHmdaJson = function() {
+        _HMDA_JSON = {};
+    };
+
+    HMDAEngine.getHmdaJson = function() {
+        return _HMDA_JSON;
+    };
+
+    HMDAEngine.setHmdaJson = function(newHmdaJson) {
+        _HMDA_JSON = newHmdaJson;
+    };
+
+    /*
+     * -----------------------------------------------------
+     * Convenience
+     * -----------------------------------------------------
+     */
+
+    HMDAEngine.getValidYears = function() {
+        return hmdaRuleSpec.getValidYears();
+    };
 
     /*
      * -----------------------------------------------------
@@ -200,16 +309,21 @@ var hmdajson = require('./lib/hmdajson'),
     };
 
     HMDAEngine.hasRecordIdentifiersForEachRow = function(hmdaFile) {
+        var records = [];
         if (hmdaFile.transmittalSheet.recordID !== '1') {
-            return false;
+            records.push(1);
         } else {
             for (var i=0; i < hmdaFile.loanApplicationRegisters.length; i++) {
                 if (hmdaFile.loanApplicationRegisters[i].recordID !== '2') {
-                    return false;
+                    records.push(hmdaFile.loanApplicationRegisters[i].lineNumber);
                 }
             }
         }
-        return true;
+
+        if (!records.length) {
+            return true;
+        }
+        return handleArrayErrors(hmdaFile, records, ['recordID']);
     };
 
     HMDAEngine.hasAtLeastOneLAR = function(hmdaFile) {
@@ -217,24 +331,155 @@ var hmdajson = require('./lib/hmdajson'),
     };
 
     HMDAEngine.isValidAgencyCode = function(hmdaFile) {
-        var validAgencies = [1, 2, 3, 5, 7, 9];
+        var validAgencies = ['1', '2', '3', '5', '7', '9'];
+        var records = [];
+
         if (! _.contains(validAgencies, hmdaFile.transmittalSheet.agencyCode)) {
-            return false;
-        } else {
-            var tsAgencyCode = hmdaFile.transmittalSheet.agencyCode;
-            for (var i=0; i < hmdaFile.loanApplicationRegisters.length; i++) {
-                if (hmdaFile.loanApplicationRegisters[i].agencyCode !== tsAgencyCode) {
-                    return false;
-                }
+            return handleArrayErrors(hmdaFile, [1], ['agencyCode']);
+        }
+        var tsAgencyCode = hmdaFile.transmittalSheet.agencyCode;
+        for (var i=0; i < hmdaFile.loanApplicationRegisters.length; i++) {
+            if (hmdaFile.loanApplicationRegisters[i].agencyCode !== tsAgencyCode) {
+                records.push(hmdaFile.loanApplicationRegisters[i].lineNumber);
             }
         }
-        return true;
+        if (!records.length) {
+            return true;
+        }
+        return handleArrayErrors(hmdaFile, records, ['agencyCode']);
     };
 
     HMDAEngine.hasUniqueLoanNumbers = function(hmdaFile) {
-        return _.unique(hmdaFile.loanApplicationRegisters, _.iteratee('loanNumber')).length === hmdaFile.loanApplicationRegisters.length;
+        if (_.unique(hmdaFile.loanApplicationRegisters, _.iteratee('loanNumber')).length === hmdaFile.loanApplicationRegisters.length) {
+            return true;
+        }
+
+        var counts = _.groupBy(hmdaFile.loanApplicationRegisters, function(lar) {
+            return lar.loanNumber;
+        });
+
+        return handleUniqueLoanNumberErrors(counts);
     };
 
+    HMDAEngine.isActionDateInActivityYear = function(actionDate, activityYear) {
+        return HMDAEngine.yyyy_mm_dd(actionDate) && HMDAEngine.yyyy(activityYear) && activityYear === actionDate.slice(0,4);
+    };
+
+    HMDAEngine.isLoanAmountFiveTimesIncome = function(loanAmount, applicantIncome) {
+        return loanAmount >= applicantIncome * 5;
+    };
+
+    HMDAEngine.checkTotalLARCount = function(hmdaFile) {
+        return parseInt(hmdaFile.transmittalSheet.totalLineEntries) === hmdaFile.loanApplicationRegisters.length;
+    };
+
+    /* TODO - Implement this */
+    HMDAEngine.compareNumEntriesSingle = function(loanApplicationRegisters, rule, cond, value) {
+        return true;
+    };
+
+    /* TODO - Implement this */
+    HMDAEngine.compareNumEntries = function(loanApplicationRegisters, ruleA, ruleB, cond, value) {
+        return true;
+    };
+
+    /*
+     * -----------------------------------------------------
+     * Custom API functions
+     * TODO - Replace with actual impl
+     * -----------------------------------------------------
+     */
+
+    /* ts-syntactical */
+    HMDAEngine.isTimestampLaterThanDatabase = function(timestamp) {
+        return true;
+    };
+
+    /* hmda-syntactical */
+    HMDAEngine.isValidControlNumber = function(hmdaFile) {
+        return true;
+    };
+
+    /* lar-validity */
+    HMDAEngine.isValidMetroArea = function(metroArea) {
+        return true;
+    };
+
+    HMDAEngine.isValidMsaMdStateAndCountyCombo = function(metroArea, fipsState, fipsCounty) {
+        return true;
+    };
+
+    HMDAEngine.isValidStateAndCounty = function(fipsState, fipsCounty) {
+        return true;
+    };
+
+    HMDAEngine.isValidCensusTractCombo = function(censusTract, metroArea, fipsState, fipsCounty) {
+        return true;
+    };
+
+    /* lar-quality */
+    HMDAEngine.isValidLoanAmount = function(loanAmount, applicantIncome) {
+        return true;
+    };
+
+    HMDAEngine.isValidStateCountyCensusTractCombo = function(fipsState, fipsCounty, censusTract, metroArea) {
+        return true;
+    };
+
+    HMDAEngine.isNotIndependentMortgageCoOrMBS = function(respondentID) {
+        return true;
+    };
+
+    HMDAEngine.isMetroAreaOnRespondentPanel = function(metroArea, respondentID) {
+        return true;
+    };
+
+    /* ts-validity */
+    HMDAEngine.isRespondentMBS = function(respondentID) {
+        return true;
+    };
+
+    /* hmda-macro */
+    HMDAEngine.isValidNumMultifamilyLoans = function(hmdaFile) {
+        return true;
+    };
+
+    HMDAEngine.isValidNumLoans = function(hmdaFile) {
+        return true;
+    };
+
+    HMDAEngine.isValidNumFannieMaeLoans = function(hmdaFile) {
+        return true;
+    };
+
+    HMDAEngine.isValidNumGinnieMaeFHALoans = function(hmdaFile) {
+        return true;
+    };
+
+    HMDAEngine.isValidNumGinnieMaeVALoans = function(hmdaFile) {
+        return true;
+    };
+
+    HMDAEngine.isValidNumHomePurchaseLoans = function(hmdaFile) {
+        return true;
+    };
+
+    HMDAEngine.isValidNumRefinanceLoans = function(hmdaFile) {
+        return true;
+    };
+
+    HMDAEngine.isValidMsaMdCountyCensusForNonDepository = function(hmdaFile) {
+        return true;
+    };
+
+    /* ts-quality */
+    HMDAEngine.isChildFI = function(respondentID) {
+        return true;
+    };
+
+    HMDAEngine.isTaxIDTheSameAsLastYear = function(respondentID, taxID) {
+        return true;
+    };
 
     /*
      * -----------------------------------------------------
@@ -242,12 +487,23 @@ var hmdajson = require('./lib/hmdajson'),
      * -----------------------------------------------------
      */
 
-    HMDAEngine.fileToJson = function(file, spec, next) {
+    HMDAEngine.fileToJson = function(file, year, next) {
+        var spec = hmdaRuleSpec.getFileSpec(year);
+
+        // If file is not an instance of a stream, make it one!
+        if (typeof file.on !== 'function') { // use duck type checking to see if file is a stream obj or not
+            var s = new stream.Readable();
+            s._read = function noop() {};
+            s.push(file);
+            s.push(null);
+            file = s;
+        }
+
         hmdajson.process(file, spec, function(err, result) {
             if (! err && result) {
-                root._HMDA_JSON = result;
+                _HMDA_JSON = result;
             }
-            next(err, root._HMDA_JSON);
+            next(err, _HMDA_JSON);
         });
     };
 
@@ -295,11 +551,11 @@ var hmdajson = require('./lib/hmdajson'),
         }
 
         if (rule.hasOwnProperty('if')) {
-            result.body += 'if (';
+            result.body += '(';
             HMDAEngine.parseRule(rule.if, result);
-            result.body += ') { return ';
+            result.body += ' ? ';
             HMDAEngine.parseRule(rule.then, result);
-            result.body += '; } return true;';
+            result.body += ' : true)';
         }
 
         if (rule.hasOwnProperty('and')) {
@@ -323,6 +579,10 @@ var hmdajson = require('./lib/hmdajson'),
             }
             result.body += ')';
         }
+
+        for (var x = 0; x < result.args.length; x++) {
+            result.properties[result.args[x]] = true;
+        }
     };
 
     /*
@@ -331,7 +591,120 @@ var hmdajson = require('./lib/hmdajson'),
      * -----------------------------------------------------
      */
 
-    // TODO
+    HMDAEngine.execRule = function(topLevelObj, rule) {
+        var result = {
+            argIndex: 0,
+            args: [],
+            body: '',
+            properties: {}
+        };
+
+        HMDAEngine.parseRule(rule, result);
+        result.body = 'return ' + result.body + ';';
+
+        var args = _.map(result.args, function(arg) {
+            if (typeof(arg) === 'string') {
+                var contextList = [topLevelObj, !topLevelObj.hmdaFile ? _HMDA_JSON : {}];        // Context list to search
+                return resolveArg(arg, contextList);
+            } else {
+                return arg;
+            }
+        });
+
+        var funcResult = new Function(result.body).apply(null, args);
+
+        if (funcResult === true) {
+            return [];
+        }
+
+        if (topLevelObj.hmdaFile) {
+            return funcResult;
+        } else {
+            var error = {'properties': {}};
+
+            error.lineNumber = topLevelObj.lineNumber;
+
+            for (var i = 0; i < args.length; i++) {
+                error.properties[result.args[i]] = args[i];
+            }
+
+            return [error];
+        }
+    };
+
+    /*
+     * -----------------------------------------------------
+     * API Endpoints
+     * -----------------------------------------------------
+     */
+
+    var addToErrors = function(newErrors, rule, editType, scope) {
+        if (errors[editType][rule.id] === undefined) {
+            errors[editType][rule.id] = {
+                'errors': []
+            };
+            errors[editType][rule.id].description = rule.description;
+            errors[editType][rule.id].explanation = rule.explanation;
+            errors[editType][rule.id].scope = scope;
+        }
+
+        for (var i = 0; i < newErrors.length; i++) {
+            errors[editType][rule.id].errors.push(newErrors[i]);
+        }
+    };
+
+    var runEdits = function(year, scope, editType) {
+        var rules = hmdaRuleSpec.getEdits(year, scope, editType);
+
+        var topLevelObjs = [];
+        switch (scope) {
+            case 'ts':
+                topLevelObjs.push(_HMDA_JSON.hmdaFile.transmittalSheet);
+                break;
+            case 'lar':
+                for (var i = 0; i < _HMDA_JSON.hmdaFile.loanApplicationRegisters.length; i++) {
+                   topLevelObjs.push(_HMDA_JSON.hmdaFile.loanApplicationRegisters[i]);
+                }
+                break;
+            case 'hmda':
+                topLevelObjs.push(_HMDA_JSON);
+                break;
+        }
+
+        for (var j = 0; j < rules.length; j++) {
+            for (var k = 0; k < topLevelObjs.length; k++) {
+                var result = HMDAEngine.execRule(topLevelObjs[k], rules[j].rule);
+                if (result.length !== 0) {
+                    addToErrors(result, rules[j], editType, scope);
+                }
+            }
+        }
+    };
+
+    HMDAEngine.runSyntactical = function(year) {
+        runEdits(year, 'ts', 'syntactical');
+        runEdits(year, 'lar', 'syntactical');
+        runEdits(year, 'hmda', 'syntactical');
+        return errors;
+    };
+
+    HMDAEngine.runValidity = function(year) {
+        runEdits(year, 'ts', 'validity');
+        runEdits(year, 'lar', 'validity');
+        return errors;
+    };
+
+    HMDAEngine.runQuality = function(year) {
+        runEdits(year, 'ts', 'quality');
+        runEdits(year, 'lar', 'quality');
+        runEdits(year, 'hmda', 'quality');
+        return errors;
+    };
+
+    HMDAEngine.runMacro = function(year) {
+        runEdits(year, 'hmda', 'macro');
+        return errors;
+    };
 
 }.call((function() {
   return (typeof module !== 'undefined' && module.exports &&

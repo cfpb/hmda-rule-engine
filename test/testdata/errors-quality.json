@@ -1,0 +1,121 @@
+{
+    "syntactical": {},
+    "validity": {},
+    "quality": {
+        "Q033": {
+            "description": "If respondent is a bank, savings association, or independent mortgage company, and if any parent company exists, then parent name, address, city, state and zip code should not = blank.",
+            "explanation": "Parent name, address, city, state, or zip code is missing.",
+            "scope": "ts",
+            "errors": [
+                {
+                    "lineNumber": "1",
+                    "properties": {
+                        "respondentID": "0123456789",
+                        "parentName": "                              ",
+                        "parentAddress": "1234 Kearney St    XXXXXXXXXXXXXXXXXXXXX",
+                        "parentCity": "San Francisco      XXXXXX",
+                        "parentState": "CA",
+                        "parentZip": "99999-1234"
+                    }
+                }
+            ]
+        },
+        "Q026": {
+            "description": "If action taken type = 1-5, 7, or 8, and (application date ≥ 20040101 and not = NA), then applicant ethnicity, race and/or sex should not = 4, 7, or 4, respectively.",
+            "explanation": "Applicant ethnicity, race and/or sex = 4, 7, or 4, respectively; Verify.",
+            "scope": "lar",
+            "errors": [
+                {
+                    "lineNumber": "2",
+                    "properties": {
+                        "applicantEthnicity": "4",
+                        "applicantRace1": "7",
+                        "applicantSex": "1",
+                        "applicationReceivedDate": "20130117",
+                        "actionTaken": "5"
+                    }
+                },
+                {
+                    "lineNumber": "3",
+                    "properties": {
+                        "applicantEthnicity": "4",
+                        "applicantRace1": "7",
+                        "applicantSex": "1",
+                        "applicationReceivedDate": "20130117",
+                        "actionTaken": "5"
+                    }
+                },
+                {
+                    "lineNumber": "4",
+                    "properties": {
+                        "applicantEthnicity": "4",
+                        "applicantRace1": "7",
+                        "applicantSex": "1",
+                        "applicationReceivedDate": "20130117",
+                        "actionTaken": "5"
+                    }
+                }
+            ]
+        },
+        "Q014": {
+            "description": "If income is numeric, then income should be < $2 million.",
+            "explanation": "Income is numeric and ≥ to $2 million; Verify.",
+            "scope": "lar",
+            "errors": [
+                {
+                    "lineNumber": "2",
+                    "properties": {
+                        "applicantIncome": "9000"
+                    }
+                },
+                {
+                    "lineNumber": "3",
+                    "properties": {
+                        "applicantIncome": "9000"
+                    }
+                },
+                {
+                    "lineNumber": "4",
+                    "properties": {
+                        "applicantIncome": "9000"
+                    }
+                }
+            ]
+        },
+        "Q059": {
+            "description": "If loan type = 3 or 4, then property type should not = 3.",
+            "explanation": "Loan type = 3 or 4 and property type = 3; Verify.",
+            "scope": "lar",
+            "errors": [
+                {
+                    "lineNumber": "2",
+                    "properties": {
+                        "loanType": "4",
+                        "propertyType": "3"
+                    }
+                },
+                {
+                    "lineNumber": "3",
+                    "properties": {
+                        "loanType": "4",
+                        "propertyType": "3"
+                    }
+                },
+                {
+                    "lineNumber": "4",
+                    "properties": {
+                        "loanType": "4",
+                        "propertyType": "3"
+                    }
+                }
+            ]
+        },
+        "Q130": {
+            "errors": [],
+            "description": "The number of loan/application records received in this transmission file per respondent does not = the total number of loan/application records reported in this respondent’s transmission or the total number of loan/application records in this submission is missing from the transmittal sheet.",
+            "explanation": "Loan/application records received in this transmission are missing or not = to the total number of loan/application records reported in this transmission.",
+            "scope": "hmda"
+        }
+    },
+    "macro": {}
+}

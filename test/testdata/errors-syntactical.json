@@ -1,0 +1,74 @@
+{
+    "syntactical": {
+        "S028": {
+            "description": "Timestamp must be numeric and in ccyymmddhhmm format.",
+            "explanation": "Timestamp is missing or nonnumeric (format = ccyymmddhhmm).",
+            "scope": "ts",
+            "errors": [
+                {
+                    "lineNumber": "1",
+                    "properties": {
+                        "timestamp": "cat"
+                    }
+                }
+            ]
+        },
+        "S100": {
+            "description": "Activity year must = year being processed (= 2013).",
+            "explanation": "Invalid activity year.",
+            "scope": "ts",
+            "errors": [
+                {
+                    "lineNumber": "1",
+                    "properties": {
+                        "activityYear": "2014"
+                    }
+                }
+            ]
+        },
+        "S270": {
+            "description": "Century (CC) and Year (YY) of action taken date must = activity century/year (CCYY) for period being processed.",
+            "explanation": "Century and/or year for action taken date does not match activity century/year.",
+            "scope": "lar",
+            "errors": [
+                {
+                    "lineNumber": "2",
+                    "properties": {
+                        "actionDate": "20130119",
+                        "hmdaFile.transmittalSheet.activityYear": "2014"
+                    }
+                },
+                {
+                    "lineNumber": "3",
+                    "properties": {
+                        "actionDate": "20130119",
+                        "hmdaFile.transmittalSheet.activityYear": "2014"
+                    }
+                },
+                {
+                    "lineNumber": "4",
+                    "properties": {
+                        "actionDate": "20130119",
+                        "hmdaFile.transmittalSheet.activityYear": "2014"
+                    }
+                }
+            ]
+        },
+        "S040": {
+            "description": "Application/loan number must be unique.",
+            "explanation": "Duplicate loan numbers reported; data already in file.",
+            "scope": "hmda",
+            "errors": [
+                {
+                    "loanNumber": "ABCDEFGHIJKLMNOPQRSTUVWXY",
+                    "properties": {
+                        "lineNumbers": ["2", "3", "4"]
+                    }
+                }
+            ]
+        }
+    },
+    "validity": {},
+    "quality": {},
+    "macro": {}
+}

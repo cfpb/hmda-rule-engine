@@ -1,0 +1,16 @@
+[
+	{
+		"lineNumber": "1",
+		"properties": {
+			"recordID": "1",
+			"filler": " "
+		}
+	},
+	{
+		"lineNumber": "3",
+		"properties": {
+			"recordID": "2",
+			"filler": "B"
+		}
+	}
+]

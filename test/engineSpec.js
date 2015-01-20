@@ -1,24 +1,50 @@
 /*global describe:false*/
 /*global it:false*/
 /*global expect:false*/
+/*global beforeEach:false*/
+/*global rewire:false*/
+/*global _:false*/
 'use strict';
 
-var engine = require('../engine');
-var FILE_SPEC = require('./testdata/2013_file_spec.json');
+var engine = require('../engine'),
+    rewiredEngine = rewire('../engine');
 
 
 describe('Engine', function() {
+    describe('getValidYears', function() {
+        it('should return list', function(done) {
+            var years = engine.getValidYears();
+            expect(years).to.not.be.undefined();
+            expect(years).to.not.be.empty();
+            done();
+        });
+    });
 
     describe('fileToJson', function() {
         it('should return json object when hmda file is valid and provided by stream', function(done) {
             var fs = require('fs');
             var stream = fs.createReadStream('test/testdata/complete.dat');
-            engine.fileToJson(stream, FILE_SPEC, function(err, result) {
+            engine.fileToJson(stream, 2013, function(err, result) {
                 expect(err).to.be.null();
                 expect(result).to.have.property('hmdaFile');
                 expect(result.hmdaFile).to.have.property('loanApplicationRegisters');
                 expect(result.hmdaFile.loanApplicationRegisters.length).to.be(3);
                 done();
+            });
+        });
+
+        it('should return json object when hmda file is valid and provided by text', function(done) {
+            var fs = require('fs');
+            var text = fs.readFile('test/testdata/complete.dat', 'utf8', function (err, text) {
+                if (err) { throw err; }
+
+                engine.fileToJson(text, 2013, function(err, result) {
+                    expect(err).to.be.null();
+                    expect(result).to.have.property('hmdaFile');
+                    expect(result.hmdaFile).to.have.property('loanApplicationRegisters');
+                    expect(result.hmdaFile.loanApplicationRegisters.length).to.be(3);
+                    done();
+                });
             });
         });
     });
@@ -642,11 +668,13 @@ describe('Engine', function() {
         it('should return true when the HMDA file has correct record identifiers for each row', function(done) {
             var hmdaFile = {
                 transmittalSheet: {
-                    recordID: '1'
+                    recordID: '1',
+                    lineNumber: '1'
                 },
                 loanApplicationRegisters: [
                     {
-                        recordID: '2'
+                        recordID: '2',
+                        lineNumber: '2'
                     }
                 ]
             };
@@ -655,36 +683,45 @@ describe('Engine', function() {
             done();
         });
 
-        it('should return false when the transmittal sheet does not have a recordID of 1', function(done) {
+        it('should return a list of errors when the transmittal sheet does not have a recordID of 1', function(done) {
             var hmdaFile = {
                 transmittalSheet: {
-                    recordID: '2'
+                    recordID: '2',
+                    lineNumber: '1'
                 }
             };
             var result = engine.hasRecordIdentifiersForEachRow(hmdaFile);
-            expect(result).to.be(false);
+            expect(result.length).to.be(1);
+            expect(result[0].properties.recordID).to.be('2');
+            expect(result[0].lineNumber).to.be('1');
             done();
         });
 
-        it('should return false when a loan application register does not have a recordID of 2', function(done) {
+        it('should return a list of errors when a loan application register does not have a recordID of 2', function(done) {
             var hmdaFile = {
                 transmittalSheet: {
-                    recordID: '1'
+                    recordID: '1',
+                    lineNumber: '1'
                 },
                 loanApplicationRegisters: [
                     {
-                        recordID: '2'
+                        recordID: '2',
+                        lineNumber: '2'
                     },
                     {
-                        recordID: '1'
+                        recordID: '1',
+                        lineNumber: '3'
                     },
                     {
-                        recordID: '2'
+                        recordID: '2',
+                        lineNumber: '4'
                     }
                 ]
             };
             var result = engine.hasRecordIdentifiersForEachRow(hmdaFile);
-            expect(result).to.be(false);
+            expect(result.length).to.be(1);
+            expect(result[0].properties.recordID).to.be('1');
+            expect(result[0].lineNumber).to.be('3');
             done();
         });
 
@@ -715,60 +752,74 @@ describe('Engine', function() {
     });
 
     describe('isValidAgencyCode', function() {
-        it('should return false if the transmittal sheet has an invalid agency code', function(done) {
+        it('should return a list of errors if the transmittal sheet has an invalid agency code', function(done) {
             var hmdaFile = {
                 transmittalSheet: {
-                    agencyCode: 11
+                    agencyCode: '11',
+                    lineNumber: '1'
                 }
             };
             var result = engine.isValidAgencyCode(hmdaFile);
-            expect(result).to.be(false);
+            expect(result.length).to.be(1);
+            expect(result[0].lineNumber).to.be('1');
+            expect(result[0].properties.agencyCode).to.be('11');
             done();
         });
 
-        it('should return false if a LAR has an invalid agency code', function(done) {
+        it('should return a list of errors if a LAR has an invalid agency code', function(done) {
             var hmdaFile = {
                 transmittalSheet: {
-                    agencyCode: 1
+                    agencyCode: '1',
+                    lineNumber: '1'
                 },
                 loanApplicationRegisters: [
                     {
-                        agencyCode: 11
+                        agencyCode: '11',
+                        lineNumber: '2'
                     }
                 ]
             };
             var result = engine.isValidAgencyCode(hmdaFile);
-            expect(result).to.be(false);
+            expect(result.length).to.be(1);
+            expect(result[0].lineNumber).to.be('2');
+            expect(result[0].properties.agencyCode).to.be('11');
             done();
         });
 
-        it('should return false if a LAR has an agency code that does not match the transmittal sheet agency code', function(done) {
+        it('should return a list of errors if a LAR has an agency code that does not match the transmittal sheet agency code', function(done) {
             var hmdaFile = {
                 transmittalSheet: {
-                    agencyCode: 1
+                    agencyCode: '1',
+                    lineNumber: '1'
                 },
                 loanApplicationRegisters: [
                     {
-                        agencyCode: 3
+                        agencyCode: '3',
+                        lineNumber: '2'
                     }
                 ]
             };
             var result = engine.isValidAgencyCode(hmdaFile);
-            expect(result).to.be(false);
+            expect(result.length).to.be(1);
+            expect(result[0].lineNumber).to.be('2');
+            expect(result[0].properties.agencyCode).to.be('3');
             done();
         });
 
         it('should return true if all LARs have the same agency code as the transmittal sheet', function(done) {
             var hmdaFile = {
                 transmittalSheet: {
-                    agencyCode: 1
+                    agencyCode: '1',
+                    lineNumber: '1'
                 },
                 loanApplicationRegisters: [
                     {
-                        agencyCode: 1
+                        agencyCode: '1',
+                        lineNumber: '2'
                     },
                     {
-                        agencyCode: 1
+                        agencyCode: '1',
+                        lineNumber: '3'
                     }
                 ]
             };
@@ -779,30 +830,37 @@ describe('Engine', function() {
     });
 
     describe('hasUniqueLoanNumbers', function() {
-        it('should return false if any LARS have duplicate loanNumbers', function(done) {
+        it('should return false if any LARs have duplicate loanNumbers', function(done) {
             var hmdaFile = {
                 loanApplicationRegisters: [
                     {
-                        loanNumber: 1
+                        loanNumber: '1',
+                        lineNumber: '2'
                     },
                     {
-                        loanNumber: 1
+                        loanNumber: '1',
+                        lineNumber: '3'
                     }
                 ]
             };
             var result = engine.hasUniqueLoanNumbers(hmdaFile);
-            expect(result).to.be(false);
+            expect(result.length).to.be(1);
+            expect(result[0].loanNumber).to.be('1');
+            expect(result[0].properties.lineNumbers.length).to.be(2);
+            expect(result[0].properties.lineNumbers[0]).to.be('2');
             done();
         });
 
-        it('should return false if any LARS have duplicate loanNumbers', function(done) {
+        it('should return true if no LARs have the same loanNumber', function(done) {
             var hmdaFile = {
                 loanApplicationRegisters: [
                     {
-                        loanNumber: 1
+                        loanNumber: '1',
+                        lineNumber: '2'
                     },
                     {
-                        loanNumber: 2
+                        loanNumber: '2',
+                        lineNumber: '3'
                     }
                 ]
             };
@@ -812,16 +870,43 @@ describe('Engine', function() {
         });
     });
 
+    describe('isActionDateInActivityYear', function() {
+        it('should return true for an actionDate with activityYear', function(done) {
+            var actionDate = '20130723';
+            var activityYear = '2013';
+
+            expect(engine.isActionDateInActivityYear(actionDate, activityYear)).to.be(true);
+            done();
+        });
+
+        it('should return false for an actionDate not in activityYear', function(done) {
+            var actionDate = '20140723';
+            var activityYear = '2013';
+
+            expect(engine.isActionDateInActivityYear(actionDate, activityYear)).to.be(false);
+            done();
+        });
+
+        it('should return false for an actionDate that is an invalid date', function(done) {
+            var actionDate = '20142014';    // Invalid month
+            var activityYear = '2014';
+
+            expect(engine.isActionDateInActivityYear(actionDate, activityYear)).to.be(false);
+            done();
+        });
+    });
+
     describe('parseRule', function() {
         it('should parse a rule with a simple property test into a function string', function(done) {
             var result = {
                 argIndex: 0,
                 args: [],
-                body: ''
+                body: '',
+                properties: {}
             };
             var rule = {
-                "property": "foo",
-                "condition": "is_true"
+                'property': 'foo',
+                'condition': 'is_true'
             };
             engine.parseRule(rule, result);
             expect(result.body).to.be('HMDAEngine.is_true(arguments[0])');
@@ -832,12 +917,13 @@ describe('Engine', function() {
             var result = {
                 argIndex: 0,
                 args: [],
-                body: ''
+                body: '',
+                properties: {}
             };
             var rule = {
-                "property": "foo",
-                "condition": "equal",
-                "value": "1"
+                'property': 'foo',
+                'condition': 'equal',
+                'value': '1'
             };
             engine.parseRule(rule, result);
             expect(result.body).to.be('HMDAEngine.equal(arguments[0], "1")');
@@ -848,12 +934,13 @@ describe('Engine', function() {
             var result = {
                 argIndex: 0,
                 args: [],
-                body: ''
+                body: '',
+                properties: {}
             };
             var rule = {
-                "property": "foo",
-                "condition": "equal",
-                "value": 1
+                'property': 'foo',
+                'condition': 'equal',
+                'value': 1
             };
             engine.parseRule(rule, result);
             expect(result.body).to.be('HMDAEngine.equal(arguments[0], 1)');
@@ -864,12 +951,13 @@ describe('Engine', function() {
             var result = {
                 argIndex: 0,
                 args: [],
-                body: ''
+                body: '',
+                properties: {}
             };
             var rule = {
-                "property": "foo",
-                "condition": "in",
-                "values": ['1', '2', '3']
+                'property': 'foo',
+                'condition': 'in',
+                'values': ['1', '2', '3']
             };
             engine.parseRule(rule, result);
             expect(result.body).to.be('HMDAEngine.in(arguments[0], ["1","2","3"])');
@@ -880,12 +968,13 @@ describe('Engine', function() {
             var result = {
                 argIndex: 0,
                 args: [],
-                body: ''
+                body: '',
+                properties: {}
             };
             var rule = {
-                "property": "foo",
-                "condition": "equal_property",
-                "value": "bar"
+                'property': 'foo',
+                'condition': 'equal_property',
+                'value': 'bar'
             };
             engine.parseRule(rule, result);
             expect(result.body).to.be('HMDAEngine.equal_property(arguments[0], arguments[1])');
@@ -896,13 +985,14 @@ describe('Engine', function() {
             var result = {
                 argIndex: 0,
                 args: [],
-                body: ''
+                body: '',
+                properties: {}
             };
             var rule = {
-                "property": "foo",
-                "condition": "between",
-                "start": "1",
-                "end": "9"
+                'property': 'foo',
+                'condition': 'between',
+                'start': '1',
+                'end': '9'
             };
             engine.parseRule(rule, result);
             expect(result.body).to.be('HMDAEngine.between(arguments[0], "1", "9")');
@@ -913,20 +1003,21 @@ describe('Engine', function() {
             var result = {
                 argIndex: 0,
                 args: [],
-                body: ''
+                body: '',
+                properties: {}
             };
             var rule = {
-                "if": {
-                    "property": "foo",
-                    "condition": "is_true"
+                'if': {
+                    'property': 'foo',
+                    'condition': 'is_true'
                 },
-                "then": {
-                    "property": "bar",
-                    "condition": "is_false"
+                'then': {
+                    'property': 'bar',
+                    'condition': 'is_false'
                 }
             };
             engine.parseRule(rule, result);
-            expect(result.body).to.be('if (HMDAEngine.is_true(arguments[0])) { return HMDAEngine.is_false(arguments[1]); } return true;');
+            expect(result.body).to.be('(HMDAEngine.is_true(arguments[0]) ? HMDAEngine.is_false(arguments[1]) : true)');
             done();
         });
 
@@ -934,17 +1025,18 @@ describe('Engine', function() {
             var result = {
                 argIndex: 0,
                 args: [],
-                body: ''
+                body: '',
+                properties: {}
             };
             var rule = {
-                "and": [
+                'and': [
                     {
-                        "property": "foo",
-                        "condition": "is_true"
+                        'property': 'foo',
+                        'condition': 'is_true'
                     },
                     {
-                        "property": "bar",
-                        "condition": "is_false"
+                        'property': 'bar',
+                        'condition': 'is_false'
                     }
                 ]
             };
@@ -957,17 +1049,18 @@ describe('Engine', function() {
             var result = {
                 argIndex: 0,
                 args: [],
-                body: ''
+                body: '',
+                properties: {}
             };
             var rule = {
-                "or": [
+                'or': [
                     {
-                        "property": "foo",
-                        "condition": "is_true"
+                        'property': 'foo',
+                        'condition': 'is_true'
                     },
                     {
-                        "property": "bar",
-                        "condition": "is_false"
+                        'property': 'bar',
+                        'condition': 'is_false'
                     }
                 ]
             };
@@ -980,33 +1073,34 @@ describe('Engine', function() {
             var result = {
                 argIndex: 0,
                 args: [],
-                body: ''
+                body: '',
+                properties: {}
             };
             var rule = {
-                "and": [
+                'and': [
                     {
-                        "or": [
+                        'or': [
                             {
-                                "property": "foo",
-                                "condition": "is_true"
+                                'property': 'foo',
+                                'condition': 'is_true'
                             },
                             {
-                                "property": "bar",
-                                "condition": "is_false"
+                                'property': 'bar',
+                                'condition': 'is_false'
                             }
                         ]
                     },
                     {
-                        "or": [
+                        'or': [
                             {
-                                "property": "animal",
-                                "condition": "equal",
-                                "value": "cow"
+                                'property': 'animal',
+                                'condition': 'equal',
+                                'value': 'cow'
                             },
                             {
-                                "property": "fruit",
-                                "condition": "equal",
-                                "value": "banana"
+                                'property': 'fruit',
+                                'condition': 'equal',
+                                'value': 'banana'
                             }
                         ]
                     }
@@ -1021,29 +1115,30 @@ describe('Engine', function() {
             var result = {
                 argIndex: 0,
                 args: [],
-                body: ''
+                body: '',
+                properties: {}
             };
             var rule = {
-                "if": {
-                    "and": [
+                'if': {
+                    'and': [
                         {
-                            "property": "foo",
-                            "condition": "is_true"
+                            'property': 'foo',
+                            'condition': 'is_true'
                         },
                         {
-                            "property": "bar",
-                            "condition": "is_false"
+                            'property': 'bar',
+                            'condition': 'is_false'
                         }
                     ]
                 },
-                "then": {
-                    "property": "baz",
-                    "condition": "equal",
-                    "value": "3"
+                'then': {
+                    'property': 'baz',
+                    'condition': 'equal',
+                    'value': '3'
                 }
-            }
+            };
             engine.parseRule(rule, result);
-            expect(result.body).to.be('if ((HMDAEngine.is_true(arguments[0]) && HMDAEngine.is_false(arguments[1]))) { return HMDAEngine.equal(arguments[2], "3"); } return true;');
+            expect(result.body).to.be('((HMDAEngine.is_true(arguments[0]) && HMDAEngine.is_false(arguments[1])) ? HMDAEngine.equal(arguments[2], "3") : true)');
             done();
         });
 
@@ -1051,12 +1146,13 @@ describe('Engine', function() {
             var result = {
                 argIndex: 0,
                 args: [],
-                body: ''
+                body: '',
+                properties: {}
             };
             var rule = {
-                "property": "foo",
-                "condition": "call",
-                "function": "isFooValid"
+                'property': 'foo',
+                'condition': 'call',
+                'function': 'isFooValid'
             };
             engine.parseRule(rule, result);
             expect(result.body).to.be('HMDAEngine.isFooValid(arguments[0])');
@@ -1067,13 +1163,14 @@ describe('Engine', function() {
             var result = {
                 argIndex: 0,
                 args: [],
-                body: ''
+                body: '',
+                properties: {}
             };
             var rule = {
-                "property": "foo",
-                "condition": "call",
-                "function": "isFooValid",
-                "args": ["foo", "bar", "baz"]
+                'property': 'foo',
+                'condition': 'call',
+                'function': 'isFooValid',
+                'args': ['foo', 'bar', 'baz']
             };
             engine.parseRule(rule, result);
             expect(result.body).to.be('HMDAEngine.isFooValid(arguments[0], arguments[1], arguments[2])');
@@ -1081,4 +1178,830 @@ describe('Engine', function() {
         });
     });
 
+    describe('execRule', function() {
+        var hmdaJson = {};
+        var topLevelObj = {};
+
+        beforeEach(function() {
+            hmdaJson = JSON.parse(JSON.stringify(require('./testdata/complete.json')));
+            topLevelObj = hmdaJson.hmdaFile.transmittalSheet;
+            engine.setHmdaJson(hmdaJson);
+        });
+
+        it('should return true for a passing function rule', function(done) {
+            var rule = {
+                'property': 'hmdaFile',
+                'condition': 'call',
+                'function': 'hasRecordIdentifiersForEachRow'
+            };
+
+            expect(engine.execRule(hmdaJson, rule).length).to.be(0);
+            done();
+        });
+
+        it('should return list of errors for a non-passing function rule', function(done) {
+            var rule = {
+                'property': 'hmdaFile',
+                'condition': 'call',
+                'function': 'hasRecordIdentifiersForEachRow'
+            };
+
+            hmdaJson.hmdaFile.loanApplicationRegisters[0].recordID = '3';
+
+            var result = engine.execRule(hmdaJson, rule);
+            expect(result.length).to.be(1);
+            expect(result[0].lineNumber).to.be('2');
+            expect(result[0].properties.recordID).to.be('3');
+
+            done();
+        });
+
+        it('should return true for a passing email_address format condition rule', function(done) {
+            hmdaJson.hmdaFile.transmittalSheet.respondentEmail = 'krabapple@gmail.com';
+
+            var rule = {
+                'property': 'respondentEmail',
+                'condition': 'email_address'
+            };
+
+            expect(engine.execRule(topLevelObj, rule).length).to.be(0);
+            done();
+        });
+
+        it('should return a list of errors for a non-passing email_address format condition rule', function(done) {
+            hmdaJson.hmdaFile.transmittalSheet.respondentEmail = 'krabapple.@gmail.com';
+
+            var rule = {
+                'property': 'respondentEmail',
+                'condition': 'email_address'
+            };
+
+            var result = engine.execRule(topLevelObj, rule);
+            expect(result.length).to.be(1);
+            expect(result[0].lineNumber).to.be('1');
+            expect(result[0].properties.respondentEmail).to.be('krabapple.@gmail.com');
+            done();
+        });
+
+        it('should return true for a passing zipcode format condition rule', function(done) {
+            var rule = {
+                'property': 'parentZip',
+                'condition': 'zipcode'
+            };
+
+            expect(engine.execRule(topLevelObj, rule).length).to.be(0);
+            done();
+        });
+
+        it('should return a list of errors for a non-passing zipcode format condition rule', function(done) {
+            hmdaJson.hmdaFile.transmittalSheet.parentZip = '555-1234';
+
+            var rule = {
+                'property': 'parentZip',
+                'condition': 'zipcode'
+            };
+
+            var result = engine.execRule(topLevelObj, rule);
+            expect(result.length).to.be(1);
+            expect(result[0].lineNumber).to.be('1');
+            expect(result[0].properties.parentZip).to.be('555-1234');
+            done();
+        });
+
+        it('should return true for a passing yyyy_mm_dd_hh_mm_ss format condition rule', function(done) {
+            hmdaJson.hmdaFile.transmittalSheet.timestamp += '37';
+
+            var rule = {
+                'property': 'timestamp',
+                'condition': 'yyyy_mm_dd_hh_mm_ss'
+            };
+
+            expect(engine.execRule(topLevelObj, rule).length).to.be(0);
+            done();
+        });
+
+        it('should return a list of errors for a non-passing yyyy_mm_dd_hh_mm_ss format condition rule', function(done) {
+            hmdaJson.hmdaFile.transmittalSheet.timestamp = hmdaJson.hmdaFile.transmittalSheet.timestamp  + '98';
+
+            var rule = {
+                'property': 'timestamp',
+                'condition': 'yyyy_mm_dd_hh_mm_ss'
+            };
+
+            var result = engine.execRule(topLevelObj, rule);
+            expect(result.length).to.be(1);
+            expect(result[0].lineNumber).to.be('1');
+            expect(result[0].properties.timestamp).to.be('20130117133098');
+            done();
+        });
+
+        it('should return true for a passing matches_regex rule', function(done) {
+            var rule = {
+                'property': 'timestamp',
+                'condition': 'matches_regex',
+                'value': '[0-9]{12}'
+            };
+
+            expect(engine.execRule(topLevelObj, rule).length).to.be(0);
+            done();
+        });
+
+        it('should return a list of errors for a non-passing matches_regex rule', function(done) {
+            var rule = {
+                'property': 'timestamp',
+                'condition': 'matches_regex',
+                'value': '[0-9]{15}'
+            };
+
+            var result = engine.execRule(topLevelObj, rule);
+            expect(result.length).to.be(1);
+            expect(result[0].lineNumber).to.be('1');
+            expect(result[0].properties.timestamp).to.be('201301171330');
+            done();
+        });
+
+        it('should return true for a passing is_integer rule', function(done) {
+            var rule = {
+                'property': 'timestamp',
+                'condition': 'is_integer',
+            };
+
+            expect(engine.execRule(topLevelObj, rule).length).to.be(0);
+            done();
+        });
+
+        it('should return a list of errors for a non-passing is_integer rule', function(done) {
+            var rule = {
+                'property': 'timestamp',
+                'condition': 'is_integer'
+            };
+
+            hmdaJson.hmdaFile.transmittalSheet.timestamp = '2013.01171330';
+
+            var result = engine.execRule(topLevelObj, rule);
+            expect(result.length).to.be(1);
+            expect(result[0].lineNumber).to.be('1');
+            expect(result[0].properties.timestamp).to.be('2013.01171330');
+            done();
+        });
+
+        it('should return true for a passing is_float rule', function(done) {
+            var rule = {
+                'property': 'timestamp',
+                'condition': 'is_float'
+            };
+
+            hmdaJson.hmdaFile.transmittalSheet.timestamp = '2013.01171330';
+            expect(engine.execRule(topLevelObj, rule).length).to.be(0);
+            done();
+        });
+
+        it('should return a list of errors for a non-passing is_float rule', function(done) {
+            var rule = {
+                'property': 'timestamp',
+                'condition': 'is_float'
+            };
+
+            var result = engine.execRule(topLevelObj, rule);
+            expect(result.length).to.be(1);
+            expect(result[0].lineNumber).to.be('1');
+            expect(result[0].properties.timestamp).to.be('201301171330');
+            done();
+        });
+
+        it('should return true for a passing equal rule', function(done) {
+            topLevelObj = hmdaJson.hmdaFile.loanApplicationRegisters[0];
+
+            var rule = {
+                'property': 'recordID',
+                'condition': 'equal',
+                'value': '2'
+            };
+
+            expect(engine.execRule(topLevelObj, rule).length).to.be(0);
+            done();
+        });
+
+        it('should return a list of errors for a non-passing equal rule', function(done) {
+            topLevelObj = hmdaJson.hmdaFile.loanApplicationRegisters[0];
+
+            var rule = {
+                'property': 'recordID',
+                'condition': 'equal',
+                'value': '1'
+            };
+
+            var result = engine.execRule(topLevelObj, rule);
+            expect(result.length).to.be(1);
+            expect(result[0].lineNumber).to.be('2');
+            expect(result[0].properties.recordID).to.be('2');
+            done();
+        });
+
+        it('should return true for a passing equal_property rule', function(done) {
+            var rule = {
+                'property': 'timestamp',
+                'condition': 'equal_property',
+                'value': 'activityYear'
+            };
+
+            hmdaJson.hmdaFile.transmittalSheet.timestamp = '2013';
+            expect(engine.execRule(topLevelObj, rule).length).to.be(0);
+            done();
+        });
+
+        it('should return a list of errors for a non-passing equal_property rule', function(done) {
+            var rule = {
+                'property': 'timestamp',
+                'condition': 'equal_property',
+                'value': 'activityYear'
+            };
+
+            var result = engine.execRule(topLevelObj, rule);
+            expect(result.length).to.be(1);
+            expect(result[0].lineNumber).to.be('1');
+            expect(result[0].properties.activityYear).to.be('2013');
+            expect(result[0].properties.timestamp).to.be('201301171330');
+            done();
+        });
+
+        it('should return true for a passing between rule', function(done) {
+            var rule = {
+                'property': 'activityYear',
+                'condition': 'between',
+                'start': '2012',
+                'end': '2014'
+            };
+
+            expect(engine.execRule(topLevelObj, rule).length).to.be(0);
+            done();
+        });
+
+        it('should return a list of errors for a non-passing between rule', function(done) {
+            var rule = {
+                'property': 'activityYear',
+                'condition': 'between',
+                'start': '2012',
+                'end': '2013'
+            };
+
+            var result = engine.execRule(topLevelObj, rule);
+            expect(result.length).to.be(1);
+            expect(result[0].lineNumber).to.be('1');
+            expect(result[0].properties.activityYear).to.be('2013');
+            done();
+        });
+
+        it('should return true for a passing is_empty rule', function(done) {
+            var rule = {
+                'property': 'filler',
+                'condition': 'is_empty'
+            };
+
+            expect(engine.execRule(topLevelObj, rule).length).to.be(0);
+            done();
+        });
+
+        it('should return a list of errors for a non-passing is_empty rule', function(done) {
+            var rule = {
+                'property': 'activityYear',
+                'condition': 'is_empty'
+            };
+
+            var result = engine.execRule(topLevelObj, rule);
+            expect(result.length).to.be(1);
+            expect(result[0].lineNumber).to.be('1');
+            expect(result[0].properties.activityYear).to.be('2013');
+            done();
+        });
+
+        it('should return true for a passing in rule', function(done) {
+            var rule = {
+                'property': 'activityYear',
+                'condition': 'in',
+                'values': ['2012', '2013']
+            };
+
+            expect(engine.execRule(topLevelObj, rule).length).to.be(0);
+            done();
+        });
+
+        it('should return a list of errors for a non-passing in rule', function(done) {
+            var rule = {
+                'property': 'activityYear',
+                'condition': 'in',
+                'values': ['2012', '2014']
+            };
+
+            var result = engine.execRule(topLevelObj, rule);
+            expect(result.length).to.be(1);
+            expect(result[0].lineNumber).to.be('1');
+            expect(result[0].properties.activityYear).to.be('2013');
+            done();
+        });
+
+        it('should return true for a passing if-then rule', function(done) {
+            var rule = {
+                'if': {
+                    'property': 'activityYear',
+                    'condition': 'equal',
+                    'value': '2013'
+                },
+                'then': {
+                    'property': 'timestamp',
+                    'condition': 'equal',
+                    'value': '201301171330'
+                }
+            };
+
+            expect(engine.execRule(topLevelObj, rule).length).to.be(0);
+
+            rule = {
+                'if': {
+                    'property': 'activityYear',
+                    'condition': 'equal',
+                    'value': '2014'
+                },
+                'then': {
+                    'property': 'timestamp',
+                    'condition': 'equal',
+                    'value': '201301171330'
+                }
+            };
+
+            expect(engine.execRule(topLevelObj, rule).length).to.be(0);
+            done();
+        });
+
+        it('should return true for a complex passing if-then rule', function(done) {
+            var rule = {
+                'if': {
+                    'property': 'activityYear',
+                    'condition': 'equal',
+                    'value': '2013'
+                },
+                'then': {
+                    'if': {
+                        'property': 'timestamp',
+                        'condition': 'equal',
+                        'value': '201301171330'
+                    },
+                    'then': {
+                        'property': 'timestamp',
+                        'condition': 'yyyy_mm_dd_hh_mm'
+                    }
+                }
+            };
+
+            expect(engine.execRule(topLevelObj, rule).length).to.be(0);
+            done();
+        });
+
+        it('should return a list of errors for a non-passing complex if-then rule', function(done) {
+            var rule = {
+                'if': {
+                    'property': 'activityYear',
+                    'condition': 'equal',
+                    'value': '2013'
+                },
+                'then': {
+                    'if': {
+                        'property': 'timestamp',
+                        'condition': 'equal',
+                        'value': '201301171330'
+                    },
+                    'then': {
+                        'property': 'timestamp',
+                        'condition': 'yyyy_mm_dd_hh_mm_ss'
+                    }
+                }
+            };
+
+            var result = engine.execRule(topLevelObj, rule);
+            expect(result.length).to.be(1);
+            expect(result[0].lineNumber).to.be('1');
+            expect(result[0].properties.activityYear).to.be('2013');
+            expect(result[0].properties.timestamp).to.be('201301171330');
+            done();
+        });
+
+        it('should return true for a passing and rule', function(done) {
+            var rule = {
+                'and': [
+                    {
+                        'property': 'activityYear',
+                        'condition': 'equal',
+                        'value': '2013'
+                    },
+                    {
+                        'property': 'timestamp',
+                        'condition': 'equal',
+                        'value': '201301171330'
+                    }
+                ]
+            };
+
+            expect(engine.execRule(topLevelObj, rule).length).to.be(0);
+            done();
+        });
+
+        it('should return true for a passing complex and rule', function(done) {
+            var rule = {
+                'if': {
+                    'and': [
+                        {
+                            'property': 'activityYear',
+                            'condition': 'equal',
+                            'value': '2013'
+                        },
+                        {
+                            'property': 'timestamp',
+                            'condition': 'equal',
+                            'value': '201301171330'
+                        }
+                    ]
+                },
+                'then': {
+                    'property': 'timestamp',
+                    'condition': 'yyyy_mm_dd_hh_mm'
+                }
+            };
+
+            expect(engine.execRule(topLevelObj, rule).length).to.be(0);
+            done();
+        });
+
+        it('should return a list of errors for a non-passing and rule', function(done) {
+            var rule = {
+                'and': [
+                    {
+                        'property': 'activityYear',
+                        'condition': 'equal',
+                        'value': '2013'
+                    },
+                    {
+                        'property': 'timestamp',
+                        'condition': 'equal',
+                        'value': '201301171330'
+                    },
+                    {
+                        'property': 'taxID',
+                        'condition': 'is_empty'
+                    }
+                ]
+            };
+
+            var result = engine.execRule(topLevelObj, rule);
+            expect(result.length).to.be(1);
+            expect(result[0].lineNumber).to.be('1');
+            expect(result[0].properties.activityYear).to.be('2013');
+            expect(result[0].properties.timestamp).to.be('201301171330');
+            expect(result[0].properties.taxID).to.be('99-9999999');
+            done();
+        });
+
+        it('should return a list of errors for a non-passing and rule', function(done) {
+            var rule = {
+                'if': {
+                    'and': [
+                        {
+                            'property': 'activityYear',
+                            'condition': 'equal',
+                            'value': '2013'
+                        },
+                        {
+                            'property': 'timestamp',
+                            'condition': 'equal',
+                            'value': '201301171330'
+                        }
+                    ]
+                },
+                'then': {
+                    'property': 'timestamp',
+                    'condition': 'yyyy_mm_dd_hh_mm_ss'
+                }
+            };
+
+            var result = engine.execRule(topLevelObj, rule);
+            expect(result.length).to.be(1);
+            expect(result[0].lineNumber).to.be('1');
+            expect(result[0].properties.activityYear).to.be('2013');
+            expect(result[0].properties.timestamp).to.be('201301171330');
+            done();
+        });
+
+        it('should return true for a passing or rule', function(done) {
+            var rule = {
+                'or': [
+                    {
+                        'property': 'activityYear',
+                        'condition': 'equal',
+                        'value': '2015'
+                    },
+                    {
+                        'property': 'timestamp',
+                        'condition': 'yyyy_mm_dd_hh_mm'
+                    }
+                ]
+            };
+
+            expect(engine.execRule(topLevelObj, rule).length).to.be(0);
+            done();
+        });
+
+        it('should return a list of errors for a non-passing or rule', function(done) {
+            var rule = {
+                'or': [
+                    {
+                        'property': 'activityYear',
+                        'condition': 'equal',
+                        'value': '2015'
+                    },
+                    {
+                        'property': 'timestamp',
+                        'condition': 'yyyy_mm_dd_hh_mm_ss'
+                    }
+                ]
+            };
+
+            var result = engine.execRule(topLevelObj, rule);
+            expect(result.length).to.be(1);
+            expect(result[0].lineNumber).to.be('1');
+            expect(result[0].properties.activityYear).to.be('2013');
+            expect(result[0].properties.timestamp).to.be('201301171330');
+            done();
+        });
+
+        it('should return true for a passing S270 rule', function(done) {
+            var rule = {
+                'property': 'actionDate',
+                'condition': 'call',
+                'function': 'isActionDateInActivityYear',
+                'args': ['actionDate', 'hmdaFile.transmittalSheet.activityYear']
+            };
+
+            topLevelObj = hmdaJson.hmdaFile.loanApplicationRegisters[0];
+            expect(engine.execRule(topLevelObj, rule).length).to.be(0);
+            done();
+        });
+    });
+
+    describe('resolveArg', function() {
+        var hmdaJson = {};
+        var topLevelObj = {};
+
+        beforeEach(function() {
+            hmdaJson = JSON.parse(JSON.stringify(require('./testdata/complete.json')));
+            topLevelObj = hmdaJson.hmdaFile.transmittalSheet;
+            engine.setHmdaJson(hmdaJson);
+            engine.clearErrors();
+        });
+
+        it('should return a value for an existing property in topLevelObj', function(done) {
+            var resolveArg = rewiredEngine.__get__('resolveArg');
+            var contextList = [topLevelObj, hmdaJson.hmdaFile];
+            expect(resolveArg('parentState', contextList)).to.be('CA');
+            done();
+        });
+
+        it('should return a value for an existing property in hmdaFile', function(done) {
+            var resolveArg = rewiredEngine.__get__('resolveArg');
+            var contextList = [topLevelObj, hmdaJson.hmdaFile];
+            expect(resolveArg('transmittalSheet.activityYear', contextList)).to.be('2013');
+            done();
+        });
+
+        it('should throw an exception for a non-existent property', function(done) {
+            var resolveArg = rewiredEngine.__get__('resolveArg');
+            var contextList = [topLevelObj, hmdaJson.hmdaFile];
+
+            expect(function() {
+                resolveArg('transmittalSheet.loanPurpose', contextList);
+            }).to.throw('Failed to resolve argument!');
+            done();
+        });
+    });
+
+    describe('retrieveProps', function() {
+        var hmdaJson = {};
+        var topLevelObj = {};
+
+        beforeEach(function() {
+            hmdaJson = JSON.parse(JSON.stringify(require('./testdata/complete.json')));
+            topLevelObj = hmdaJson.hmdaFile.transmittalSheet;
+            engine.setHmdaJson(hmdaJson);
+            engine.clearErrors();
+        });
+
+        it('should add properties to the error object', function(done) {
+            var error = {'properties': {}};
+            var retrieveProps = rewiredEngine.__get__('retrieveProps');
+            retrieveProps(error, topLevelObj, ['institutionName', 'respondentZip', 'recordID']);
+
+            var expectedError = {
+                'properties': {
+                    'institutionName': 'MIKES SMALL BANK   XXXXXXXXXXX',
+                    'respondentZip': '99999-9999',
+                    'recordID': '1'
+                }
+            };
+
+            expect(_.isEqual(error, expectedError)).to.be(true);
+            done();
+        });
+
+        it('should return an exception for a non-existent property', function(done) {
+            var error = {'properties': {}};
+            var retrieveProps = rewiredEngine.__get__('retrieveProps');
+
+            expect(function() {
+                retrieveProps(error, topLevelObj, ['loanNumber']);
+            }).to.throw('Failed to resolve argument!');
+            done();
+        });
+
+    });
+
+    describe('handleArrayErrors', function() {
+        var hmdaJson = {};
+        var topLevelObj = {};
+
+        beforeEach(function() {
+            hmdaJson = JSON.parse(JSON.stringify(require('./testdata/complete.json')));
+            topLevelObj = hmdaJson.hmdaFile.transmittalSheet;
+            engine.setHmdaJson(hmdaJson);
+            engine.clearErrors();
+        });
+
+        it('should return a list of errors for a list of line numbers', function(done) {
+            var handleArrayErrors = rewiredEngine.__get__('handleArrayErrors');
+            var array_errors = require('./testdata/array-errors.json');
+
+            expect(_.isEqual(handleArrayErrors(hmdaJson.hmdaFile, [1, 3], ['recordID', 'filler']), array_errors)).to.be(true);
+            done();
+        });
+    });
+
+    describe('handleUniqueLoanNumberErrors', function() {
+        var hmdaJson = {};
+        var topLevelObj = {};
+
+        beforeEach(function() {
+            hmdaJson = JSON.parse(JSON.stringify(require('./testdata/complete.json')));
+            topLevelObj = hmdaJson.hmdaFile.transmittalSheet;
+            engine.setHmdaJson(hmdaJson);
+            engine.clearErrors();
+        });
+
+        it('should return a list of errors for a list of line counts', function(done) {
+            var handleUniqueLoanNumberErrors = rewiredEngine.__get__('handleUniqueLoanNumberErrors');
+            var counts = require('./testdata/counts.json');
+            var errors = require('./testdata/loan-number-errors.json');
+
+            expect(_.isEqual(handleUniqueLoanNumberErrors(counts), errors)).to.be(true);
+            done();
+        });
+    });
+
+    describe('runSyntactical', function() {
+        var hmdaJson = {};
+        var topLevelObj = {};
+
+        beforeEach(function() {
+            hmdaJson = JSON.parse(JSON.stringify(require('./testdata/complete.json')));
+            topLevelObj = hmdaJson.hmdaFile.transmittalSheet;
+            engine.setHmdaJson(hmdaJson);
+            engine.clearErrors();
+        });
+
+        it('should return an unmodified set of errors for passing syntactical edits', function(done) {
+            hmdaJson.hmdaFile.loanApplicationRegisters[1].loanNumber = '1000000000000000000000000';
+            hmdaJson.hmdaFile.loanApplicationRegisters[2].loanNumber = '2000000000000000000000000';
+
+            engine.runSyntactical('2013');
+            expect(Object.keys(engine.getErrors().syntactical).length).to.be(0);
+            done();
+        });
+
+        it('should return a modified set of errors for failing syntactical edits', function(done) {
+            topLevelObj.timestamp = 'cat';
+            topLevelObj.activityYear = '2014';
+
+            var errors_syntactical = require('./testdata/errors-syntactical.json');
+
+            engine.runSyntactical('2013');
+            expect(_.isEqual(engine.getErrors(), errors_syntactical)).to.be(true);
+            done();
+        });
+    });
+
+    describe('runValidity', function() {
+        var hmdaJson = {};
+        var topLevelObj = {};
+
+        beforeEach(function() {
+            hmdaJson = JSON.parse(JSON.stringify(require('./testdata/complete.json')));
+            topLevelObj = hmdaJson.hmdaFile.transmittalSheet;
+            engine.setHmdaJson(hmdaJson);
+            engine.clearErrors();
+        });
+
+        it('should return a modified set of errors for failing validity edits', function(done) {
+            var errors_validity = require('./testdata/errors-validity.json');
+
+            hmdaJson.hmdaFile.loanApplicationRegisters[1].preapprovals = ' ';
+
+            engine.runValidity('2013');
+            expect(_.isEqual(engine.getErrors(), errors_validity)).to.be(true);
+            done();
+        });
+    });
+
+    describe('runQuality', function() {
+        var hmdaJson = {};
+        var topLevelObj = {};
+
+        beforeEach(function() {
+            hmdaJson = JSON.parse(JSON.stringify(require('./testdata/complete.json')));
+            topLevelObj = hmdaJson.hmdaFile.transmittalSheet;
+            engine.setHmdaJson(hmdaJson);
+            engine.clearErrors();
+        });
+
+        it('should return a modified set of errors for failing quality edits', function(done) {
+            hmdaJson.hmdaFile.transmittalSheet.parentName = '                              ';
+            var errors_quality = require('./testdata/errors-quality.json');
+
+            engine.runQuality('2013');
+
+            expect(_.isEqual(engine.getErrors(), errors_quality)).to.be(true);
+            done();
+        });
+    });
+
+    describe('runMacro', function() {
+        var hmdaJson = {};
+        var topLevelObj = {};
+
+        beforeEach(function() {
+            hmdaJson = JSON.parse(JSON.stringify(require('./testdata/complete.json')));
+            topLevelObj = hmdaJson.hmdaFile.transmittalSheet;
+            engine.setHmdaJson(hmdaJson);
+            engine.clearErrors();
+        });
+
+        it('should return an unmodified set of errors for passing macro edits', function(done) {
+            var errors = {
+                'syntactical': {},
+                'validity': {},
+                'quality': {},
+                'macro': {},
+            };
+
+            engine.runMacro('2013');
+            expect(_.isEqual(engine.getErrors(), errors)).to.be(true);
+            done();
+        });
+    });
+
+    describe('isLoanAmountFiveTimesIncome', function() {
+        it('should return true if the loan amount is equal to five times the applicant income', function(done) {
+            expect(engine.isLoanAmountFiveTimesIncome(5, 1)).to.be.true();
+            done();
+        });
+
+        it('should return true if the loan amount is greater than five times the applicant income', function(done) {
+            expect(engine.isLoanAmountFiveTimesIncome(6, 1)).to.be.true();
+            done();
+        });
+
+        it('should return false if the loan amount is less than five times the applicant income', function(done) {
+            expect(engine.isLoanAmountFiveTimesIncome(1, 1)).to.be.false();
+            done();
+        });
+    });
+
+    describe('checkTotalLARCount', function() {
+        it('should return true if total lines from the transmittal sheet equals the total number of loan application registers', function(done) {
+            var hmdaFile = {
+                transmittalSheet: {
+                    totalLineEntries: '1'
+                },
+                loanApplicationRegisters: [ { } ]
+            };
+            expect(engine.checkTotalLARCount(hmdaFile)).to.be.true();
+            done();
+        });
+
+        it('should return false if total lines from the transmittal sheet does not equal the total number of loan application registers', function(done) {
+            var hmdaFile = {
+                transmittalSheet: {
+                    totalLineEntries: '1'
+                },
+                loanApplicationRegisters: [ { }, { } ]
+            };
+            expect(engine.checkTotalLARCount(hmdaFile)).to.be.false();
+            done();
+        });
+    });
 });
