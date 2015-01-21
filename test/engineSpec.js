@@ -7,8 +7,7 @@
 'use strict';
 
 var engine = require('../engine'),
-    rewiredEngine = rewire('../engine');
-
+    rewiredEngine = require('./rewiredEngine');
 
 describe('Engine', function() {
     describe('getValidYears', function() {
@@ -894,7 +893,7 @@ describe('Engine', function() {
                 'condition': 'is_true'
             };
             engine.parseRule(rule, result);
-            expect(result.body).to.be('HMDAEngine.is_true(arguments[0])');
+            expect(result.body).to.be('this.is_true(arguments[0])');
             done();
         });
 
@@ -911,7 +910,7 @@ describe('Engine', function() {
                 'value': '1'
             };
             engine.parseRule(rule, result);
-            expect(result.body).to.be('HMDAEngine.equal(arguments[0], "1")');
+            expect(result.body).to.be('this.equal(arguments[0], "1")');
             done();
         });
 
@@ -928,7 +927,7 @@ describe('Engine', function() {
                 'value': 1
             };
             engine.parseRule(rule, result);
-            expect(result.body).to.be('HMDAEngine.equal(arguments[0], 1)');
+            expect(result.body).to.be('this.equal(arguments[0], 1)');
             done();
         });
 
@@ -945,7 +944,7 @@ describe('Engine', function() {
                 'values': ['1', '2', '3']
             };
             engine.parseRule(rule, result);
-            expect(result.body).to.be('HMDAEngine.in(arguments[0], ["1","2","3"])');
+            expect(result.body).to.be('this.in(arguments[0], ["1","2","3"])');
             done();
         });
 
@@ -962,7 +961,7 @@ describe('Engine', function() {
                 'value': 'bar'
             };
             engine.parseRule(rule, result);
-            expect(result.body).to.be('HMDAEngine.equal_property(arguments[0], arguments[1])');
+            expect(result.body).to.be('this.equal_property(arguments[0], arguments[1])');
             done();
         });
 
@@ -980,7 +979,7 @@ describe('Engine', function() {
                 'end': '9'
             };
             engine.parseRule(rule, result);
-            expect(result.body).to.be('HMDAEngine.between(arguments[0], "1", "9")');
+            expect(result.body).to.be('this.between(arguments[0], "1", "9")');
             done();
         });
 
@@ -1002,7 +1001,7 @@ describe('Engine', function() {
                 }
             };
             engine.parseRule(rule, result);
-            expect(result.body).to.be('(HMDAEngine.is_true(arguments[0]) ? HMDAEngine.is_false(arguments[1]) : true)');
+            expect(result.body).to.be('(this.is_true(arguments[0]) ? this.is_false(arguments[1]) : true)');
             done();
         });
 
@@ -1026,7 +1025,7 @@ describe('Engine', function() {
                 ]
             };
             engine.parseRule(rule, result);
-            expect(result.body).to.be('(HMDAEngine.is_true(arguments[0]) && HMDAEngine.is_false(arguments[1]))');
+            expect(result.body).to.be('(this.is_true(arguments[0]) && this.is_false(arguments[1]))');
             done();
         });
 
@@ -1050,7 +1049,7 @@ describe('Engine', function() {
                 ]
             };
             engine.parseRule(rule, result);
-            expect(result.body).to.be('(HMDAEngine.is_true(arguments[0]) || HMDAEngine.is_false(arguments[1]))');
+            expect(result.body).to.be('(this.is_true(arguments[0]) || this.is_false(arguments[1]))');
             done();
         });
 
@@ -1092,7 +1091,7 @@ describe('Engine', function() {
                 ]
             };
             engine.parseRule(rule, result);
-            expect(result.body).to.be('((HMDAEngine.is_true(arguments[0]) || HMDAEngine.is_false(arguments[1])) && (HMDAEngine.equal(arguments[2], "cow") || HMDAEngine.equal(arguments[3], "banana")))');
+            expect(result.body).to.be('((this.is_true(arguments[0]) || this.is_false(arguments[1])) && (this.equal(arguments[2], "cow") || this.equal(arguments[3], "banana")))');
             done();
         });
 
@@ -1123,7 +1122,7 @@ describe('Engine', function() {
                 }
             };
             engine.parseRule(rule, result);
-            expect(result.body).to.be('((HMDAEngine.is_true(arguments[0]) && HMDAEngine.is_false(arguments[1])) ? HMDAEngine.equal(arguments[2], "3") : true)');
+            expect(result.body).to.be('((this.is_true(arguments[0]) && this.is_false(arguments[1])) ? this.equal(arguments[2], "3") : true)');
             done();
         });
 
@@ -1140,7 +1139,7 @@ describe('Engine', function() {
                 'function': 'isFooValid'
             };
             engine.parseRule(rule, result);
-            expect(result.body).to.be('HMDAEngine.isFooValid(arguments[0])');
+            expect(result.body).to.be('this.isFooValid(arguments[0])');
             done();
         });
 
@@ -1158,7 +1157,7 @@ describe('Engine', function() {
                 'args': ['foo', 'bar', 'baz']
             };
             engine.parseRule(rule, result);
-            expect(result.body).to.be('HMDAEngine.isFooValid(arguments[0], arguments[1], arguments[2])');
+            expect(result.body).to.be('this.isFooValid(arguments[0], arguments[1], arguments[2])');
             done();
         });
     });
@@ -1855,16 +1854,16 @@ describe('Engine', function() {
         beforeEach(function() {
             hmdaJson = JSON.parse(JSON.stringify(require('./testdata/complete.json')));
             topLevelObj = hmdaJson.hmdaFile.transmittalSheet;
-            engine.setHmdaJson(hmdaJson);
-            engine.clearErrors();
+            rewiredEngine.setHmdaJson(hmdaJson);
+            rewiredEngine.clearErrors();
         });
 
         it('should return an unmodified set of errors for passing syntactical edits', function(done) {
             hmdaJson.hmdaFile.loanApplicationRegisters[1].loanNumber = '1000000000000000000000000';
             hmdaJson.hmdaFile.loanApplicationRegisters[2].loanNumber = '2000000000000000000000000';
 
-            engine.runSyntactical('2013');
-            expect(Object.keys(engine.getErrors().syntactical).length).to.be(0);
+            rewiredEngine.runSyntactical('2013');
+            expect(Object.keys(rewiredEngine.getErrors().syntactical).length).to.be(0);
             done();
         });
 
@@ -1874,8 +1873,8 @@ describe('Engine', function() {
 
             var errors_syntactical = require('./testdata/errors-syntactical.json');
 
-            engine.runSyntactical('2013');
-            expect(_.isEqual(engine.getErrors(), errors_syntactical)).to.be(true);
+            rewiredEngine.runSyntactical('2013');
+            expect(_.isEqual(rewiredEngine.getErrors(), errors_syntactical)).to.be(true);
             done();
         });
     });
@@ -1887,8 +1886,8 @@ describe('Engine', function() {
         beforeEach(function() {
             hmdaJson = JSON.parse(JSON.stringify(require('./testdata/complete.json')));
             topLevelObj = hmdaJson.hmdaFile.transmittalSheet;
-            engine.setHmdaJson(hmdaJson);
-            engine.clearErrors();
+            rewiredEngine.setHmdaJson(hmdaJson);
+            rewiredEngine.clearErrors();
         });
 
         it('should return a modified set of errors for failing validity edits', function(done) {
@@ -1896,8 +1895,8 @@ describe('Engine', function() {
 
             hmdaJson.hmdaFile.loanApplicationRegisters[1].preapprovals = ' ';
 
-            engine.runValidity('2013');
-            expect(_.isEqual(engine.getErrors(), errors_validity)).to.be(true);
+            rewiredEngine.runValidity('2013');
+            expect(_.isEqual(rewiredEngine.getErrors(), errors_validity)).to.be(true);
             done();
         });
     });
@@ -1909,17 +1908,16 @@ describe('Engine', function() {
         beforeEach(function() {
             hmdaJson = JSON.parse(JSON.stringify(require('./testdata/complete.json')));
             topLevelObj = hmdaJson.hmdaFile.transmittalSheet;
-            engine.setHmdaJson(hmdaJson);
-            engine.clearErrors();
+            rewiredEngine.setHmdaJson(hmdaJson);
+            rewiredEngine.clearErrors();
         });
 
         it('should return a modified set of errors for failing quality edits', function(done) {
             hmdaJson.hmdaFile.transmittalSheet.parentName = '                              ';
             var errors_quality = require('./testdata/errors-quality.json');
+            rewiredEngine.runQuality('2013');
 
-            engine.runQuality('2013');
-
-            expect(_.isEqual(engine.getErrors(), errors_quality)).to.be(true);
+            expect(_.isEqual(rewiredEngine.getErrors(), errors_quality)).to.be(true);
             done();
         });
     });
@@ -1931,8 +1929,8 @@ describe('Engine', function() {
         beforeEach(function() {
             hmdaJson = JSON.parse(JSON.stringify(require('./testdata/complete.json')));
             topLevelObj = hmdaJson.hmdaFile.transmittalSheet;
-            engine.setHmdaJson(hmdaJson);
-            engine.clearErrors();
+            rewiredEngine.setHmdaJson(hmdaJson);
+            rewiredEngine.clearErrors();
         });
 
         it('should return an unmodified set of errors for passing macro edits', function(done) {
@@ -1943,8 +1941,8 @@ describe('Engine', function() {
                 'macro': {},
             };
 
-            engine.runMacro('2013');
-            expect(_.isEqual(engine.getErrors(), errors)).to.be(true);
+            rewiredEngine.runMacro('2013');
+            expect(_.isEqual(rewiredEngine.getErrors(), errors)).to.be(true);
             done();
         });
     });

@@ -515,7 +515,7 @@ var handleUniqueLoanNumberErrors = function(counts) {
     };
 
     HMDAEngine.parseRuleCustomCall = function(rule, result) {
-        result.body += 'HMDAEngine.' + rule.function + '(';
+        result.body += 'this.' + rule.function + '(';
         if (rule.args) {
             for (var i=0; i < rule.args.length; i++) {
                 result.body += 'arguments[' + result.argIndex++ + ']';
@@ -532,7 +532,7 @@ var handleUniqueLoanNumberErrors = function(counts) {
     };
 
     HMDAEngine.parseRuleCondition = function(rule, result) {
-        result.body += 'HMDAEngine.' + rule.condition + '(arguments[' + result.argIndex++ + ']';
+        result.body += 'this.' + rule.condition + '(arguments[' + result.argIndex++ + ']';
         result.args.push(rule.property);
         var fields = brijSpec.VALID_CONDITIONS[rule.condition].additionalFields;
         if (fields) {
@@ -618,7 +618,7 @@ var handleUniqueLoanNumberErrors = function(counts) {
             }
         });
 
-        var funcResult = new Function(result.body).apply(null, args);
+        var funcResult = new Function(result.body).apply(this, args);
 
         if (funcResult === true) {
             return [];
@@ -680,7 +680,7 @@ var handleUniqueLoanNumberErrors = function(counts) {
 
         for (var j = 0; j < rules.length; j++) {
             for (var k = 0; k < topLevelObjs.length; k++) {
-                var result = HMDAEngine.execRule(topLevelObjs[k], rules[j].rule);
+                var result = this.execRule(topLevelObjs[k], rules[j].rule);
                 if (result.length !== 0) {
                     addToErrors(result, rules[j], editType, scope);
                 }
@@ -689,26 +689,26 @@ var handleUniqueLoanNumberErrors = function(counts) {
     };
 
     HMDAEngine.runSyntactical = function(year) {
-        runEdits(year, 'ts', 'syntactical');
-        runEdits(year, 'lar', 'syntactical');
-        runEdits(year, 'hmda', 'syntactical');
+        runEdits.bind(this)(year, 'ts', 'syntactical');
+        runEdits.bind(this)(year, 'lar', 'syntactical');
+        runEdits.bind(this)(year, 'hmda', 'syntactical');
         return errors;
     };
 
     HMDAEngine.runValidity = function(year) {
-        runEdits(year, 'ts', 'validity');
-        runEdits(year, 'lar', 'validity');
+        runEdits.bind(this)(year, 'ts', 'validity');
+        runEdits.bind(this)(year, 'lar', 'validity');
         return errors;
     };
 
     HMDAEngine.runQuality = function(year) {
-        runEdits(year, 'ts', 'quality');
-        runEdits(year, 'lar', 'quality');
+        runEdits.bind(this)(year, 'ts', 'quality');
+        runEdits.bind(this)(year, 'lar', 'quality');
         return errors;
     };
 
     HMDAEngine.runMacro = function(year) {
-        runEdits(year, 'hmda', 'macro');
+        runEdits.bind(this)(year, 'hmda', 'macro');
         return errors;
     };
 
