@@ -393,9 +393,20 @@ var handleUniqueLoanNumberErrors = function(counts) {
     };
 
     /* hmda-macro */
-    /* TODO - Replace with actual impl */
     HMDAEngine.compareNumEntriesSingle = function(loanApplicationRegisters, rule, cond) {
-        return true;
+        var count = 0;
+
+        _.each(loanApplicationRegisters, function(element, index, list) {
+            if (HMDAEngine.execRule(element, rule).length === 0) {
+                count += 1;
+            }
+        });
+
+        var topLevelObj = {'result': count};
+        if (HMDAEngine.execRule(topLevelObj, cond).length === 0) {
+            return true;
+        }
+        return false;
     };
 
     /* TODO - Replace with actual impl */
@@ -403,9 +414,20 @@ var handleUniqueLoanNumberErrors = function(counts) {
         return true;
     };
 
-    /* TODO - Replace with actual impl */
     HMDAEngine.isValidNumMultifamilyLoans = function(hmdaFile) {
-        return true;
+        var multifamilyCount = 0,
+            multifamilyAmount = 0,
+            totalAmount = 0;
+
+        _.each(hmdaFile.loanApplicationRegisters, function(element, index, list) {
+            if (element.propertyType === '3') {
+                multifamilyCount += 1;
+                multifamilyAmount += +element.loanAmount;
+            }
+            totalAmount += +element.loanAmount;
+        });
+
+        return ((multifamilyCount / hmdaFile.loanApplicationRegisters.length) < 0.1) || ((multifamilyAmount / totalAmount) < 0.1);
     };
 
     /*

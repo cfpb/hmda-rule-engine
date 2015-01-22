@@ -957,6 +957,84 @@ describe('Engine', function() {
         });
     });
 
+    describe('compareNumEntriesSingle', function() {
+        var hmdaJson = {};
+        var topLevelObj = {};
+
+        beforeEach(function() {
+            hmdaJson = JSON.parse(JSON.stringify(require('./testdata/complete.json')));
+            topLevelObj = hmdaJson.hmdaFile.transmittalSheet;
+            engine.setHmdaJson(hmdaJson);
+        });
+
+        it('should return true for a passing comparison', function(done) {
+            var rule = {
+                'property': 'propertyType',
+                'condition': 'equal',
+                'value': '3'
+            };
+            var cond = {
+                'property': 'result',
+                'condition': 'less_than',
+                'value': '200'
+            };
+
+            expect(engine.compareNumEntriesSingle(hmdaJson.hmdaFile.loanApplicationRegisters, rule, cond)).to.be(true);
+            done();
+        });
+
+        it('should return false for a non-passing comparison', function(done) {
+            var rule = {
+                'property': 'propertyType',
+                'condition': 'equal',
+                'value': '3'
+            };
+            var cond = {
+                'property': 'result',
+                'condition': 'less_than',
+                'value': '3'
+            };
+
+            expect(engine.compareNumEntriesSingle(hmdaJson.hmdaFile.loanApplicationRegisters, rule, cond)).to.be(false);
+            done();
+        });
+    });
+
+    describe('isValidNumMultifamilyLoans', function() {
+        var hmdaJson = {};
+        var topLevelObj = {};
+
+        beforeEach(function() {
+            hmdaJson = JSON.parse(JSON.stringify(require('./testdata/complete.json')));
+            topLevelObj = hmdaJson.hmdaFile.transmittalSheet;
+            engine.setHmdaJson(hmdaJson);
+        });
+
+        it('should return true for a valid number of multifamily loans', function(done) {
+            for (var i = 0; i < hmdaJson.hmdaFile.loanApplicationRegisters.length; i++) {
+                hmdaJson.hmdaFile.loanApplicationRegisters[i].propertyType = '2';
+            }
+
+            expect(engine.isValidNumMultifamilyLoans(hmdaJson.hmdaFile)).to.be(true);
+            done();
+        });
+
+        it('should return true when there are more than 10% multifamily loans but their value is < 10% of the total', function(done) {
+            hmdaJson.hmdaFile.loanApplicationRegisters[1].propertyType = '2';
+            hmdaJson.hmdaFile.loanApplicationRegisters[2].propertyType = '2';
+            hmdaJson.hmdaFile.loanApplicationRegisters[0].loanAmount = '100';
+
+            expect(engine.isValidNumMultifamilyLoans(hmdaJson.hmdaFile)).to.be(true);
+            done();
+        });
+
+        it('should return false for an invalid number of multifamily loans', function(done) {
+            expect(engine.isValidNumMultifamilyLoans(hmdaJson.hmdaFile)).to.be(false);
+            done();
+        });
+
+    });
+
     describe('parseRule', function() {
         it('should parse a rule with a simple property test into a function string', function(done) {
             var result = {
