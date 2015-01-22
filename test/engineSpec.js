@@ -1000,6 +1000,59 @@ describe('Engine', function() {
         });
     });
 
+    describe('compareNumEntries', function() {
+        var hmdaJson = {};
+        var topLevelObj = {};
+
+        beforeEach(function() {
+            hmdaJson = JSON.parse(JSON.stringify(require('./testdata/complete.json')));
+            topLevelObj = hmdaJson.hmdaFile.transmittalSheet;
+            engine.setHmdaJson(hmdaJson);
+        });
+
+        it('should return true for a passing comparison', function(done) {
+            var ruleA = {
+                'property': 'propertyType',
+                'condition': 'equal',
+                'value': '3'
+            };
+            var ruleB = {
+                'property': 'recordID',
+                'condition': 'equal',
+                'value': '2'
+            };
+            var cond = {
+                'property': 'result',
+                'condition': 'greater_than',
+                'value': '.8'
+            };
+
+            expect(engine.compareNumEntries(hmdaJson.hmdaFile.loanApplicationRegisters, ruleA, ruleB, cond)).to.be(true);
+            done();
+        });
+
+        it('should return false for a non-passing comparison', function(done) {
+            var ruleA = {
+                'property': 'propertyType',
+                'condition': 'equal',
+                'value': '3'
+            };
+            var ruleB = {
+                'property': 'recordID',
+                'condition': 'equal',
+                'value': '2'
+            };
+            var cond = {
+                'property': 'result',
+                'condition': 'less_than',
+                'value': '.8'
+            };
+
+            expect(engine.compareNumEntries(hmdaJson.hmdaFile.loanApplicationRegisters, ruleA, ruleB, cond)).to.be(false);
+            done();
+        });
+    });
+
     describe('isValidNumMultifamilyLoans', function() {
         var hmdaJson = {};
         var topLevelObj = {};

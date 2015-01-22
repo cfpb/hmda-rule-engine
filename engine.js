@@ -411,7 +411,19 @@ var handleUniqueLoanNumberErrors = function(counts) {
 
     /* TODO - Replace with actual impl */
     HMDAEngine.compareNumEntries = function(loanApplicationRegisters, ruleA, ruleB, cond) {
-        return true;
+        var countA = 0,
+            countB = 0;
+
+        _.each(loanApplicationRegisters, function(element, index, list) {
+            (HMDAEngine.execRule(element, ruleA).length === 0) ? countA += 1 : false;
+            (HMDAEngine.execRule(element, ruleB).length === 0) ? countB += 1 : false;
+        });
+
+        var topLevelObj = {'result': countA / countB};
+        if (HMDAEngine.execRule(topLevelObj, cond).length === 0) {
+            return true;
+        }
+        return false;
     };
 
     HMDAEngine.isValidNumMultifamilyLoans = function(hmdaFile) {
