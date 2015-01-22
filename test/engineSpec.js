@@ -880,6 +880,61 @@ describe('Engine', function() {
         });
     });
 
+    describe('isLoanAmountFiveTimesIncome', function() {
+        it('should return true for loanAmount > 5x income', function(done) {
+            var loanAmount = '1000',
+                applicantIncome = '20';
+
+            expect(engine.isLoanAmountFiveTimesIncome(loanAmount, applicantIncome)).to.be(true);
+            done();
+        });
+
+        it('should return false for loanAmount <= 5x income', function(done) {
+            var loanAmount = '1000',
+                applicantIncome = '300';
+
+            expect(engine.isLoanAmountFiveTimesIncome(loanAmount, applicantIncome)).to.be(false);
+
+            applicantIncome = '200';
+            expect(engine.isLoanAmountFiveTimesIncome(loanAmount, applicantIncome)).to.be(false);
+            done();
+        });
+    });
+
+    describe('isValidLoanAmount', function() {
+        it('should return true for a valid loanAmount', function(done) {
+            var loanAmount = '1000',
+                applicantIncome = '500';
+
+            expect(engine.isValidLoanAmount(loanAmount, applicantIncome)).to.be(true);
+            done();
+        });
+
+        it('should return true when applicantIncome is NA', function(done) {
+            var loanAmount = '1000',
+                applicantIncome = 'NA';
+
+            expect(engine.isValidLoanAmount(loanAmount, applicantIncome)).to.be(true);
+            done();
+        });
+
+        it('should return true when loanAmount is < 1000', function(done) {
+            var loanAmount = '800',
+                applicantIncome = '500';
+
+            expect(engine.isValidLoanAmount(loanAmount, applicantIncome)).to.be(true);
+            done();
+        });
+
+        it('should return false when loanAmount is not valid', function(done) {
+            var loanAmount = '3000',
+                applicantIncome = '400';
+
+            expect(engine.isValidLoanAmount(loanAmount, applicantIncome)).to.be(false);
+            done();
+        });
+    });
+
     describe('parseRule', function() {
         it('should parse a rule with a simple property test into a function string', function(done) {
             var result = {

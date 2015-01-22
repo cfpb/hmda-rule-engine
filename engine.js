@@ -376,11 +376,15 @@ var handleUniqueLoanNumberErrors = function(counts) {
 
     /* lar-quality */
     HMDAEngine.isLoanAmountFiveTimesIncome = function(loanAmount, applicantIncome) {
-        return loanAmount >= applicantIncome * 5;
+        return loanAmount > applicantIncome * 5;
     };
 
     /* TODO - Replace with actual impl */
     HMDAEngine.isValidLoanAmount = function(loanAmount, applicantIncome) {
+        if (!isNaN(+applicantIncome) && loanAmount >= 1000) {
+            return loanAmount < 5 * applicantIncome;
+        }
+
         return true;
     };
 
