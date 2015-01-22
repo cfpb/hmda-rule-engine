@@ -935,6 +935,28 @@ describe('Engine', function() {
         });
     });
 
+    describe('checkTotalLARCount', function() {
+        var hmdaJson = {};
+        var topLevelObj = {};
+
+        beforeEach(function() {
+            hmdaJson = JSON.parse(JSON.stringify(require('./testdata/complete.json')));
+            topLevelObj = hmdaJson.hmdaFile.transmittalSheet;
+            engine.setHmdaJson(hmdaJson);
+        });
+
+        it('should return true for a valid lar count', function(done) {
+            topLevelObj.totalLineEntries = '0000003';
+            expect(engine.checkTotalLARCount(hmdaJson.hmdaFile)).to.be(true);
+            done();
+        });
+
+        it('should return false for an invalid lar count', function(done) {
+            expect(engine.checkTotalLARCount(hmdaJson.hmdaFile)).to.be(false);
+            done();
+        });
+    });
+
     describe('parseRule', function() {
         it('should parse a rule with a simple property test into a function string', function(done) {
             var result = {

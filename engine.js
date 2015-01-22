@@ -379,7 +379,6 @@ var handleUniqueLoanNumberErrors = function(counts) {
         return loanAmount > applicantIncome * 5;
     };
 
-    /* TODO - Replace with actual impl */
     HMDAEngine.isValidLoanAmount = function(loanAmount, applicantIncome) {
         if (!isNaN(+applicantIncome) && loanAmount >= 1000) {
             return loanAmount < 5 * applicantIncome;
