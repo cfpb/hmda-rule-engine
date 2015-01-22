@@ -375,9 +375,8 @@ var handleUniqueLoanNumberErrors = function(counts) {
     };
 
     /* lar-quality */
-    /* TODO - Replace with actual impl */
     HMDAEngine.isLoanAmountFiveTimesIncome = function(loanAmount, applicantIncome) {
-        return true;
+        return loanAmount >= applicantIncome * 5;
     };
 
     /* TODO - Replace with actual impl */
@@ -386,9 +385,8 @@ var handleUniqueLoanNumberErrors = function(counts) {
     };
 
     /* ts-quality */
-    /* TODO - Replace with actual impl */
-    HMDAEngine.checkTotalLARCount = function(totalLineEntries) {
-        return true;
+    HMDAEngine.checkTotalLARCount = function(hmdaFile) {
+        return parseInt(hmdaFile.transmittalSheet.totalLineEntries) === hmdaFile.loanApplicationRegisters.length;
     };
 
     /* hmda-macro */
