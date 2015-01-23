@@ -409,7 +409,6 @@ var handleUniqueLoanNumberErrors = function(counts) {
         return false;
     };
 
-    /* TODO - Replace with actual impl */
     HMDAEngine.compareNumEntries = function(loanApplicationRegisters, ruleA, ruleB, cond) {
         var countA = 0,
             countB = 0;
