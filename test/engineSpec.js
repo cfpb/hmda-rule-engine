@@ -7,10 +7,58 @@
 'use strict';
 
 var engine = require('../engine'),
-    rewiredEngine = rewire('../engine');
-
+    rewiredEngine = rewire('../engine'),
+    http = require('http'),
+    mockAPIURL,
+    mockYEAR;
 
 describe('Engine', function() {
+
+    before(function() {
+        mockAPIURL = 'http://localhost:' + port;
+        mockYEAR = '2013';
+    });
+
+    beforeEach(function() {
+        engine.setAPIURL(mockAPIURL);
+        engine.setRuleYear(mockYEAR);
+        mockAPI('clean');
+    });
+
+    describe('Make sure mockAPI is up', function() {
+        it('should allow route define and respond with 200', function(done) {
+            mockAPI('get', '/foo', 200, 'bar');
+            http.get(mockAPIURL+'/foo', function(resp) {
+                expect(resp.statusCode).to.be(200);
+                done();
+            });
+        });
+        it('should have fulfilled route in previus test and now respond with 404', function(done) {
+            http.get(mockAPIURL+'/foo', function(resp) {
+                expect(resp.statusCode).to.be(404);
+                done();
+            });
+        });
+    });
+
+    describe('get/set API URL', function() {
+        it('should get/set API URL correctly', function(done) {
+            expect(engine.getAPIURL()).to.be(mockAPIURL);
+            engine.setAPIURL('foo');
+            expect(engine.getAPIURL()).to.be('foo');
+            done();
+        });
+    });
+
+    describe('get/set rule year', function() {
+        it('should get/set rule year correctly', function(done) {
+            expect(engine.getRuleYear()).to.be(mockYEAR);
+            engine.setRuleYear('2014');
+            expect(engine.getRuleYear()).to.be('2014');
+            done();
+        });
+    });
+
     describe('getValidYears', function() {
         it('should return list', function(done) {
             var years = engine.getValidYears();
@@ -892,6 +940,17 @@ describe('Engine', function() {
             var activityYear = '2014';
 
             expect(engine.isActionDateInActivityYear(actionDate, activityYear)).to.be(false);
+            done();
+        });
+    });
+
+    describe('isChildFI', function() {
+        it('should return true when API response result is true', function(done) {
+            var respondentID = '1';
+            var path = '/isChildFI/'+engine.getRuleYear()+'/'+respondentID;
+            mockAPI('get', path, 200, JSON.stringify({ result: true }));
+            var result = engine.isChildFI(respondentID);
+            expect(result).to.be.true();
             done();
         });
     });
@@ -1929,6 +1988,9 @@ describe('Engine', function() {
         });
 
         it('should return a modified set of errors for failing quality edits', function(done) {
+            var path = '/isChildFI/'+engine.getRuleYear()+'/0123456789';
+            mockAPI('get', path, 200, JSON.stringify({ result: true }));
+
             hmdaJson.hmdaFile.transmittalSheet.parentName = '                              ';
             var errors_quality = require('./testdata/errors-quality.json');
 
