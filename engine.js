@@ -6,7 +6,8 @@ var hmdajson = require('./lib/hmdajson'),
     hmdaRuleSpec = require('hmda-rule-spec'),
     _ = require('underscore'),
     brijSpec = require('brij-spec'),
-    stream = require('stream');
+    stream = require('stream'),
+    request = require('sync-request');
 
 var resolveArg = function(arg, contextList) {
     var tokens = arg.split('.');
@@ -106,6 +107,26 @@ var handleUniqueLoanNumberErrors = function(counts) {
             quality: {},
             macro: {}
         };
+
+    HMDAEngine.setAPIURL = function(url) {
+        // Has to be set on root scope so that the parsed engine rules
+        // ran in new Function() can access it
+        root._API_BASE_URL = url;
+    };
+
+    HMDAEngine.getAPIURL = function() {
+        return root._API_BASE_URL;
+    };
+
+    HMDAEngine.setRuleYear = function(year) {
+        // Has to be set on root scope so that the parsed engine rules
+        // ran in new Function() can access it
+        root._API_RULE_YEAR = year;
+    };
+
+    HMDAEngine.getRuleYear = function() {
+        return root._API_RULE_YEAR;
+    };
 
     HMDAEngine.clearErrors = function() {
         errors = {
@@ -474,7 +495,11 @@ var handleUniqueLoanNumberErrors = function(counts) {
 
     /* ts-quality */
     HMDAEngine.isChildFI = function(respondentID) {
-        return true;
+        var url = HMDAEngine.getAPIURL() + '/isChildFI/' + HMDAEngine.getRuleYear() + '/' + respondentID;
+        var response = request('GET', url);
+        var body = response.getBody('utf8');
+        var result = JSON.parse(body);
+        return result.result;
     };
 
     HMDAEngine.isTaxIDTheSameAsLastYear = function(respondentID, taxID) {
@@ -654,6 +679,7 @@ var handleUniqueLoanNumberErrors = function(counts) {
     };
 
     var runEdits = function(year, scope, editType) {
+        HMDAEngine.setRuleYear(year);
         var rules = hmdaRuleSpec.getEdits(year, scope, editType);
 
         var topLevelObjs = [];
