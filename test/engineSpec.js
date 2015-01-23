@@ -31,6 +31,21 @@ describe('Engine', function() {
                 done();
             });
         });
+
+        it('should return json object when hmda file is valid and provided by text', function(done) {
+            var fs = require('fs');
+            var text = fs.readFile('test/testdata/complete.dat', 'utf8', function (err, text) {
+                if (err) { throw err; }
+
+                engine.fileToJson(text, 2013, function(err, result) {
+                    expect(err).to.be.null();
+                    expect(result).to.have.property('hmdaFile');
+                    expect(result.hmdaFile).to.have.property('loanApplicationRegisters');
+                    expect(result.hmdaFile.loanApplicationRegisters.length).to.be(3);
+                    done();
+                });
+            });
+        });
     });
 
     describe('email_address', function() {
@@ -2151,6 +2166,47 @@ describe('Engine', function() {
 
             rewiredEngine.runMacro('2013');
             expect(_.isEqual(rewiredEngine.getErrors(), errors)).to.be(true);
+            done();
+        });
+    });
+
+    describe('isLoanAmountFiveTimesIncome', function() {
+        it('should return true if the loan amount is greater than five times the applicant income', function(done) {
+            expect(engine.isLoanAmountFiveTimesIncome(6, 1)).to.be.true();
+            done();
+        });
+
+        it('should return false if the loan amount is less than five times the applicant income', function(done) {
+            expect(engine.isLoanAmountFiveTimesIncome(1, 1)).to.be.false();
+            done();
+        });
+
+        it('should return false if the loan amount is equal to five times the applicant income', function(done) {
+            expect(engine.isLoanAmountFiveTimesIncome(5, 1)).to.be.false();
+            done();
+        });
+    });
+
+    describe('checkTotalLARCount', function() {
+        it('should return true if total lines from the transmittal sheet equals the total number of loan application registers', function(done) {
+            var hmdaFile = {
+                transmittalSheet: {
+                    totalLineEntries: '1'
+                },
+                loanApplicationRegisters: [ { } ]
+            };
+            expect(engine.checkTotalLARCount(hmdaFile)).to.be.true();
+            done();
+        });
+
+        it('should return false if total lines from the transmittal sheet does not equal the total number of loan application registers', function(done) {
+            var hmdaFile = {
+                transmittalSheet: {
+                    totalLineEntries: '1'
+                },
+                loanApplicationRegisters: [ { }, { } ]
+            };
+            expect(engine.checkTotalLARCount(hmdaFile)).to.be.false();
             done();
         });
     });

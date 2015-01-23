@@ -5,7 +5,8 @@
 var hmdajson = require('./lib/hmdajson'),
     hmdaRuleSpec = require('hmda-rule-spec'),
     _ = require('underscore'),
-    brijSpec = require('brij-spec');
+    brijSpec = require('brij-spec'),
+    stream = require('stream');
 
 var resolveArg = function(arg, contextList) {
     var tokens = arg.split('.');
@@ -72,8 +73,6 @@ var handleUniqueLoanNumberErrors = function(counts) {
     // Set root (global) scope
     var root = this;
 
-    root._HMDA_JSON = {};
-
     // Constructor of our HMDAEngine
     var HMDAEngine = function(obj) {
         if (obj instanceof HMDAEngine) {
@@ -100,7 +99,7 @@ var handleUniqueLoanNumberErrors = function(counts) {
      * -----------------------------------------------------
      */
 
-    var hmdaJson = {},
+    var _HMDA_JSON = {},
         errors = {
             syntactical: {},
             validity: {},
@@ -113,7 +112,7 @@ var handleUniqueLoanNumberErrors = function(counts) {
             syntactical: {},
             validity: {},
             quality: {},
-            macro: {}      
+            macro: {}
         };
     };
 
@@ -122,15 +121,15 @@ var handleUniqueLoanNumberErrors = function(counts) {
     };
 
     HMDAEngine.clearHmdaJson = function() {
-        hmdaJson = {};
+        _HMDA_JSON = {};
     };
 
     HMDAEngine.getHmdaJson = function() {
-        return hmdaJson;
+        return _HMDA_JSON;
     };
 
     HMDAEngine.setHmdaJson = function(newHmdaJson) {
-        hmdaJson = newHmdaJson;
+        _HMDA_JSON = newHmdaJson;
     };
 
     /*
@@ -375,16 +374,16 @@ var handleUniqueLoanNumberErrors = function(counts) {
     };
 
     /* lar-quality */
-    HMDAEngine.isLoanAmountFiveTimesIncome = function(loanAmount, applicantIncome) {
-        return loanAmount > applicantIncome * 5;
-    };
-
     HMDAEngine.isValidLoanAmount = function(loanAmount, applicantIncome) {
         if (!isNaN(+applicantIncome) && loanAmount >= 1000) {
             return loanAmount < 5 * applicantIncome;
         }
 
         return true;
+    };
+
+    HMDAEngine.isLoanAmountFiveTimesIncome = function(loanAmount, applicantIncome) {
+        return loanAmount > applicantIncome * 5;
     };
 
     /* ts-quality */
@@ -539,12 +538,21 @@ var handleUniqueLoanNumberErrors = function(counts) {
 
     HMDAEngine.fileToJson = function(file, year, next) {
         var spec = hmdaRuleSpec.getFileSpec(year);
+
+        // If file is not an instance of a stream, make it one!
+        if (typeof file.on !== 'function') { // use duck type checking to see if file is a stream obj or not
+            var s = new stream.Readable();
+            s._read = function noop() {};
+            s.push(file);
+            s.push(null);
+            file = s;
+        }
+
         hmdajson.process(file, spec, function(err, result) {
             if (! err && result) {
-                root._HMDA_JSON = result;
-                hmdaJson.hmdaFile = result;
+                _HMDA_JSON = result;
             }
-            next(err, root._HMDA_JSON);
+            next(err, _HMDA_JSON);
         });
     };
 
@@ -645,7 +653,7 @@ var handleUniqueLoanNumberErrors = function(counts) {
 
         var args = _.map(result.args, function(arg) {
             if (typeof(arg) === 'string') {
-                var contextList = [topLevelObj, !topLevelObj.hmdaFile ? hmdaJson : {}];        // Context list to search
+                var contextList = [topLevelObj, !topLevelObj.hmdaFile ? _HMDA_JSON : {}];        // Context list to search
                 return resolveArg(arg, contextList);
             } else {
                 return arg;
@@ -696,19 +704,19 @@ var handleUniqueLoanNumberErrors = function(counts) {
 
     var runEdits = function(year, scope, editType) {
         var rules = hmdaRuleSpec.getEdits(year, scope, editType);
-        
+
         var topLevelObjs = [];
         switch (scope) {
-            case 'ts': 
-                topLevelObjs.push(hmdaJson.hmdaFile.transmittalSheet);
+            case 'ts':
+                topLevelObjs.push(_HMDA_JSON.hmdaFile.transmittalSheet);
                 break;
-            case 'lar': 
-                for (var i = 0; i < hmdaJson.hmdaFile.loanApplicationRegisters.length; i++) {
-                   topLevelObjs.push(hmdaJson.hmdaFile.loanApplicationRegisters[i]);
+            case 'lar':
+                for (var i = 0; i < _HMDA_JSON.hmdaFile.loanApplicationRegisters.length; i++) {
+                   topLevelObjs.push(_HMDA_JSON.hmdaFile.loanApplicationRegisters[i]);
                 }
                 break;
             case 'hmda':
-                topLevelObjs.push(hmdaJson);
+                topLevelObjs.push(_HMDA_JSON);
                 break;
         }
 
@@ -738,6 +746,7 @@ var handleUniqueLoanNumberErrors = function(counts) {
     HMDAEngine.runQuality = function(year) {
         runEdits.bind(this)(year, 'ts', 'quality');
         runEdits.bind(this)(year, 'lar', 'quality');
+        runEdits.bind(this)(year, 'hmda', 'quality');
         return errors;
     };
 
