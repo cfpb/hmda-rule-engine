@@ -2169,45 +2169,4 @@ describe('Engine', function() {
             done();
         });
     });
-
-    describe('isLoanAmountFiveTimesIncome', function() {
-        it('should return true if the loan amount is greater than five times the applicant income', function(done) {
-            expect(engine.isLoanAmountFiveTimesIncome(6, 1)).to.be.true();
-            done();
-        });
-
-        it('should return false if the loan amount is less than five times the applicant income', function(done) {
-            expect(engine.isLoanAmountFiveTimesIncome(1, 1)).to.be.false();
-            done();
-        });
-
-        it('should return false if the loan amount is equal to five times the applicant income', function(done) {
-            expect(engine.isLoanAmountFiveTimesIncome(5, 1)).to.be.false();
-            done();
-        });
-    });
-
-    describe('checkTotalLARCount', function() {
-        it('should return true if total lines from the transmittal sheet equals the total number of loan application registers', function(done) {
-            var hmdaFile = {
-                transmittalSheet: {
-                    totalLineEntries: '1'
-                },
-                loanApplicationRegisters: [ { } ]
-            };
-            expect(engine.checkTotalLARCount(hmdaFile)).to.be.true();
-            done();
-        });
-
-        it('should return false if total lines from the transmittal sheet does not equal the total number of loan application registers', function(done) {
-            var hmdaFile = {
-                transmittalSheet: {
-                    totalLineEntries: '1'
-                },
-                loanApplicationRegisters: [ { }, { } ]
-            };
-            expect(engine.checkTotalLARCount(hmdaFile)).to.be.false();
-            done();
-        });
-    });
 });
