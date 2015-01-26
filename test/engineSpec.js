@@ -14,15 +14,19 @@ var engine = require('../engine'),
 
 describe('Engine', function() {
 
-    before(function() {
+    before(function(done) {
         mockAPIURL = 'http://localhost:' + port;
         mockYEAR = '2013';
+        expect(port).to.not.be.undefined();
+        expect(port).to.not.be(0);
+        done();
     });
 
-    beforeEach(function() {
+    beforeEach(function(done) {
         engine.setAPIURL(mockAPIURL);
         engine.setRuleYear(mockYEAR);
         mockAPI('clean');
+        done();
     });
 
     describe('Make sure mockAPI is up', function() {
