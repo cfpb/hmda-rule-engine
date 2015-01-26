@@ -101,6 +101,8 @@ var handleUniqueLoanNumberErrors = function(counts) {
      */
 
     var _HMDA_JSON = {},
+        _API_BASE_URL,
+        _API_RULE_YEAR,
         errors = {
             syntactical: {},
             validity: {},
@@ -109,23 +111,19 @@ var handleUniqueLoanNumberErrors = function(counts) {
         };
 
     HMDAEngine.setAPIURL = function(url) {
-        // Has to be set on root scope so that the parsed engine rules
-        // ran in new Function() can access it
-        root._API_BASE_URL = url;
+        _API_BASE_URL = url;
     };
 
     HMDAEngine.getAPIURL = function() {
-        return root._API_BASE_URL;
+        return _API_BASE_URL;
     };
 
     HMDAEngine.setRuleYear = function(year) {
-        // Has to be set on root scope so that the parsed engine rules
-        // ran in new Function() can access it
-        root._API_RULE_YEAR = year;
+        _API_RULE_YEAR = year;
     };
 
     HMDAEngine.getRuleYear = function() {
-        return root._API_RULE_YEAR;
+        return _API_RULE_YEAR;
     };
 
     HMDAEngine.clearErrors = function() {
