@@ -69,6 +69,17 @@ var handleUniqueLoanNumberErrors = function(counts) {
     return errors;
 };
 
+var readResponseSync = function(APIURL, funcName, year, params) {
+    var url = APIURL + '/' + funcName + '/' + year;
+    for (var i = 0; i < params.length; i++) {
+        url = url + '/' + params[i];
+    }
+    var response = request('GET', url);
+    var body = response.getBody('utf8');
+    var result = JSON.parse(body);
+    return result.result;
+};
+
 (function() {
 
     // Set root (global) scope
@@ -482,7 +493,7 @@ var handleUniqueLoanNumberErrors = function(counts) {
     };
 
     HMDAEngine.isValidMsaMdStateAndCountyCombo = function(metroArea, fipsState, fipsCounty) {
-        return true;
+        return readResponseSync(HMDAEngine.getAPIURL(), 'isValidMSAStateCounty', HMDAEngine.getRuleYear(), [metroArea, fipsState, fipsCounty]);
     };
 
     HMDAEngine.isValidStateAndCounty = function(fipsState, fipsCounty) {
@@ -542,11 +553,7 @@ var handleUniqueLoanNumberErrors = function(counts) {
 
     /* ts-quality */
     HMDAEngine.isChildFI = function(respondentID) {
-        var url = HMDAEngine.getAPIURL() + '/isChildFI/' + HMDAEngine.getRuleYear() + '/' + respondentID;
-        var response = request('GET', url);
-        var body = response.getBody('utf8');
-        var result = JSON.parse(body);
-        return result.result;
+        return readResponseSync(HMDAEngine.getAPIURL(), 'isChildFI', HMDAEngine.getRuleYear(), [respondentID]);
     };
 
     HMDAEngine.isTaxIDTheSameAsLastYear = function(respondentID, taxID) {

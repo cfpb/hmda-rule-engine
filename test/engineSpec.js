@@ -4,6 +4,7 @@
 /*global beforeEach:false*/
 /*global rewire:false*/
 /*global _:false*/
+/*global mockAPI:false*/
 'use strict';
 
 var engine = require('../engine'),
@@ -1155,8 +1156,17 @@ describe('Engine', function() {
         });
     });
 
+    describe('isValidMsaMdStateAndCountyCombo', function() {
+        it('should return true when the API response is true', function(done) {
+            var path = '/isValidMSAStateCounty/' + engine.getRuleYear() + '/22220/05/143';
+            mockAPI('get', path, 200, JSON.stringify({ result: true }));
+            expect(engine.isValidMsaMdStateAndCountyCombo('22220', '05', '143')).to.be(true);
+            done();
+        });
+    });
+
     describe('isChildFI', function() {
-        it('should return true when API response result is true', function(done) {
+        it('should return true when the API response result is true', function(done) {
             var respondentID = '1';
             var path = '/isChildFI/'+engine.getRuleYear()+'/'+respondentID;
             mockAPI('get', path, 200, JSON.stringify({ result: true }));
