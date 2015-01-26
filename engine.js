@@ -329,6 +329,13 @@ var handleUniqueLoanNumberErrors = function(counts) {
         return property.trim() !== '';
     };
 
+    /*
+     * -----------------------------------------------------
+     * Custom Non-API functions
+     * -----------------------------------------------------
+     */
+
+    /* hmda-syntactical */
     HMDAEngine.hasRecordIdentifiersForEachRow = function(hmdaFile) {
         var records = [];
         if (hmdaFile.transmittalSheet.recordID !== '1') {
@@ -382,26 +389,76 @@ var handleUniqueLoanNumberErrors = function(counts) {
         return handleUniqueLoanNumberErrors(counts);
     };
 
+    /* lar-syntactical */
     HMDAEngine.isActionDateInActivityYear = function(actionDate, activityYear) {
         return HMDAEngine.yyyy_mm_dd(actionDate) && HMDAEngine.yyyy(activityYear) && activityYear === actionDate.slice(0,4);
     };
 
-    HMDAEngine.isLoanAmountFiveTimesIncome = function(loanAmount, applicantIncome) {
-        return loanAmount >= applicantIncome * 5;
+    /* lar-quality */
+    HMDAEngine.isValidLoanAmount = function(loanAmount, applicantIncome) {
+        if (!isNaN(+applicantIncome) && loanAmount >= 1000) {
+            return loanAmount < 5 * applicantIncome;
+        }
+
+        return true;
     };
 
+    HMDAEngine.isLoanAmountFiveTimesIncome = function(loanAmount, applicantIncome) {
+        return loanAmount > applicantIncome * 5;
+    };
+
+    /* ts-quality */
     HMDAEngine.checkTotalLARCount = function(hmdaFile) {
         return parseInt(hmdaFile.transmittalSheet.totalLineEntries) === hmdaFile.loanApplicationRegisters.length;
     };
 
-    /* TODO - Implement this */
-    HMDAEngine.compareNumEntriesSingle = function(loanApplicationRegisters, rule, cond, value) {
-        return true;
+    /* hmda-macro */
+    HMDAEngine.compareNumEntriesSingle = function(loanApplicationRegisters, rule, cond) {
+        var count = 0;
+
+        _.each(loanApplicationRegisters, function(element, index, list) {
+            if (HMDAEngine.execRule(element, rule).length === 0) {
+                count += 1;
+            }
+        });
+
+        var topLevelObj = {'result': count};
+        if (HMDAEngine.execRule(topLevelObj, cond).length === 0) {
+            return true;
+        }
+        return false;
     };
 
-    /* TODO - Implement this */
-    HMDAEngine.compareNumEntries = function(loanApplicationRegisters, ruleA, ruleB, cond, value) {
-        return true;
+    HMDAEngine.compareNumEntries = function(loanApplicationRegisters, ruleA, ruleB, cond) {
+        var countA = 0,
+            countB = 0;
+
+        _.each(loanApplicationRegisters, function(element, index, list) {
+            (HMDAEngine.execRule(element, ruleA).length === 0) ? countA += 1 : false;
+            (HMDAEngine.execRule(element, ruleB).length === 0) ? countB += 1 : false;
+        });
+
+        var topLevelObj = {'result': countA / countB};
+        if (HMDAEngine.execRule(topLevelObj, cond).length === 0) {
+            return true;
+        }
+        return false;
+    };
+
+    HMDAEngine.isValidNumMultifamilyLoans = function(hmdaFile) {
+        var multifamilyCount = 0,
+            multifamilyAmount = 0,
+            totalAmount = 0;
+
+        _.each(hmdaFile.loanApplicationRegisters, function(element, index, list) {
+            if (element.propertyType === '3') {
+                multifamilyCount += 1;
+                multifamilyAmount += +element.loanAmount;
+            }
+            totalAmount += +element.loanAmount;
+        });
+
+        return ((multifamilyCount / hmdaFile.loanApplicationRegisters.length) < 0.1) || ((multifamilyAmount / totalAmount) < 0.1);
     };
 
     /*
@@ -439,10 +496,6 @@ var handleUniqueLoanNumberErrors = function(counts) {
     };
 
     /* lar-quality */
-    HMDAEngine.isValidLoanAmount = function(loanAmount, applicantIncome) {
-        return true;
-    };
-
     HMDAEngine.isValidStateCountyCensusTractCombo = function(fipsState, fipsCounty, censusTract, metroArea) {
         return true;
     };
@@ -461,10 +514,6 @@ var handleUniqueLoanNumberErrors = function(counts) {
     };
 
     /* hmda-macro */
-    HMDAEngine.isValidNumMultifamilyLoans = function(hmdaFile) {
-        return true;
-    };
-
     HMDAEngine.isValidNumLoans = function(hmdaFile) {
         return true;
     };
@@ -533,7 +582,7 @@ var handleUniqueLoanNumberErrors = function(counts) {
     };
 
     HMDAEngine.parseRuleCustomCall = function(rule, result) {
-        result.body += 'HMDAEngine.' + rule.function + '(';
+        result.body += 'this.' + rule.function + '(';
         if (rule.args) {
             for (var i=0; i < rule.args.length; i++) {
                 result.body += 'arguments[' + result.argIndex++ + ']';
@@ -550,7 +599,7 @@ var handleUniqueLoanNumberErrors = function(counts) {
     };
 
     HMDAEngine.parseRuleCondition = function(rule, result) {
-        result.body += 'HMDAEngine.' + rule.condition + '(arguments[' + result.argIndex++ + ']';
+        result.body += 'this.' + rule.condition + '(arguments[' + result.argIndex++ + ']';
         result.args.push(rule.property);
         var fields = brijSpec.VALID_CONDITIONS[rule.condition].additionalFields;
         if (fields) {
@@ -636,7 +685,7 @@ var handleUniqueLoanNumberErrors = function(counts) {
             }
         });
 
-        var funcResult = new Function(result.body).apply(null, args);
+        var funcResult = new Function(result.body).apply(this, args);
 
         if (funcResult === true) {
             return [];
@@ -699,7 +748,7 @@ var handleUniqueLoanNumberErrors = function(counts) {
 
         for (var j = 0; j < rules.length; j++) {
             for (var k = 0; k < topLevelObjs.length; k++) {
-                var result = HMDAEngine.execRule(topLevelObjs[k], rules[j].rule);
+                var result = this.execRule(topLevelObjs[k], rules[j].rule);
                 if (result.length !== 0) {
                     addToErrors(result, rules[j], editType, scope);
                 }
@@ -708,27 +757,27 @@ var handleUniqueLoanNumberErrors = function(counts) {
     };
 
     HMDAEngine.runSyntactical = function(year) {
-        runEdits(year, 'ts', 'syntactical');
-        runEdits(year, 'lar', 'syntactical');
-        runEdits(year, 'hmda', 'syntactical');
+        runEdits.bind(this)(year, 'ts', 'syntactical');
+        runEdits.bind(this)(year, 'lar', 'syntactical');
+        runEdits.bind(this)(year, 'hmda', 'syntactical');
         return errors;
     };
 
     HMDAEngine.runValidity = function(year) {
-        runEdits(year, 'ts', 'validity');
-        runEdits(year, 'lar', 'validity');
+        runEdits.bind(this)(year, 'ts', 'validity');
+        runEdits.bind(this)(year, 'lar', 'validity');
         return errors;
     };
 
     HMDAEngine.runQuality = function(year) {
-        runEdits(year, 'ts', 'quality');
-        runEdits(year, 'lar', 'quality');
-        runEdits(year, 'hmda', 'quality');
+        runEdits.bind(this)(year, 'ts', 'quality');
+        runEdits.bind(this)(year, 'lar', 'quality');
+        runEdits.bind(this)(year, 'hmda', 'quality');
         return errors;
     };
 
     HMDAEngine.runMacro = function(year) {
-        runEdits(year, 'hmda', 'macro');
+        runEdits.bind(this)(year, 'hmda', 'macro');
         return errors;
     };
 
