@@ -1156,6 +1156,19 @@ describe('Engine', function() {
         });
     });
 
+    describe('isValidControlNumber', function() {
+        it('should return true when the API response result is true', function(done) {
+            var path = '/isValidControlNumber/' + engine.getRuleYear() + '/1/0000000001';
+            mockAPI('get', path, 200, JSON.stringify({ result: true }));
+            expect(engine.isValidControlNumber({
+                transmittalSheet: {
+                    agencyCode: '1',
+                    respondentID: '0000000001'
+            }})).to.be(true);
+            done();
+        });
+    });
+
     describe('isValidMetroArea', function() {
         it('should return true when the API response result is true', function(done) {
             var path = '/isValidMSA/' + engine.getRuleYear() + '/22220';

@@ -484,7 +484,8 @@ var readResponseSync = function(APIURL, funcName, year, params) {
 
     /* hmda-syntactical */
     HMDAEngine.isValidControlNumber = function(hmdaFile) {
-        return true;
+        return readResponseSync(HMDAEngine.getAPIURL(), 'isValidControlNumber', HMDAEngine.getRuleYear(), 
+            [hmdaFile.transmittalSheet.agencyCode, hmdaFile.transmittalSheet.respondentID]);
     };
 
     /* lar-validity */
