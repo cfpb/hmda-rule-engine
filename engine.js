@@ -489,7 +489,7 @@ var readResponseSync = function(APIURL, funcName, year, params) {
 
     /* lar-validity */
     HMDAEngine.isValidMetroArea = function(metroArea) {
-        return true;
+        return readResponseSync(HMDAEngine.getAPIURL(), 'isValidMSA', HMDAEngine.getRuleYear(), [metroArea]);
     };
 
     HMDAEngine.isValidMsaMdStateAndCountyCombo = function(metroArea, fipsState, fipsCounty) {

@@ -1156,8 +1156,17 @@ describe('Engine', function() {
         });
     });
 
+    describe('isValidMetroArea', function() {
+        it('should return true when the API response result is true', function(done) {
+            var path = '/isValidMSA/' + engine.getRuleYear() + '/22220';
+            mockAPI('get', path, 200, JSON.stringify({ result: true }));
+            expect(engine.isValidMetroArea('22220')).to.be(true);
+            done();
+        });
+    });
+
     describe('isValidMsaMdStateAndCountyCombo', function() {
-        it('should return true when the API response is true', function(done) {
+        it('should return true when the API response result is true', function(done) {
             var path = '/isValidMSAStateCounty/' + engine.getRuleYear() + '/22220/05/143';
             mockAPI('get', path, 200, JSON.stringify({ result: true }));
             expect(engine.isValidMsaMdStateAndCountyCombo('22220', '05', '143')).to.be(true);
