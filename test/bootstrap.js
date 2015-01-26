@@ -9,12 +9,6 @@ global.port = 0;
 
 var child = require('child_process').fork(__dirname + '/server.js');
 
-child.on('message', function(m) {
-    if (m.hasOwnProperty('port')) {
-        port = m.port;
-    };
-});
-
 global.mockAPI = function(method, path, status, reply) {
     var ob = {
         method: method || '',
@@ -25,8 +19,14 @@ global.mockAPI = function(method, path, status, reply) {
     child.send(ob);
 };
 
-before(function() {
+before(function(done) {
     mockAPI('port');
+    child.on('message', function(m) {
+        if (m.hasOwnProperty('port')) {
+            port = m.port;
+            done();
+        };
+    });
 });
 
 after(function() {
