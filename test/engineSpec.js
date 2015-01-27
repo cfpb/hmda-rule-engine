@@ -1203,6 +1203,15 @@ describe('Engine', function() {
         });
     });
 
+    describe('isValidStateAndCounty', function() {
+        it('should return true when the API response result is true', function(done) {
+            var path = '/isValidStateCounty/' + engine.getRuleYear() + '/05/143';
+            mockAPI('get', path, 200, JSON.stringify({ result: true }));
+            expect(engine.isValidStateAndCounty('05', '143')).to.be(true);
+            done();
+        });
+    });
+
     describe('isRespondentMBS', function() {
         it('should return true when the API response result is true', function(done) {
             var path = '/isRespondentMBS/' + engine.getRuleYear() + '/0000000001';
