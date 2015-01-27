@@ -9,12 +9,13 @@ global.port = 0;
 
 var child = require('child_process').fork(__dirname + '/server.js');
 
-global.mockAPI = function(method, path, status, reply) {
+global.mockAPI = function(method, path, status, reply, persisted) {
     var ob = {
-        method: method || '',
-        path: path || '',
+        method: method || 'get',
+        path: path || '/',
         status: status || 200,
-        reply: reply || ''
+        reply: reply || '{}',
+        persisted: persisted || false
     }
     child.send(ob);
 };

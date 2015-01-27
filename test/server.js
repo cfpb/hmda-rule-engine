@@ -10,7 +10,11 @@ process.on('message', function(msg) {
             process.send(ob);
             break;
         case 'get':
-            mockAPI.get(msg.path).reply(msg.status, msg.reply);
+            if (msg.persisted) {
+                mockAPI.get(msg.path).persist().reply(msg.status, msg.reply);
+            } else {
+                mockAPI.get(msg.path).reply(msg.status, msg.reply);
+            }
             break;
         case 'clean':
             mockAPI.clean();
