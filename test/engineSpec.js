@@ -31,17 +31,25 @@ describe('Engine', function() {
     });
 
     describe('Make sure mockAPI is up', function() {
-        it('should allow route define and respond with 200', function(done) {
+        it('should allow route define and respond with 200 first time, 404 second time called', function(done) {
             mockAPI('get', '/foo', 200, 'bar');
             http.get(mockAPIURL+'/foo', function(resp) {
                 expect(resp.statusCode).to.be(200);
-                done();
+                http.get(mockAPIURL+'/foo', function(resp) {
+                    expect(resp.statusCode).to.be(404);
+                    done();
+                });
             });
         });
-        it('should have fulfilled route in previus test and now respond with 404', function(done) {
-            http.get(mockAPIURL+'/foo', function(resp) {
-                expect(resp.statusCode).to.be(404);
-                done();
+
+        it('should allow route define and respond with 200 every time called when persist option enabled', function(done) {
+            mockAPI('get', '/bar', 200, 'foo', true);
+            http.get(mockAPIURL+'/bar', function(resp) {
+                expect(resp.statusCode).to.be(200);
+                http.get(mockAPIURL+'/bar', function(resp) {
+                    expect(resp.statusCode).to.be(200);
+                    done();
+                });
             });
         });
     });
