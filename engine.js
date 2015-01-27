@@ -69,6 +69,17 @@ var handleUniqueLoanNumberErrors = function(counts) {
     return errors;
 };
 
+var readResponseSync = function(APIURL, funcName, year, params) {
+    var url = APIURL + '/' + funcName + '/' + year;
+    for (var i = 0; i < params.length; i++) {
+        url = url + '/' + params[i];
+    }
+    var response = request('GET', url);
+    var body = response.getBody('utf8');
+    var result = JSON.parse(body);
+    return result.result;
+};
+
 (function() {
 
     // Set root (global) scope
@@ -473,24 +484,34 @@ var handleUniqueLoanNumberErrors = function(counts) {
 
     /* hmda-syntactical */
     HMDAEngine.isValidControlNumber = function(hmdaFile) {
-        return true;
+        return readResponseSync(HMDAEngine.getAPIURL(), 'isValidControlNumber', HMDAEngine.getRuleYear(), 
+            [hmdaFile.transmittalSheet.agencyCode, hmdaFile.transmittalSheet.respondentID]);
     };
 
     /* lar-validity */
     HMDAEngine.isValidMetroArea = function(metroArea) {
-        return true;
+        return readResponseSync(HMDAEngine.getAPIURL(), 'isValidMSA', HMDAEngine.getRuleYear(), [metroArea]);
     };
 
     HMDAEngine.isValidMsaMdStateAndCountyCombo = function(metroArea, fipsState, fipsCounty) {
-        return true;
+        return readResponseSync(HMDAEngine.getAPIURL(), 'isValidMSAStateCounty', HMDAEngine.getRuleYear(), [metroArea, fipsState, fipsCounty]);
     };
 
     HMDAEngine.isValidStateAndCounty = function(fipsState, fipsCounty) {
-        return true;
+        return readResponseSync(HMDAEngine.getAPIURL(), 'isValidStateCounty', HMDAEngine.getRuleYear(), [fipsState, fipsCounty]);
     };
 
     HMDAEngine.isValidCensusTractCombo = function(censusTract, metroArea, fipsState, fipsCounty) {
-        return true;
+        if (metroArea === 'NA') {
+            return readResponseSync(HMDAEngine.getAPIURL(), 'isValidCensusCombination', HMDAEngine.getRuleYear(), [fipsState, fipsCounty, censusTract]);
+        } else {
+            return readResponseSync(HMDAEngine.getAPIURL(), 'isValidCensusInMSA', HMDAEngine.getRuleYear(), [metroArea, fipsState, fipsCounty, censusTract]);
+        }
+    };
+
+    /* ts-validity */
+    HMDAEngine.isRespondentMBS = function(respondentID) {
+        return readResponseSync(HMDAEngine.getAPIURL(), 'isRespondentMBS', HMDAEngine.getRuleYear(), [respondentID]);
     };
 
     /* lar-quality */
@@ -506,8 +527,12 @@ var handleUniqueLoanNumberErrors = function(counts) {
         return true;
     };
 
-    /* ts-validity */
-    HMDAEngine.isRespondentMBS = function(respondentID) {
+    /* ts-quality */
+    HMDAEngine.isChildFI = function(respondentID) {
+        return readResponseSync(HMDAEngine.getAPIURL(), 'isChildFI', HMDAEngine.getRuleYear(), [respondentID]);
+    };
+
+    HMDAEngine.isTaxIDTheSameAsLastYear = function(respondentID, taxID) {
         return true;
     };
 
@@ -537,19 +562,6 @@ var handleUniqueLoanNumberErrors = function(counts) {
     };
 
     HMDAEngine.isValidMsaMdCountyCensusForNonDepository = function(hmdaFile) {
-        return true;
-    };
-
-    /* ts-quality */
-    HMDAEngine.isChildFI = function(respondentID) {
-        var url = HMDAEngine.getAPIURL() + '/isChildFI/' + HMDAEngine.getRuleYear() + '/' + respondentID;
-        var response = request('GET', url);
-        var body = response.getBody('utf8');
-        var result = JSON.parse(body);
-        return result.result;
-    };
-
-    HMDAEngine.isTaxIDTheSameAsLastYear = function(respondentID, taxID) {
         return true;
     };
 

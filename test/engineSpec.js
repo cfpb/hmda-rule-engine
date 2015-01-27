@@ -4,6 +4,7 @@
 /*global beforeEach:false*/
 /*global rewire:false*/
 /*global _:false*/
+/*global mockAPI:false*/
 'use strict';
 
 var engine = require('../engine'),
@@ -1163,8 +1164,73 @@ describe('Engine', function() {
         });
     });
 
+    describe('isValidControlNumber', function() {
+        it('should return true when the API response result is true', function(done) {
+            var path = '/isValidControlNumber/' + engine.getRuleYear() + '/1/0000000001';
+            mockAPI('get', path, 200, JSON.stringify({ result: true }));
+            expect(engine.isValidControlNumber({
+                transmittalSheet: {
+                    agencyCode: '1',
+                    respondentID: '0000000001'
+            }})).to.be(true);
+            done();
+        });
+    });
+
+    describe('isValidMetroArea', function() {
+        it('should return true when the API response result is true', function(done) {
+            var path = '/isValidMSA/' + engine.getRuleYear() + '/22220';
+            mockAPI('get', path, 200, JSON.stringify({ result: true }));
+            expect(engine.isValidMetroArea('22220')).to.be(true);
+            done();
+        });
+    });
+
+    describe('isValidMsaMdStateAndCountyCombo', function() {
+        it('should return true when the API response result is true', function(done) {
+            var path = '/isValidMSAStateCounty/' + engine.getRuleYear() + '/22220/05/143';
+            mockAPI('get', path, 200, JSON.stringify({ result: true }));
+            expect(engine.isValidMsaMdStateAndCountyCombo('22220', '05', '143')).to.be(true);
+            done();
+        });
+    });
+
+    describe('isValidCensusTractCombo', function() {
+        it('should return true when the API response result is true for MSA not = NA', function(done) {
+            var path = '/isValidCensusInMSA/' + engine.getRuleYear() + '/22220/05/143/9702.00';
+            mockAPI('get', path, 200, JSON.stringify({ result: true }));
+            expect(engine.isValidCensusTractCombo('9702.00', '22220', '05', '143')).to.be(true);
+            done(); 
+        });
+
+        it('should return true when the API response result is true for MSA = NA', function(done) {
+            var path = '/isValidCensusCombination/' + engine.getRuleYear() + '/05/143/9702.00';
+            mockAPI('get', path, 200, JSON.stringify({ result: true }));
+            expect(engine.isValidCensusTractCombo('9702.00', 'NA', '05', '143')).to.be(true);
+            done(); 
+        });
+    });
+
+    describe('isValidStateAndCounty', function() {
+        it('should return true when the API response result is true', function(done) {
+            var path = '/isValidStateCounty/' + engine.getRuleYear() + '/05/143';
+            mockAPI('get', path, 200, JSON.stringify({ result: true }));
+            expect(engine.isValidStateAndCounty('05', '143')).to.be(true);
+            done();
+        });
+    });
+
+    describe('isRespondentMBS', function() {
+        it('should return true when the API response result is true', function(done) {
+            var path = '/isRespondentMBS/' + engine.getRuleYear() + '/0000000001';
+            mockAPI('get', path, 200, JSON.stringify({ result: true }));
+            expect(engine.isRespondentMBS('0000000001')).to.be(true);
+            done();  
+        });
+    });
+
     describe('isChildFI', function() {
-        it('should return true when API response result is true', function(done) {
+        it('should return true when the API response result is true', function(done) {
             var respondentID = '1';
             var path = '/isChildFI/'+engine.getRuleYear()+'/'+respondentID;
             mockAPI('get', path, 200, JSON.stringify({ result: true }));
