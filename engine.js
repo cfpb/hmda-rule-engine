@@ -511,7 +511,7 @@ var readResponseSync = function(APIURL, funcName, year, params) {
 
     /* ts-validity */
     HMDAEngine.isRespondentMBS = function(respondentID) {
-        return true;
+        return readResponseSync(HMDAEngine.getAPIURL(), 'isRespondentMBS', HMDAEngine.getRuleYear(), [respondentID]);
     };
 
     /* lar-quality */
