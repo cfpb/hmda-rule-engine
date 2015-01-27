@@ -1176,6 +1176,18 @@ describe('Engine', function() {
             expect(result).to.be.true();
             done();
         });
+        it('should return false when statecensustract combo is valid, but msa is NA', function(done) {
+            var metroArea = 'NA';
+            var state = '37';
+            var county = '103';
+            var tract = '5010.02';
+            var path =  '/isValidCensusCombination/' + engine.getRuleYear() + '/' +
+                        state + '/' + county + '/' + tract;
+            mockAPI('get', path, 200, JSON.stringify({ result: true }));
+            var result = engine.isValidStateCountyCensusTractCombo(metroArea, state, county, tract);
+            expect(result).to.be.false();
+            done();
+        });
     });
 
     describe('isChildFI', function() {
