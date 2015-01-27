@@ -494,8 +494,19 @@ var handleUniqueLoanNumberErrors = function(counts) {
     };
 
     /* lar-quality */
-    HMDAEngine.isValidStateCountyCensusTractCombo = function(fipsState, fipsCounty, censusTract, metroArea) {
-        return true;
+    HMDAEngine.isValidStateCountyCensusTractCombo = function(metroArea, fipsState, fipsCounty, censusTract) {
+        var url = HMDAEngine.getAPIURL() + '/isValidCensusCombination/' + HMDAEngine.getRuleYear() + 
+                  '/' + fipsState + '/' + fipsCounty + '/' + censusTract;
+        var response = request('GET', url);
+        var body = response.getBody('utf8');
+        var result = JSON.parse(body);
+        if (result.result && metroArea!=='NA') {
+            return true;
+        } 
+        if (!result.result && metroArea==='NA') {
+            return true;
+        }
+        return false;
     };
 
     HMDAEngine.isNotIndependentMortgageCoOrMBS = function(respondentID) {
