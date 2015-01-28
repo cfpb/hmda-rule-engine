@@ -207,7 +207,7 @@ var readResponseSync = function(APIURL, funcName, year, params) {
             var seconds = (+tokens[6] >= 0 && +tokens[6] < 60) ? +tokens[6] : null;
 
             var date = new Date(year, month, day, hours, minutes, seconds);
-            return (date.getFullYear() === year && date.getMonth() === month && date.getHours() === hours && date.getMinutes() === minutes && date.getSeconds() === seconds);
+            return (date.getFullYear() === year && date.getMonth() === month && date.getDate() == day && date.getHours() === hours && date.getMinutes() === minutes && date.getSeconds() === seconds);
         }
 
         return false;
