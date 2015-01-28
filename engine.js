@@ -172,6 +172,10 @@ var readResponseSync = function(APIURL, funcName, year, params) {
         return hmdaRuleSpec.getValidYears();
     };
 
+    HMDAEngine.getFileSpec = function(year) {
+        return hmdaRuleSpec.getFileSpec(year);
+    };
+
     /*
      * -----------------------------------------------------
      * Condition Functions
@@ -484,7 +488,7 @@ var readResponseSync = function(APIURL, funcName, year, params) {
 
     /* hmda-syntactical */
     HMDAEngine.isValidControlNumber = function(hmdaFile) {
-        return readResponseSync(HMDAEngine.getAPIURL(), 'isValidControlNumber', HMDAEngine.getRuleYear(), 
+        return readResponseSync(HMDAEngine.getAPIURL(), 'isValidControlNumber', HMDAEngine.getRuleYear(),
             [hmdaFile.transmittalSheet.agencyCode, hmdaFile.transmittalSheet.respondentID]);
     };
 
