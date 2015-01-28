@@ -81,6 +81,15 @@ describe('Engine', function() {
         });
     });
 
+    describe('getFileSpec', function() {
+        it('should return the file spec for a year', function(done) {
+            var spec = engine.getFileSpec('2013');
+            expect(spec).to.not.be.undefined();
+            expect(spec).to.not.be.empty();
+            done();
+        });
+    });
+
     describe('fileToJson', function() {
         it('should return json object when hmda file is valid and provided by stream', function(done) {
             var fs = require('fs');
@@ -1200,14 +1209,14 @@ describe('Engine', function() {
             var path = '/isValidCensusInMSA/' + engine.getRuleYear() + '/22220/05/143/9702.00';
             mockAPI('get', path, 200, JSON.stringify({ result: true }));
             expect(engine.isValidCensusTractCombo('9702.00', '22220', '05', '143')).to.be(true);
-            done(); 
+            done();
         });
 
         it('should return true when the API response result is true for MSA = NA', function(done) {
             var path = '/isValidCensusCombination/' + engine.getRuleYear() + '/05/143/9702.00';
             mockAPI('get', path, 200, JSON.stringify({ result: true }));
             expect(engine.isValidCensusTractCombo('9702.00', 'NA', '05', '143')).to.be(true);
-            done(); 
+            done();
         });
     });
 
@@ -1225,7 +1234,7 @@ describe('Engine', function() {
             var path = '/isRespondentMBS/' + engine.getRuleYear() + '/0000000001';
             mockAPI('get', path, 200, JSON.stringify({ result: true }));
             expect(engine.isRespondentMBS('0000000001')).to.be(true);
-            done();  
+            done();
         });
     });
 
