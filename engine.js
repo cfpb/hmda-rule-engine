@@ -207,7 +207,7 @@ var readResponseSync = function(APIURL, funcName, year, params) {
             var seconds = (+tokens[6] >= 0 && +tokens[6] < 60) ? +tokens[6] : null;
 
             var date = new Date(year, month, day, hours, minutes, seconds);
-            return (date.getFullYear() === year && date.getMonth() === month && date.getDate() == day && date.getHours() === hours && date.getMinutes() === minutes && date.getSeconds() === seconds);
+            return (date.getFullYear() === year && date.getMonth() === month && date.getDate() === day && date.getHours() === hours && date.getMinutes() === minutes && date.getSeconds() === seconds);
         }
 
         return false;
@@ -297,10 +297,12 @@ var readResponseSync = function(APIURL, funcName, year, params) {
     };
 
     HMDAEngine.equal = HMDAEngine.equal_property = function(property, value) {
+        property = (typeof(property) === 'string' ? property.trim() : property);
         return property === value;
     };
 
     HMDAEngine.not_equal = HMDAEngine.not_equal_property = function(property, value) {
+        property = (typeof(property) === 'string' ? property.trim() : property);
         return property !== value;
     };
 
