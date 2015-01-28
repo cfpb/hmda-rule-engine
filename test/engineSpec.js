@@ -81,6 +81,15 @@ describe('Engine', function() {
         });
     });
 
+    describe('getFileSpec', function() {
+        it('should return the file spec for a year', function(done) {
+            var spec = engine.getFileSpec('2013');
+            expect(spec).to.not.be.undefined();
+            expect(spec).to.not.be.empty();
+            done();
+        });
+    });
+
     describe('fileToJson', function() {
         it('should return json object when hmda file is valid and provided by stream', function(done) {
             var fs = require('fs');
@@ -1200,14 +1209,14 @@ describe('Engine', function() {
             var path = '/isValidCensusInMSA/' + engine.getRuleYear() + '/22220/05/143/9702.00';
             mockAPI('get', path, 200, JSON.stringify({ result: true }));
             expect(engine.isValidCensusTractCombo('9702.00', '22220', '05', '143')).to.be(true);
-            done(); 
+            done();
         });
 
         it('should return true when the API response result is true for MSA = NA', function(done) {
             var path = '/isValidCensusCombination/' + engine.getRuleYear() + '/05/143/9702.00';
             mockAPI('get', path, 200, JSON.stringify({ result: true }));
             expect(engine.isValidCensusTractCombo('9702.00', 'NA', '05', '143')).to.be(true);
-            done(); 
+            done();
         });
     });
 
@@ -1225,7 +1234,34 @@ describe('Engine', function() {
             var path = '/isRespondentMBS/' + engine.getRuleYear() + '/0000000001';
             mockAPI('get', path, 200, JSON.stringify({ result: true }));
             expect(engine.isRespondentMBS('0000000001')).to.be(true);
-            done();  
+            done();
+        });
+    });
+
+    describe('isValidStateCountyCensusTract', function() {
+        it('should return true when API call to isValidStateCounty API call result is true', function(done) {
+            var metroArea = '35100';
+            var state = '37';
+            var county = '103';
+            var tract = '5010.02';
+            var path =  '/isValidCensusCombination/' + engine.getRuleYear() + '/' +
+                        state + '/' + county + '/' + tract;
+            mockAPI('get', path, 200, JSON.stringify({ result: true }));
+            var result = engine.isValidStateCountyCensusTractCombo(metroArea, state, county, tract);
+            expect(result).to.be.true();
+            done();
+        });
+        it('should return false when statecensustract combo is valid, but msa is NA', function(done) {
+            var metroArea = 'NA';
+            var state = '37';
+            var county = '103';
+            var tract = '5010.02';
+            var path =  '/isValidCensusCombination/' + engine.getRuleYear() + '/' +
+                        state + '/' + county + '/' + tract;
+            mockAPI('get', path, 200, JSON.stringify({ result: true }));
+            var result = engine.isValidStateCountyCensusTractCombo(metroArea, state, county, tract);
+            expect(result).to.be.false();
+            done();
         });
     });
 
@@ -2273,7 +2309,11 @@ describe('Engine', function() {
         });
 
         it('should return a modified set of errors for failing quality edits', function(done) {
-            var path = '/isChildFI/'+engine.getRuleYear()+'/0123456789';
+              // Q029
+            var path = '/isValidCensusCombination/'+engine.getRuleYear()+'/06920/06/034/0100.01';
+            mockAPI('get', path, 200, JSON.stringify({ result: true }), true);
+
+            path = '/isChildFI/'+engine.getRuleYear()+'/0123456789';
             mockAPI('get', path, 200, JSON.stringify({ result: true }));
 
             hmdaJson.hmdaFile.transmittalSheet.parentName = '                              ';
