@@ -80,6 +80,13 @@ var readResponseSync = function(APIURL, funcName, year, params) {
     return result.result;
 };
 
+var resolveError = function(err, next) {
+    if (err.message && err.message === 'Failed to resolve argument!') {
+        return next('Rule-spec error: Invalid property', {});
+    }
+    return next('There was a problem connecting to the HMDA server. Please check your connection or try again later.', {});
+};
+
 (function() {
 
     // Set root (global) scope
@@ -776,7 +783,7 @@ var readResponseSync = function(APIURL, funcName, year, params) {
             runEdits.bind(this)(year, 'lar', 'syntactical');
             runEdits.bind(this)(year, 'hmda', 'syntactical');
         } catch (err) {
-            return next('There was a problem connecting to the HMDA server. Please check your connection or try again later.', {});
+            return resolveError(err, next);
         }
         return next(null, errors);
     };
@@ -786,7 +793,7 @@ var readResponseSync = function(APIURL, funcName, year, params) {
             runEdits.bind(this)(year, 'ts', 'validity');
             runEdits.bind(this)(year, 'lar', 'validity');
         } catch (err) {
-            return next('There was a problem connecting to the HMDA server. Please check your connection or try again later.', {});
+            return resolveError(err, next);
         }
         return next(null, errors);
     };
@@ -797,7 +804,7 @@ var readResponseSync = function(APIURL, funcName, year, params) {
             runEdits.bind(this)(year, 'lar', 'quality');
             runEdits.bind(this)(year, 'hmda', 'quality');
         } catch (err) {
-            return next('There was a problem connecting to the HMDA server. Please check your connection or try again later.', {});
+            return resolveError(err, next);
         }
         return next(null, errors);
     };
@@ -806,9 +813,8 @@ var readResponseSync = function(APIURL, funcName, year, params) {
         try {
             runEdits.bind(this)(year, 'hmda', 'macro');
         } catch (err) {
-            return next('There was a problem connecting to the HMDA server. Please check your connection or try again later.', {});
+            return resolveError(err, next);
         }
-        
         return next(null, errors);
     };
 

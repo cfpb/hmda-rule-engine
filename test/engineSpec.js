@@ -2308,7 +2308,7 @@ describe('Engine', function() {
 
         it('should return an error when there is a connection problem', function(done) {
             engine.clearErrors();
-            engine.setAPIURL('/');
+            engine.setAPIURL('http://localhost:8000');
             engine.runValidity('2013', function(err, result) {
                 expect(err).to.be('There was a problem connecting to the HMDA server. Please check your connection or try again later.');
             });
