@@ -297,12 +297,10 @@ var readResponseSync = function(APIURL, funcName, year, params) {
     };
 
     HMDAEngine.equal = HMDAEngine.equal_property = function(property, value) {
-        // property = (typeof(property) === 'string' ? property.trim() : property);
         return property === value;
     };
 
     HMDAEngine.not_equal = HMDAEngine.not_equal_property = function(property, value) {
-        // property = (typeof(property) === 'string' ? property.trim() : property);
         return property !== value;
     };
 
