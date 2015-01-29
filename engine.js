@@ -82,9 +82,9 @@ var readResponseSync = function(APIURL, funcName, year, params) {
 
 var resolveError = function(err, next) {
     if (err.message && err.message === 'Failed to resolve argument!') {
-        return next('Rule-spec error: Invalid property', {});
+        return next('Rule-spec error: Invalid property', null);
     }
-    return next('There was a problem connecting to the HMDA server. Please check your connection or try again later.', {});
+    return next('There was a problem connecting to the HMDA server. Please check your connection or try again later.', null);
 };
 
 (function() {
