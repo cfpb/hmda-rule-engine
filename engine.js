@@ -207,7 +207,7 @@ var readResponseSync = function(APIURL, funcName, year, params) {
             var seconds = (+tokens[6] >= 0 && +tokens[6] < 60) ? +tokens[6] : null;
 
             var date = new Date(year, month, day, hours, minutes, seconds);
-            return (date.getFullYear() === year && date.getMonth() === month && date.getDate() == day && date.getHours() === hours && date.getMinutes() === minutes && date.getSeconds() === seconds);
+            return (date.getFullYear() === year && date.getMonth() === month && date.getDate() === day && date.getHours() === hours && date.getMinutes() === minutes && date.getSeconds() === seconds);
         }
 
         return false;
@@ -520,15 +520,8 @@ var readResponseSync = function(APIURL, funcName, year, params) {
 
     /* lar-quality */
     HMDAEngine.isValidStateCountyCensusTractCombo = function(metroArea, fipsState, fipsCounty, censusTract) {
-        var url = HMDAEngine.getAPIURL() + '/isValidCensusCombination/' + HMDAEngine.getRuleYear() + 
-                  '/' + fipsState + '/' + fipsCounty + '/' + censusTract;
-        var response = request('GET', url);
-        var body = response.getBody('utf8');
-        var result = JSON.parse(body);
-        if (result.result && metroArea!=='NA') {
-            return true;
-        } 
-        if (!result.result && metroArea==='NA') {
+        var result = readResponseSync(HMDAEngine.getAPIURL(), 'isValidCensusCombination', HMDAEngine.getRuleYear(), [fipsState, fipsCounty, censusTract]);
+        if ((result && metroArea !== 'NA') || (!result && metroArea !== 'NA')) {
             return true;
         }
         return false;
