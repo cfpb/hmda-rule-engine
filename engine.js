@@ -506,11 +506,7 @@ var readResponseSync = function(APIURL, funcName, year, params) {
     };
 
     HMDAEngine.isValidCensusTractCombo = function(censusTract, metroArea, fipsState, fipsCounty) {
-        if (metroArea === 'NA') {
-            return readResponseSync(HMDAEngine.getAPIURL(), 'isValidCensusCombination', HMDAEngine.getRuleYear(), [fipsState, fipsCounty, censusTract]);
-        } else {
-            return readResponseSync(HMDAEngine.getAPIURL(), 'isValidCensusInMSA', HMDAEngine.getRuleYear(), [metroArea, fipsState, fipsCounty, censusTract]);
-        }
+        return readResponseSync(HMDAEngine.getAPIURL(), 'isValidCensusTractCombo', HMDAEngine.getRuleYear(), [fipsState, fipsCounty, metroArea, censusTract]);
     };
 
     /* ts-validity */

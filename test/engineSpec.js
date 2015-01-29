@@ -1206,14 +1206,14 @@ describe('Engine', function() {
 
     describe('isValidCensusTractCombo', function() {
         it('should return true when the API response result is true for MSA not = NA', function(done) {
-            var path = '/isValidCensusInMSA/' + engine.getRuleYear() + '/22220/05/143/9702.00';
+            var path = '/isValidCensusTractCombo/' + engine.getRuleYear() + '/05/143/22220/9702.00';
             mockAPI('get', path, 200, JSON.stringify({ result: true }));
             expect(engine.isValidCensusTractCombo('9702.00', '22220', '05', '143')).to.be(true);
             done();
         });
 
         it('should return true when the API response result is true for MSA = NA', function(done) {
-            var path = '/isValidCensusCombination/' + engine.getRuleYear() + '/05/143/9702.00';
+            var path = '/isValidCensusTractCombo/' + engine.getRuleYear() + '/05/143/NA/9702.00';
             mockAPI('get', path, 200, JSON.stringify({ result: true }));
             expect(engine.isValidCensusTractCombo('9702.00', 'NA', '05', '143')).to.be(true);
             done();
