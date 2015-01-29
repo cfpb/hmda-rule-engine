@@ -774,29 +774,46 @@ var readResponseSync = function(APIURL, funcName, year, params) {
         }
     };
 
-    HMDAEngine.runSyntactical = function(year) {
-        runEdits.bind(this)(year, 'ts', 'syntactical');
-        runEdits.bind(this)(year, 'lar', 'syntactical');
-        runEdits.bind(this)(year, 'hmda', 'syntactical');
-        return errors;
+    HMDAEngine.runSyntactical = function(year, next) {
+        try {
+            runEdits.bind(this)(year, 'ts', 'syntactical');
+            runEdits.bind(this)(year, 'lar', 'syntactical');
+            runEdits.bind(this)(year, 'hmda', 'syntactical');
+        } catch (err) {
+            return next('There was a problem connecting to the HMDA server. Please check your connection or try again later.', errors);
+        }
+        return next(null, errors);
     };
 
-    HMDAEngine.runValidity = function(year) {
-        runEdits.bind(this)(year, 'ts', 'validity');
-        runEdits.bind(this)(year, 'lar', 'validity');
-        return errors;
+    HMDAEngine.runValidity = function(year, next) {
+        try {
+            runEdits.bind(this)(year, 'ts', 'validity');
+            runEdits.bind(this)(year, 'lar', 'validity');
+        } catch (err) {
+            return next('There was a problem connecting to the HMDA server. Please check your connection or try again later.', errors);
+        }
+        return next(null, errors);
     };
 
-    HMDAEngine.runQuality = function(year) {
-        runEdits.bind(this)(year, 'ts', 'quality');
-        runEdits.bind(this)(year, 'lar', 'quality');
-        runEdits.bind(this)(year, 'hmda', 'quality');
-        return errors;
+    HMDAEngine.runQuality = function(year, next) {
+        try {
+            runEdits.bind(this)(year, 'ts', 'quality');
+            runEdits.bind(this)(year, 'lar', 'quality');
+            runEdits.bind(this)(year, 'hmda', 'quality');
+        } catch (err) {
+            return next('There was a problem connecting to the HMDA server. Please check your connection or try again later.', errors);
+        }
+        return next(null, errors);
     };
 
-    HMDAEngine.runMacro = function(year) {
-        runEdits.bind(this)(year, 'hmda', 'macro');
-        return errors;
+    HMDAEngine.runMacro = function(year, next) {
+        try {
+            runEdits.bind(this)(year, 'hmda', 'macro');
+        } catch (err) {
+            return next('There was a problem connecting to the HMDA server. Please check your connection or try again later.', errors);
+        }
+        
+        return next(null, errors);
     };
 
 }.call((function() {

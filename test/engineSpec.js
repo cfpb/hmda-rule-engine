@@ -1251,7 +1251,7 @@ describe('Engine', function() {
             expect(result).to.be.true();
             done();
         });
-        
+
         it('should return false when statecensustract combo is valid, but msa is NA', function(done) {
             var metroArea = 'NA';
             var state = '37';
@@ -2259,7 +2259,7 @@ describe('Engine', function() {
             hmdaJson.hmdaFile.loanApplicationRegisters[1].loanNumber = '1000000000000000000000000';
             hmdaJson.hmdaFile.loanApplicationRegisters[2].loanNumber = '2000000000000000000000000';
 
-            rewiredEngine.runSyntactical('2013');
+            rewiredEngine.runSyntactical('2013', function(err, result) {});
             expect(Object.keys(rewiredEngine.getErrors().syntactical).length).to.be(0);
             done();
         });
@@ -2270,7 +2270,7 @@ describe('Engine', function() {
 
             var errors_syntactical = require('./testdata/errors-syntactical.json');
 
-            rewiredEngine.runSyntactical('2013');
+            rewiredEngine.runSyntactical('2013', function(err, result) {});
             expect(_.isEqual(rewiredEngine.getErrors(), errors_syntactical)).to.be(true);
             done();
         });
@@ -2292,7 +2292,7 @@ describe('Engine', function() {
 
             hmdaJson.hmdaFile.loanApplicationRegisters[1].preapprovals = ' ';
 
-            rewiredEngine.runValidity('2013');
+            rewiredEngine.runValidity('2013', function(err, result) {});
             expect(_.isEqual(rewiredEngine.getErrors(), errors_validity)).to.be(true);
             done();
         });
@@ -2319,7 +2319,7 @@ describe('Engine', function() {
 
             hmdaJson.hmdaFile.transmittalSheet.parentName = '                              ';
             var errors_quality = require('./testdata/errors-quality.json');
-            rewiredEngine.runQuality('2013');
+            rewiredEngine.runQuality('2013', function(err, result) {});
 
             expect(_.isEqual(rewiredEngine.getErrors(), errors_quality)).to.be(true);
             done();
@@ -2345,7 +2345,7 @@ describe('Engine', function() {
                 'macro': {},
             };
 
-            rewiredEngine.runMacro('2013');
+            rewiredEngine.runMacro('2013', function(err, result) {});
             expect(_.isEqual(rewiredEngine.getErrors(), errors)).to.be(true);
             done();
         });
