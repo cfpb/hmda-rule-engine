@@ -780,7 +780,7 @@ var readResponseSync = function(APIURL, funcName, year, params) {
             runEdits.bind(this)(year, 'lar', 'syntactical');
             runEdits.bind(this)(year, 'hmda', 'syntactical');
         } catch (err) {
-            return next('There was a problem connecting to the HMDA server. Please check your connection or try again later.', errors);
+            return next('There was a problem connecting to the HMDA server. Please check your connection or try again later.', {});
         }
         return next(null, errors);
     };
@@ -790,7 +790,7 @@ var readResponseSync = function(APIURL, funcName, year, params) {
             runEdits.bind(this)(year, 'ts', 'validity');
             runEdits.bind(this)(year, 'lar', 'validity');
         } catch (err) {
-            return next('There was a problem connecting to the HMDA server. Please check your connection or try again later.', errors);
+            return next('There was a problem connecting to the HMDA server. Please check your connection or try again later.', {});
         }
         return next(null, errors);
     };
@@ -801,7 +801,7 @@ var readResponseSync = function(APIURL, funcName, year, params) {
             runEdits.bind(this)(year, 'lar', 'quality');
             runEdits.bind(this)(year, 'hmda', 'quality');
         } catch (err) {
-            return next('There was a problem connecting to the HMDA server. Please check your connection or try again later.', errors);
+            return next('There was a problem connecting to the HMDA server. Please check your connection or try again later.', {});
         }
         return next(null, errors);
     };
@@ -810,7 +810,7 @@ var readResponseSync = function(APIURL, funcName, year, params) {
         try {
             runEdits.bind(this)(year, 'hmda', 'macro');
         } catch (err) {
-            return next('There was a problem connecting to the HMDA server. Please check your connection or try again later.', errors);
+            return next('There was a problem connecting to the HMDA server. Please check your connection or try again later.', {});
         }
         
         return next(null, errors);

@@ -2274,6 +2274,15 @@ describe('Engine', function() {
             expect(_.isEqual(rewiredEngine.getErrors(), errors_syntactical)).to.be(true);
             done();
         });
+
+        it('should return an error when there is a connection problem', function(done) {
+            engine.clearErrors();
+            engine.setAPIURL('/');
+            engine.runSyntactical('2013', function(err, result) {
+                expect(err).to.be('There was a problem connecting to the HMDA server. Please check your connection or try again later.');
+            });
+            done();
+        });
     });
 
     describe('runValidity', function() {
@@ -2294,6 +2303,15 @@ describe('Engine', function() {
 
             rewiredEngine.runValidity('2013', function(err, result) {});
             expect(_.isEqual(rewiredEngine.getErrors(), errors_validity)).to.be(true);
+            done();
+        });
+
+        it('should return an error when there is a connection problem', function(done) {
+            engine.clearErrors();
+            engine.setAPIURL('/');
+            engine.runValidity('2013', function(err, result) {
+                expect(err).to.be('There was a problem connecting to the HMDA server. Please check your connection or try again later.');
+            });
             done();
         });
     });
@@ -2322,6 +2340,15 @@ describe('Engine', function() {
             rewiredEngine.runQuality('2013', function(err, result) {});
 
             expect(_.isEqual(rewiredEngine.getErrors(), errors_quality)).to.be(true);
+            done();
+        });
+
+        it('should return an error when there is a connection problem', function(done) {
+            engine.clearErrors();
+            engine.setAPIURL('/');
+            engine.runQuality('2013', function(err, result) {
+                expect(err).to.be('There was a problem connecting to the HMDA server. Please check your connection or try again later.');
+            });
             done();
         });
     });
