@@ -25,7 +25,9 @@ var resolveArg = function(arg, contextList) {
             return mappedArg;
         }
     }
-    throw new Error('Failed to resolve argument!');
+    var err = new Error('Failed to resolve argument!');
+    err.property = arg;
+    throw err;
 };
 
 var retrieveProps = function(error, line, properties) {
@@ -82,7 +84,8 @@ var readResponseSync = function(APIURL, funcName, year, params) {
 
 var resolveError = function(err, next) {
     if (err.message && err.message === 'Failed to resolve argument!') {
-        return next('Rule-spec error: Invalid property', null);
+        var msg = 'Rule-spec error: Invalid property\nProperty: ' + err.property + ' not found!';
+        return next(msg, null);
     }
     return next('There was a problem connecting to the HMDA server. Please check your connection or try again later.', null);
 };
