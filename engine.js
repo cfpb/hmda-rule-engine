@@ -25,7 +25,9 @@ var resolveArg = function(arg, contextList) {
             return mappedArg;
         }
     }
-    throw new Error('Failed to resolve argument!');
+    var err = new Error('Failed to resolve argument!');
+    err.property = arg;
+    throw err;
 };
 
 var retrieveProps = function(error, line, properties) {
@@ -78,6 +80,14 @@ var readResponseSync = function(APIURL, funcName, year, params) {
     var body = response.getBody('utf8');
     var result = JSON.parse(body);
     return result.result;
+};
+
+var resolveError = function(err, next) {
+    if (err.message && err.message === 'Failed to resolve argument!') {
+        var msg = 'Rule-spec error: Invalid property\nProperty: ' + err.property + ' not found!';
+        return next(msg, null);
+    }
+    return next('There was a problem connecting to the HMDA server. Please check your connection or try again later.', null);
 };
 
 (function() {
@@ -511,11 +521,7 @@ var readResponseSync = function(APIURL, funcName, year, params) {
     };
 
     HMDAEngine.isValidCensusTractCombo = function(censusTract, metroArea, fipsState, fipsCounty) {
-        if (metroArea === 'NA') {
-            return readResponseSync(HMDAEngine.getAPIURL(), 'isValidCensusCombination', HMDAEngine.getRuleYear(), [fipsState, fipsCounty, censusTract]);
-        } else {
-            return readResponseSync(HMDAEngine.getAPIURL(), 'isValidCensusInMSA', HMDAEngine.getRuleYear(), [metroArea, fipsState, fipsCounty, censusTract]);
-        }
+        return readResponseSync(HMDAEngine.getAPIURL(), 'isValidCensusTractCombo', HMDAEngine.getRuleYear(), [fipsState, fipsCounty, metroArea, censusTract]);
     };
 
     /* ts-validity */
@@ -525,15 +531,8 @@ var readResponseSync = function(APIURL, funcName, year, params) {
 
     /* lar-quality */
     HMDAEngine.isValidStateCountyCensusTractCombo = function(metroArea, fipsState, fipsCounty, censusTract) {
-        var url = HMDAEngine.getAPIURL() + '/isValidCensusCombination/' + HMDAEngine.getRuleYear() + 
-                  '/' + fipsState + '/' + fipsCounty + '/' + censusTract;
-        var response = request('GET', url);
-        var body = response.getBody('utf8');
-        var result = JSON.parse(body);
-        if (result.result && metroArea!=='NA') {
-            return true;
-        } 
-        if (!result.result && metroArea==='NA') {
+        var result = readResponseSync(HMDAEngine.getAPIURL(), 'isValidCensusCombination', HMDAEngine.getRuleYear(), [fipsState, fipsCounty, censusTract]);
+        if ((result && metroArea !== 'NA') || (!result && metroArea !== 'NA')) {
             return true;
         }
         return false;
@@ -785,29 +784,45 @@ var readResponseSync = function(APIURL, funcName, year, params) {
         }
     };
 
-    HMDAEngine.runSyntactical = function(year) {
-        runEdits.bind(this)(year, 'ts', 'syntactical');
-        runEdits.bind(this)(year, 'lar', 'syntactical');
-        runEdits.bind(this)(year, 'hmda', 'syntactical');
-        return errors;
+    HMDAEngine.runSyntactical = function(year, next) {
+        try {
+            runEdits.bind(this)(year, 'ts', 'syntactical');
+            runEdits.bind(this)(year, 'lar', 'syntactical');
+            runEdits.bind(this)(year, 'hmda', 'syntactical');
+        } catch (err) {
+            return resolveError(err, next);
+        }
+        return next(null, errors);
     };
 
-    HMDAEngine.runValidity = function(year) {
-        runEdits.bind(this)(year, 'ts', 'validity');
-        runEdits.bind(this)(year, 'lar', 'validity');
-        return errors;
+    HMDAEngine.runValidity = function(year, next) {
+        try {
+            runEdits.bind(this)(year, 'ts', 'validity');
+            runEdits.bind(this)(year, 'lar', 'validity');
+        } catch (err) {
+            return resolveError(err, next);
+        }
+        return next(null, errors);
     };
 
-    HMDAEngine.runQuality = function(year) {
-        runEdits.bind(this)(year, 'ts', 'quality');
-        runEdits.bind(this)(year, 'lar', 'quality');
-        runEdits.bind(this)(year, 'hmda', 'quality');
-        return errors;
+    HMDAEngine.runQuality = function(year, next) {
+        try {
+            runEdits.bind(this)(year, 'ts', 'quality');
+            runEdits.bind(this)(year, 'lar', 'quality');
+            runEdits.bind(this)(year, 'hmda', 'quality');
+        } catch (err) {
+            return resolveError(err, next);
+        }
+        return next(null, errors);
     };
 
-    HMDAEngine.runMacro = function(year) {
-        runEdits.bind(this)(year, 'hmda', 'macro');
-        return errors;
+    HMDAEngine.runMacro = function(year, next) {
+        try {
+            runEdits.bind(this)(year, 'hmda', 'macro');
+        } catch (err) {
+            return resolveError(err, next);
+        }
+        return next(null, errors);
     };
 
 }.call((function() {

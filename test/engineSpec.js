@@ -1208,14 +1208,14 @@ describe('Engine', function() {
 
     describe('isValidCensusTractCombo', function() {
         it('should return true when the API response result is true for MSA not = NA', function(done) {
-            var path = '/isValidCensusInMSA/' + engine.getRuleYear() + '/22220/05/143/9702.00';
+            var path = '/isValidCensusTractCombo/' + engine.getRuleYear() + '/05/143/22220/9702.00';
             mockAPI('get', path, 200, JSON.stringify({ result: true }));
             expect(engine.isValidCensusTractCombo('9702.00', '22220', '05', '143')).to.be(true);
             done();
         });
 
         it('should return true when the API response result is true for MSA = NA', function(done) {
-            var path = '/isValidCensusCombination/' + engine.getRuleYear() + '/05/143/9702.00';
+            var path = '/isValidCensusTractCombo/' + engine.getRuleYear() + '/05/143/NA/9702.00';
             mockAPI('get', path, 200, JSON.stringify({ result: true }));
             expect(engine.isValidCensusTractCombo('9702.00', 'NA', '05', '143')).to.be(true);
             done();
@@ -1253,6 +1253,7 @@ describe('Engine', function() {
             expect(result).to.be.true();
             done();
         });
+
         it('should return false when statecensustract combo is valid, but msa is NA', function(done) {
             var metroArea = 'NA';
             var state = '37';
@@ -2275,7 +2276,8 @@ describe('Engine', function() {
 
             hmdaJson.hmdaFile.loanApplicationRegisters[1].loanNumber = '1000000000000000000000000';
             hmdaJson.hmdaFile.loanApplicationRegisters[2].loanNumber = '2000000000000000000000000';
-            rewiredEngine.runSyntactical('2013');
+            rewiredEngine.runSyntactical('2013', function(err, result) {});
+
             expect(Object.keys(rewiredEngine.getErrors().syntactical).length).to.be(0);
             done();
         });
@@ -2289,8 +2291,17 @@ describe('Engine', function() {
 
             var errors_syntactical = require('./testdata/errors-syntactical.json');
 
-            rewiredEngine.runSyntactical('2013');
+            rewiredEngine.runSyntactical('2013', function(err, result) {});
             expect(_.isEqual(rewiredEngine.getErrors(), errors_syntactical)).to.be(true);
+            done();
+        });
+
+        it('should return an error when there is a connection problem', function(done) {
+            engine.clearErrors();
+            engine.setAPIURL('/');
+            engine.runSyntactical('2013', function(err, result) {
+                expect(err).to.be('There was a problem connecting to the HMDA server. Please check your connection or try again later.');
+            });
             done();
         });
     });
@@ -2311,8 +2322,17 @@ describe('Engine', function() {
 
             hmdaJson.hmdaFile.loanApplicationRegisters[1].preapprovals = ' ';
 
-            rewiredEngine.runValidity('2013');
+            rewiredEngine.runValidity('2013', function(err, result) {});
             expect(_.isEqual(rewiredEngine.getErrors(), errors_validity)).to.be(true);
+            done();
+        });
+
+        it('should return an error when there is a connection problem', function(done) {
+            engine.clearErrors();
+            engine.setAPIURL('http://localhost:8000');
+            engine.runValidity('2013', function(err, result) {
+                expect(err).to.be('There was a problem connecting to the HMDA server. Please check your connection or try again later.');
+            });
             done();
         });
     });
@@ -2338,9 +2358,18 @@ describe('Engine', function() {
 
             hmdaJson.hmdaFile.transmittalSheet.parentName = '                              ';
             var errors_quality = require('./testdata/errors-quality.json');
-            rewiredEngine.runQuality('2013');
+            rewiredEngine.runQuality('2013', function(err, result) {});
 
             expect(_.isEqual(rewiredEngine.getErrors(), errors_quality)).to.be(true);
+            done();
+        });
+
+        it('should return an error when there is a connection problem', function(done) {
+            engine.clearErrors();
+            engine.setAPIURL('/');
+            engine.runQuality('2013', function(err, result) {
+                expect(err).to.be('There was a problem connecting to the HMDA server. Please check your connection or try again later.');
+            });
             done();
         });
     });
@@ -2364,7 +2393,7 @@ describe('Engine', function() {
                 'macro': {},
             };
 
-            rewiredEngine.runMacro('2013');
+            rewiredEngine.runMacro('2013', function(err, result) {});
             expect(_.isEqual(rewiredEngine.getErrors(), errors)).to.be(true);
             done();
         });
