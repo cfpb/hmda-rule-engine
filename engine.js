@@ -482,8 +482,13 @@ var readResponseSync = function(APIURL, funcName, year, params) {
      */
 
     /* ts-syntactical */
-    HMDAEngine.isTimestampLaterThanDatabase = function(timestamp) {
-        return true;
+    HMDAEngine.isTimestampLaterThanDatabase = function(respondentId, timestamp) {
+        var url = HMDAEngine.getAPIURL() + '/isValidTimestamp/' + HMDAEngine.getRuleYear() + 
+                  '/' + respondentId + '/' + timestamp;
+        var response = request('GET', url);
+        var body = response.getBody('utf8');
+        var result = JSON.parse(body);
+        return result.result;
     };
 
     /* hmda-syntactical */
@@ -711,7 +716,6 @@ var readResponseSync = function(APIURL, funcName, year, params) {
         });
 
         var funcResult = new Function(result.body).apply(this, args);
-
         if (funcResult === true) {
             return [];
         }

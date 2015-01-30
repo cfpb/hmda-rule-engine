@@ -26,6 +26,8 @@ describe('Engine', function() {
     beforeEach(function(done) {
         engine.setAPIURL(mockAPIURL);
         engine.setRuleYear(mockYEAR);
+        rewiredEngine.setAPIURL(mockAPIURL);
+        rewiredEngine.setRuleYear(mockYEAR);
         mockAPI('clean');
         done();
     });
@@ -1265,6 +1267,18 @@ describe('Engine', function() {
         });
     });
 
+    describe('isTimestampLaterThanDatabase', function() {
+        it('should return true when API call to isValidTimestamp API call result is true', function(done) {
+            var respondentId = '0000001195';
+            var timestamp = '201501010000';
+            var path =  '/isValidTimestamp/' + engine.getRuleYear() + '/' + respondentId + '/' + timestamp;
+            mockAPI('get', path, 200, JSON.stringify({ result: true }));
+            var result = engine.isTimestampLaterThanDatabase(respondentId, timestamp);
+            expect(result).to.be.true();
+            done();
+        });
+    });
+
     describe('isChildFI', function() {
         it('should return true when the API response result is true', function(done) {
             var respondentID = '1';
@@ -2255,9 +2269,12 @@ describe('Engine', function() {
         });
 
         it('should return an unmodified set of errors for passing syntactical edits', function(done) {
+            // S013
+            var path = '/isValidTimestamp/'+engine.getRuleYear()+'/0123456789/201301171330';
+            mockAPI('get', path, 200, JSON.stringify({ result: true }), true);
+
             hmdaJson.hmdaFile.loanApplicationRegisters[1].loanNumber = '1000000000000000000000000';
             hmdaJson.hmdaFile.loanApplicationRegisters[2].loanNumber = '2000000000000000000000000';
-
             rewiredEngine.runSyntactical('2013');
             expect(Object.keys(rewiredEngine.getErrors().syntactical).length).to.be(0);
             done();
@@ -2266,6 +2283,9 @@ describe('Engine', function() {
         it('should return a modified set of errors for failing syntactical edits', function(done) {
             topLevelObj.timestamp = 'cat';
             topLevelObj.activityYear = '2014';
+            // S013
+            var path = '/isValidTimestamp/'+engine.getRuleYear()+'/0123456789/cat';
+            mockAPI('get', path, 200, JSON.stringify({ result: true }), true);
 
             var errors_syntactical = require('./testdata/errors-syntactical.json');
 
@@ -2310,7 +2330,7 @@ describe('Engine', function() {
 
         it('should return a modified set of errors for failing quality edits', function(done) {
               // Q029
-            var path = '/isValidCensusCombination/'+engine.getRuleYear()+'/06920/06/034/0100.01';
+            var path = '/isValidCensusCombination/'+engine.getRuleYear()+'/06/034/0100.01';
             mockAPI('get', path, 200, JSON.stringify({ result: true }), true);
 
             path = '/isChildFI/'+engine.getRuleYear()+'/0123456789';

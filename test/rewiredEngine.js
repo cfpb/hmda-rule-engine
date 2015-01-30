@@ -60,9 +60,6 @@ RewiredEngine.isValidNumMultifamilyLoans = function(hmdaFile) {
  */
 
 /* ts-syntactical */
-RewiredEngine.isTimestampLaterThanDatabase = function(timestamp) {
-    return true;
-};
 
 /* hmda-syntactical */
 RewiredEngine.isValidControlNumber = function(hmdaFile) {
@@ -87,9 +84,6 @@ RewiredEngine.isValidCensusTractCombo = function(censusTract, metroArea, fipsSta
 };
 
 /* lar-quality */
-RewiredEngine.isValidStateCountyCensusTractCombo = function(fipsState, fipsCounty, censusTract, metroArea) {
-    return true;
-};
 
 RewiredEngine.isNotIndependentMortgageCoOrMBS = function(respondentID) {
     return true;
@@ -134,9 +128,7 @@ RewiredEngine.isValidMsaMdCountyCensusForNonDepository = function(hmdaFile) {
 };
 
 /* ts-quality */
-RewiredEngine.isChildFI = function(respondentID) {
-    return true;
-};
+
 
 RewiredEngine.isTaxIDTheSameAsLastYear = function(respondentID, taxID) {
     return true;
