@@ -37,6 +37,7 @@
     "brij-spec": "0.0.4",
     "hmda-rule-spec": "cfpb/hmda-rule-spec#milestone5",
     "line-chomper": "^0.4.5",
+    "moment": "^2.9.0",
     "sync-request": "^2.0.0",
     "underscore": "^1.7.0"
   }
