@@ -7,7 +7,8 @@ var hmdajson = require('./lib/hmdajson'),
     _ = require('underscore'),
     brijSpec = require('brij-spec'),
     stream = require('stream'),
-    request = require('sync-request');
+    request = require('sync-request'),
+    moment = require('moment');
 
 var resolveArg = function(arg, contextList) {
     var tokens = arg.split('.');
@@ -205,47 +206,31 @@ var resolveError = function(err, next) {
     };
 
     HMDAEngine.yyyy_mm_dd_hh_mm_ss = function(property) {
-        var regex = /^(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})$/;
-        var tokens = property.match(regex);
-
-        if (tokens !== null) {
-            var year = +tokens[1];
-            var month = (+tokens[2] >= 1 && +tokens[2] <= 12) ? +tokens[2] - 1 : null;
-            var day = (+tokens[3] >= 1 && +tokens[3] <= 31) ? +tokens[3] : null;
-            var hours = (+tokens[4] >= 0 && +tokens[4] < 24) ? +tokens[4] : null;
-            var minutes = (+tokens[5] >= 0 && +tokens[5] < 60) ? +tokens[5] : null;
-            var seconds = (+tokens[6] >= 0 && +tokens[6] < 60) ? +tokens[6] : null;
-
-            var date = new Date(year, month, day, hours, minutes, seconds);
-            return (date.getFullYear() === year && date.getMonth() === month && date.getDate() === day && date.getHours() === hours && date.getMinutes() === minutes && date.getSeconds() === seconds);
-        }
-
-        return false;
+        return moment(property, 'YYYYMMDDHHmmss', true).isValid();
     };
 
     HMDAEngine.yyyy_mm_dd_hh_mm = function(property) {
-        return HMDAEngine.yyyy_mm_dd_hh_mm_ss(property + '00');
+        return moment(property, 'YYYYMMDDHHmm', true).isValid();
     };
 
     HMDAEngine.yyyy_mm_dd = function(property) {
-        return HMDAEngine.yyyy_mm_dd_hh_mm_ss(property + '000000');
+        return moment(property, 'YYYYMMDD', true).isValid();
     };
 
     HMDAEngine.mm_dd_yyyy = function(property) {
-        var dateStr = property.slice(4,8) + property.slice(0,2) + property.slice(2,4) + property.slice(8);
-        return HMDAEngine.yyyy_mm_dd(dateStr);
+        return moment(property, 'MMDDYYYY', true).isValid();
     };
 
     HMDAEngine.yyyy = function(property) {
-        return HMDAEngine.yyyy_mm_dd(property + '0101');
+        return moment(property, 'YYYY', true).isValid();
     };
 
     HMDAEngine.hh_mm = function(property) {
-        return HMDAEngine.yyyy_mm_dd_hh_mm('20140101' + property);
+        return moment(property, 'HHmm', true).isValid();
     };
 
     HMDAEngine.hh_mm_ss = function(property) {
-        return HMDAEngine.yyyy_mm_dd_hh_mm_ss('20140101' + property);
+        return moment(property, 'HHmmss', true).isValid();
     };
 
     HMDAEngine.matches_regex = function(property, regexStr) {
@@ -493,7 +478,7 @@ var resolveError = function(err, next) {
 
     /* ts-syntactical */
     HMDAEngine.isTimestampLaterThanDatabase = function(respondentId, timestamp) {
-        var url = HMDAEngine.getAPIURL() + '/isValidTimestamp/' + HMDAEngine.getRuleYear() + 
+        var url = HMDAEngine.getAPIURL() + '/isValidTimestamp/' + HMDAEngine.getRuleYear() +
                   '/' + respondentId + '/' + timestamp;
         var response = request('GET', url);
         var body = response.getBody('utf8');
