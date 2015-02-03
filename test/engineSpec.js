@@ -2236,7 +2236,7 @@ describe('Engine', function() {
         it('should return a list of errors for a list of line numbers', function(done) {
             var handleArrayErrors = rewiredEngine.__get__('handleArrayErrors');
             var array_errors = require('./testdata/array-errors.json');
-
+            
             expect(_.isEqual(handleArrayErrors(hmdaJson.hmdaFile, [1, 3], ['recordID', 'filler']), array_errors)).to.be(true);
             done();
         });
@@ -2297,9 +2297,6 @@ describe('Engine', function() {
             var errors_syntactical = require('./testdata/errors-syntactical.json');
 
             rewiredEngine.runSyntactical('2013', function(err, result) {});
-            console.log(errors_syntactical);
-            console.log(rewiredEngine.getErrors());
-            console.log(rewiredEngine.getHmdaJson());
             expect(_.isEqual(rewiredEngine.getErrors(), errors_syntactical)).to.be(true);
             done();
         });
