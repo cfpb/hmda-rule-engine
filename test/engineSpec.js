@@ -1195,6 +1195,11 @@ describe('Engine', function() {
             expect(engine.isValidMetroArea('22220')).to.be(true);
             done();
         });
+
+        it('should return true when metroArea is NA', function(done) {
+            expect(engine.isValidMetroArea('NA')).to.be(true);
+            done();
+        });
     });
 
     describe('isValidMsaMdStateAndCountyCombo', function() {
@@ -2292,6 +2297,9 @@ describe('Engine', function() {
             var errors_syntactical = require('./testdata/errors-syntactical.json');
 
             rewiredEngine.runSyntactical('2013', function(err, result) {});
+            console.log(errors_syntactical);
+            console.log(rewiredEngine.getErrors());
+            console.log(rewiredEngine.getHmdaJson());
             expect(_.isEqual(rewiredEngine.getErrors(), errors_syntactical)).to.be(true);
             done();
         });
