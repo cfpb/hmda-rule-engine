@@ -472,6 +472,10 @@ var handleUniqueLoanNumberErrors = function(counts) {
         return true;
     };
 
+    HMDAEngine.isCraReporter = function(hmdaFile) {
+        return true;
+    };
+
     HMDAEngine.isValidMsaMdCountyCensusForNonDepository = function(hmdaFile) {
         return true;
     };
