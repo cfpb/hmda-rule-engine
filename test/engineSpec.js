@@ -2293,10 +2293,11 @@ describe('Engine', function() {
 
             hmdaJson.hmdaFile.loanApplicationRegisters[1].loanNumber = '1000000000000000000000000';
             hmdaJson.hmdaFile.loanApplicationRegisters[2].loanNumber = '2000000000000000000000000';
-            rewiredEngine.runSyntactical('2013', function(err, result) {});
-
-            expect(Object.keys(rewiredEngine.getErrors().syntactical).length).to.be(0);
-            done();
+            rewiredEngine.runSyntactical('2013')
+            .then(function(result) {
+                expect(Object.keys(rewiredEngine.getErrors().syntactical).length).to.be(0);
+                done();
+            });
         });
 
         it('should return a modified set of errors for failing syntactical edits', function(done) {
@@ -2308,18 +2309,20 @@ describe('Engine', function() {
 
             var errors_syntactical = require('./testdata/errors-syntactical.json');
 
-            rewiredEngine.runSyntactical('2013', function(err, result) {});
-            expect(_.isEqual(rewiredEngine.getErrors(), errors_syntactical)).to.be(true);
-            done();
+            rewiredEngine.runSyntactical('2013')
+            .then(function(result) {
+                expect(_.isEqual(rewiredEngine.getErrors(), errors_syntactical)).to.be(true);
+                done();
+            });
         });
 
         it('should return an error when there is a connection problem', function(done) {
-            engine.clearErrors();
             engine.setAPIURL('/');
-            engine.runSyntactical('2013', function(err, result) {
+            engine.runSyntactical('2013')
+            .catch(function(err) {
                 expect(err).to.be('There was a problem connecting to the HMDA server. Please check your connection or try again later.');
+                done();
             });
-            done();
         });
     });
 
@@ -2339,18 +2342,20 @@ describe('Engine', function() {
 
             hmdaJson.hmdaFile.loanApplicationRegisters[1].preapprovals = ' ';
 
-            rewiredEngine.runValidity('2013', function(err, result) {});
-            expect(_.isEqual(rewiredEngine.getErrors(), errors_validity)).to.be(true);
-            done();
+            rewiredEngine.runValidity('2013')
+            .then(function(result) {
+                expect(_.isEqual(rewiredEngine.getErrors(), errors_validity)).to.be(true);
+                done();
+            });
         });
 
         it('should return an error when there is a connection problem', function(done) {
-            engine.clearErrors();
-            engine.setAPIURL('http://localhost:8000');
-            engine.runValidity('2013', function(err, result) {
+            engine.setAPIURL('/');
+            engine.runValidity('2013')
+            .catch(function(err) {
                 expect(err).to.be('There was a problem connecting to the HMDA server. Please check your connection or try again later.');
+                done();
             });
-            done();
         });
     });
 
@@ -2375,19 +2380,20 @@ describe('Engine', function() {
 
             hmdaJson.hmdaFile.transmittalSheet.parentName = '                              ';
             var errors_quality = require('./testdata/errors-quality.json');
-            rewiredEngine.runQuality('2013', function(err, result) {});
-
-            expect(_.isEqual(rewiredEngine.getErrors(), errors_quality)).to.be(true);
-            done();
+            rewiredEngine.runQuality('2013')
+            .then(function(result) {
+                expect(_.isEqual(rewiredEngine.getErrors(), errors_quality)).to.be(true);
+                done();
+            });
         });
 
         it('should return an error when there is a connection problem', function(done) {
-            engine.clearErrors();
             engine.setAPIURL('/');
-            engine.runQuality('2013', function(err, result) {
+            engine.runQuality('2013')
+            .catch(function(err) {
                 expect(err).to.be('There was a problem connecting to the HMDA server. Please check your connection or try again later.');
+                done();
             });
-            done();
         });
     });
 
@@ -2410,9 +2416,21 @@ describe('Engine', function() {
                 'macro': {},
             };
 
-            rewiredEngine.runMacro('2013', function(err, result) {});
-            expect(_.isEqual(rewiredEngine.getErrors(), errors)).to.be(true);
-            done();
+            rewiredEngine.runMacro('2013')
+            .then(function(result) {
+                expect(_.isEqual(rewiredEngine.getErrors(), errors)).to.be(true);
+                done();
+            });
         });
+
+        // TODO: When macro API elements are connected, re-enable
+        // it('should return an error when there is a connection problem', function(done) {
+        //     engine.setAPIURL('/');
+        //     engine.runMacro('2013')
+        //     .catch(function(err) {
+        //         expect(err).to.be('There was a problem connecting to the HMDA server. Please check your connection or try again later.');
+        //         done();
+        //     });
+        // });
     });
 });

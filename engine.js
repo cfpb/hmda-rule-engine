@@ -8,7 +8,8 @@ var hmdajson = require('./lib/hmdajson'),
     brijSpec = require('brij-spec'),
     stream = require('stream'),
     request = require('sync-request'),
-    moment = require('moment');
+    moment = require('moment'),
+    Q = require('q');
 
 var resolveArg = function(arg, contextList) {
     var tokens = arg.split('.');
@@ -83,12 +84,12 @@ var readResponseSync = function(APIURL, funcName, year, params) {
     return result.result;
 };
 
-var resolveError = function(err, next) {
+var resolveError = function(err) {
     if (err.message && err.message === 'Failed to resolve argument!') {
         var msg = 'Rule-spec error: Invalid property\nProperty: ' + err.property + ' not found!';
-        return next(msg, null);
+        return Q.reject(msg);
     }
-    return next('There was a problem connecting to the HMDA server. Please check your connection or try again later.', null);
+    return Q.reject('There was a problem connecting to the HMDA server. Please check your connection or try again later.');
 };
 
 (function() {
@@ -749,74 +750,77 @@ var resolveError = function(err, next) {
         }
     };
 
-    var runEdits = function(year, scope, editType) {
-        HMDAEngine.setRuleYear(year);
-        var rules = hmdaRuleSpec.getEdits(year, scope, editType);
+    HMDAEngine.runEdits = function(year, scope, editType) {
+        var currentEngine = this;
+        return Q.fcall(function() {
+            currentEngine.setRuleYear(year);
+            var rules = hmdaRuleSpec.getEdits(year, scope, editType);
 
-        var topLevelObjs = [];
-        switch (scope) {
-            case 'ts':
-                topLevelObjs.push(_HMDA_JSON.hmdaFile.transmittalSheet);
-                break;
-            case 'lar':
-                for (var i = 0; i < _HMDA_JSON.hmdaFile.loanApplicationRegisters.length; i++) {
-                   topLevelObjs.push(_HMDA_JSON.hmdaFile.loanApplicationRegisters[i]);
-                }
-                break;
-            case 'hmda':
-                topLevelObjs.push(_HMDA_JSON);
-                break;
-        }
+            var topLevelObjs = [];
+            switch (scope) {
+                case 'ts':
+                    topLevelObjs.push(_HMDA_JSON.hmdaFile.transmittalSheet);
+                    break;
+                case 'lar':
+                    for (var i = 0; i < _HMDA_JSON.hmdaFile.loanApplicationRegisters.length; i++) {
+                       topLevelObjs.push(_HMDA_JSON.hmdaFile.loanApplicationRegisters[i]);
+                    }
+                    break;
+                case 'hmda':
+                    topLevelObjs.push(_HMDA_JSON);
+                    break;
+            }
 
-        for (var j = 0; j < rules.length; j++) {
-            for (var k = 0; k < topLevelObjs.length; k++) {
-                var result = this.execRule(topLevelObjs[k], rules[j].rule);
-                if (result.length !== 0) {
-                    addToErrors(result, rules[j], editType, scope);
+            for (var j = 0; j < rules.length; j++) {
+                for (var k = 0; k < topLevelObjs.length; k++) {
+                    var result = currentEngine.execRule(topLevelObjs[k], rules[j].rule);
+                    if (result.length !== 0) {
+                        addToErrors(result, rules[j], editType, scope);
+                    }
                 }
             }
-        }
+        });
     };
 
-    HMDAEngine.runSyntactical = function(year, next) {
-        try {
-            runEdits.bind(this)(year, 'ts', 'syntactical');
-            runEdits.bind(this)(year, 'lar', 'syntactical');
-            runEdits.bind(this)(year, 'hmda', 'syntactical');
-        } catch (err) {
-            return resolveError(err, next);
-        }
-        return next(null, errors);
+    HMDAEngine.runSyntactical = function(year) {
+        return Q.all([
+            this.runEdits(year, 'ts', 'syntactical'),
+            this.runEdits(year, 'lar', 'syntactical'),
+            this.runEdits(year, 'hmda', 'syntactical')
+        ])
+        .fail(function(err) {
+            return resolveError(err);
+        });
     };
 
-    HMDAEngine.runValidity = function(year, next) {
-        try {
-            runEdits.bind(this)(year, 'ts', 'validity');
-            runEdits.bind(this)(year, 'lar', 'validity');
-        } catch (err) {
-            return resolveError(err, next);
-        }
-        return next(null, errors);
+    HMDAEngine.runValidity = function(year) {
+        return Q.all([
+            this.runEdits(year, 'ts', 'validity'),
+            this.runEdits(year, 'lar', 'validity')
+        ])
+        .fail(function(err) {
+            return resolveError(err);
+        });
     };
 
-    HMDAEngine.runQuality = function(year, next) {
-        try {
-            runEdits.bind(this)(year, 'ts', 'quality');
-            runEdits.bind(this)(year, 'lar', 'quality');
-            runEdits.bind(this)(year, 'hmda', 'quality');
-        } catch (err) {
-            return resolveError(err, next);
-        }
-        return next(null, errors);
+    HMDAEngine.runQuality = function(year) {
+        return Q.all([
+            this.runEdits(year, 'ts', 'quality'),
+            this.runEdits(year, 'lar', 'quality'),
+            this.runEdits(year, 'hmda', 'quality')
+        ])
+        .fail(function(err) {
+            return resolveError(err);
+        });
     };
 
-    HMDAEngine.runMacro = function(year, next) {
-        try {
-            runEdits.bind(this)(year, 'hmda', 'macro');
-        } catch (err) {
-            return resolveError(err, next);
-        }
-        return next(null, errors);
+    HMDAEngine.runMacro = function(year) {
+        return Q.all([
+            this.runEdits(year, 'hmda', 'macro')
+        ])
+        .fail(function(err) {
+            return resolveError(err);
+        });
     };
 
 }.call((function() {
