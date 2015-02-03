@@ -1195,6 +1195,11 @@ describe('Engine', function() {
             expect(engine.isValidMetroArea('22220')).to.be(true);
             done();
         });
+
+        it('should return true when metroArea is NA', function(done) {
+            expect(engine.isValidMetroArea('NA')).to.be(true);
+            done();
+        });
     });
 
     describe('isValidMsaMdStateAndCountyCombo', function() {
@@ -2231,7 +2236,7 @@ describe('Engine', function() {
         it('should return a list of errors for a list of line numbers', function(done) {
             var handleArrayErrors = rewiredEngine.__get__('handleArrayErrors');
             var array_errors = require('./testdata/array-errors.json');
-
+            
             expect(_.isEqual(handleArrayErrors(hmdaJson.hmdaFile, [1, 3], ['recordID', 'filler']), array_errors)).to.be(true);
             done();
         });

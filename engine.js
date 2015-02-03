@@ -494,6 +494,9 @@ var resolveError = function(err, next) {
 
     /* lar-validity */
     HMDAEngine.isValidMetroArea = function(metroArea) {
+        if (metroArea === 'NA') {
+            return true;
+        }
         return readResponseSync(HMDAEngine.getAPIURL(), 'isValidMSA', HMDAEngine.getRuleYear(), [metroArea]);
     };
 
