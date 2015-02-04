@@ -561,7 +561,13 @@ var resolveError = function(err, next) {
     };
 
     HMDAEngine.isValidNumHomePurchaseLoans = function(hmdaFile) {
-        return true;
+        var count = 0;
+        _.each(hmdaFile.loanApplicationRegisters, function(element, index, next) {
+            if (element.loanPurpose === '1' && _.contains(['1', '6'], element.actionTaken) && _.contains(['1', '2'], element.propertyType) && element.purchaserType !== '0') {
+                count += 1;
+            }
+        });
+        return readResponseSync(HMDAEngine.getAPIURL(), 'isValidNumHomePurchaseLoans', HMDAEngine.getRuleYear(), [count, hmdaFile.transmittalSheet.respondentID]);
     };
 
     HMDAEngine.isValidNumRefinanceLoans = function(hmdaFile) {
