@@ -664,7 +664,10 @@ var resolveError = function(err) {
                 count += 1;
             }
         });
-        return readResponseSync(HMDAEngine.getAPIURL(), 'isValidNumHomePurchaseLoans', HMDAEngine.getRuleYear(), [count, hmdaFile.transmittalSheet.respondentID]);
+        return apiGET(HMDAEngine.getAPIURL(), 'isValidNumHomePurchaseLoans', HMDAEngine.getRuleYear(), [count, hmdaFile.transmittalSheet.respondentID])
+        .then(function(body) {
+            return resultFromResponse(body);
+        });
     };
 
     HMDAEngine.isValidNumRefinanceLoans = function(hmdaFile) {

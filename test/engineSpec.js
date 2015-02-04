@@ -1344,8 +1344,11 @@ describe('Engine', function() {
             var respondentID = '0123456789';
             var path = '/isValidNumHomePurchaseLoans/' + engine.getRuleYear() + '/10/' + respondentID;
             mockAPI('get', path, 200, JSON.stringify({ result: true }));
-            expect(engine.isValidNumHomePurchaseLoans(hmdaJson.hmdaFile)).to.be(true);
-            done();
+            engine.isValidNumHomePurchaseLoans(hmdaJson.hmdaFile)
+            .then(function(result) {
+                expect(result).to.be(true);
+                done();
+            });
         });
     });
 
@@ -2349,7 +2352,7 @@ describe('Engine', function() {
         it('should return a list of errors for a list of line numbers', function(done) {
             var handleArrayErrors = rewiredEngine.__get__('handleArrayErrors');
             var array_errors = require('./testdata/array-errors.json');
-            
+
             expect(_.isEqual(handleArrayErrors(hmdaJson.hmdaFile, [1, 3], ['recordID', 'filler']), array_errors)).to.be(true);
             done();
         });
