@@ -83,12 +83,6 @@ var handleUniqueLoanNumberErrors = function(counts) {
     return errors;
 };
 
-var apiGET = function(APIURL, funcName, year, params) {
-    var url = APIURL + '/' + funcName + '/' + year;
-    url += '/' + params.join('/');
-    return request('GET', url);
-};
-
 var resultFromResponse = function(response) {
     var body = response.getBody('utf8');
     var result = JSON.parse(body);
@@ -535,9 +529,14 @@ var resolveError = function(err) {
      * -----------------------------------------------------
      */
 
+    var apiGET = function(funcName, params) {
+        var url = HMDAEngine.getAPIURL()+'/'+funcName+'/'+HMDAEngine.getRuleYear()+'/'+params.join('/');
+        return request('GET', url);
+    };
+
     /* ts-syntactical */
     HMDAEngine.isTimestampLaterThanDatabase = function(respondentId, timestamp) {
-        return apiGET(HMDAEngine.getAPIURL(), 'isValidTimestamp', HMDAEngine.getRuleYear(), [respondentId, timestamp])
+        return apiGET('isValidTimestamp', [respondentId, timestamp])
         .then(function(response) {
             return resultFromResponse(response);
         });
@@ -545,7 +544,7 @@ var resolveError = function(err) {
 
     /* hmda-syntactical */
     HMDAEngine.isValidControlNumber = function(hmdaFile) {
-        return apiGET(HMDAEngine.getAPIURL(), 'isValidControlNumber', HMDAEngine.getRuleYear(),
+        return apiGET('isValidControlNumber',
             [hmdaFile.transmittalSheet.agencyCode, hmdaFile.transmittalSheet.respondentID])
         .then(function(response) {
             return resultFromResponse(response);
@@ -557,28 +556,28 @@ var resolveError = function(err) {
         if (metroArea === 'NA') {
             return true;
         }
-        return apiGET(HMDAEngine.getAPIURL(), 'isValidMSA', HMDAEngine.getRuleYear(), [metroArea])
+        return apiGET('isValidMSA', [metroArea])
         .then(function(response) {
             return resultFromResponse(response);
         });
     };
 
     HMDAEngine.isValidMsaMdStateAndCountyCombo = function(metroArea, fipsState, fipsCounty) {
-        return apiGET(HMDAEngine.getAPIURL(), 'isValidMSAStateCounty', HMDAEngine.getRuleYear(), [metroArea, fipsState, fipsCounty])
+        return apiGET('isValidMSAStateCounty', [metroArea, fipsState, fipsCounty])
         .then(function(response) {
             return resultFromResponse(response);
         });
     };
 
     HMDAEngine.isValidStateAndCounty = function(fipsState, fipsCounty) {
-        return apiGET(HMDAEngine.getAPIURL(), 'isValidStateCounty', HMDAEngine.getRuleYear(), [fipsState, fipsCounty])
+        return apiGET('isValidStateCounty', [fipsState, fipsCounty])
         .then(function(response) {
             return resultFromResponse(response);
         });
     };
 
     HMDAEngine.isValidCensusTractCombo = function(censusTract, metroArea, fipsState, fipsCounty) {
-        return apiGET(HMDAEngine.getAPIURL(), 'isValidCensusTractCombo', HMDAEngine.getRuleYear(), [fipsState, fipsCounty, metroArea, censusTract])
+        return apiGET('isValidCensusTractCombo', [fipsState, fipsCounty, metroArea, censusTract])
         .then(function(response) {
             return resultFromResponse(response);
         });
@@ -586,7 +585,7 @@ var resolveError = function(err) {
 
     /* ts-validity */
     HMDAEngine.isRespondentMBS = function(respondentID) {
-        return apiGET(HMDAEngine.getAPIURL(), 'isRespondentMBS', HMDAEngine.getRuleYear(), [respondentID])
+        return apiGET('isRespondentMBS', [respondentID])
         .then(function(response) {
             return resultFromResponse(response);
         });
@@ -594,7 +593,7 @@ var resolveError = function(err) {
 
     /* lar-quality */
     HMDAEngine.isValidStateCountyCensusTractCombo = function(metroArea, fipsState, fipsCounty, censusTract) {
-        return apiGET(HMDAEngine.getAPIURL(), 'isValidCensusCombination', HMDAEngine.getRuleYear(), [fipsState, fipsCounty, censusTract])
+        return apiGET('isValidCensusCombination', [fipsState, fipsCounty, censusTract])
         .then(function(response) {
             var result = resultFromResponse(response);
             if ((result && metroArea !== 'NA') || (!result && metroArea !== 'NA')) {
@@ -614,7 +613,7 @@ var resolveError = function(err) {
 
     /* ts-quality */
     HMDAEngine.isChildFI = function(respondentID) {
-        return apiGET(HMDAEngine.getAPIURL(), 'isChildFI', HMDAEngine.getRuleYear(), [respondentID])
+        return apiGET('isChildFI', [respondentID])
         .then(function(body) {
             return resultFromResponse(body);
         });
@@ -648,7 +647,7 @@ var resolveError = function(err) {
                 count += 1;
             }
         });
-        return apiGET(HMDAEngine.getAPIURL(), 'isValidNumHomePurchaseLoans', HMDAEngine.getRuleYear(), [count, hmdaFile.transmittalSheet.respondentID])
+        return apiGET('isValidNumHomePurchaseLoans', [count, hmdaFile.transmittalSheet.respondentID])
         .then(function(body) {
             return resultFromResponse(body);
         });
