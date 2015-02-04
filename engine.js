@@ -21,17 +21,6 @@ var randomResultName = function() {
     return text;
 };
 
-var iterateArray = function(arr) {
-    var iter = '';
-    for (var i=0; i < arr.length; i++) {
-        iter += arr[i];
-        if (i !== arr.length-1) {
-            iter += ', ';
-        }
-    }
-    return iter;
-};
-
 var resolveArg = function(arg, contextList) {
     var tokens = arg.split('.');
     for (var i = 0; i < contextList.length; i++) {
@@ -807,9 +796,9 @@ var resolveError = function(err) {
 
         currentEngine.parseRule(rule.rule, result);
         var functionBody = 'return Q.spread([';
-        functionBody += iterateArray(result.funcs);
+        functionBody += result.funcs.join(',');
         functionBody += '], function(';
-        functionBody += iterateArray(result.spreads);
+        functionBody += result.spreads.join(',');
         functionBody += ') { return ' + result.body + ' });';
 
         var args = _.map(result.args, function(arg) {
