@@ -96,9 +96,7 @@ var handleUniqueLoanNumberErrors = function(counts) {
 
 var apiGET = function(APIURL, funcName, year, params) {
     var url = APIURL + '/' + funcName + '/' + year;
-    for (var i = 0; i < params.length; i++) {
-        url = url + '/' + params[i];
-    }
+    url += '/' + params.join('/');
     return request('GET', url);
 };
 
