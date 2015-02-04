@@ -100,9 +100,6 @@ var apiGET = function(APIURL, funcName, year, params) {
         url = url + '/' + params[i];
     }
     return request('GET', url);
-    // var body = response.getBody('utf8');
-    // var result = JSON.parse(body);
-    // return result.result;
 };
 
 var resultFromResponse = function(response) {
