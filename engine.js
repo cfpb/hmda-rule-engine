@@ -11,16 +11,6 @@ var hmdajson = require('./lib/hmdajson'),
     moment = require('moment'),
     Q = require('q');
 
-var randomResultName = function() {
-    var text = '';
-    var possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
-
-    for (var i=0; i < 20; i++) {
-        text += possible.charAt(Math.floor(Math.random() * possible.length));
-    }
-    return text;
-};
-
 var resolveArg = function(arg, contextList) {
     var tokens = arg.split('.');
     for (var i = 0; i < contextList.length; i++) {
@@ -671,6 +661,10 @@ var resolveError = function(err) {
      * -----------------------------------------------------
      */
 
+    var promiseResultName = function(promises) {
+        return 'promise' + promises.length + 'result';
+    };
+
     HMDAEngine.fileToJson = function(file, year, next) {
         var spec = hmdaRuleSpec.getFileSpec(year);
 
@@ -707,7 +701,7 @@ var resolveError = function(err) {
             result.args.push(rule.property);
         }
         func += ')';
-        var resultName = randomResultName();
+        var resultName = promiseResultName(result.funcs);
         result.body += resultName;
         result.spreads.push(resultName);
         result.funcs.push(func);
@@ -729,7 +723,7 @@ var resolveError = function(err) {
             }
         }
         func += ')';
-        var resultName = randomResultName();
+        var resultName = promiseResultName(result.funcs);
         result.body += resultName;
         result.spreads.push(resultName);
         result.funcs.push(func);
