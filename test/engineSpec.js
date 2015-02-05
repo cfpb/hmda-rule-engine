@@ -1201,6 +1201,26 @@ describe('Engine', function() {
                 done();
             });
         });
+        it('should return error array when API response result is false', function(done) {
+            var path = '/isValidControlNumber/' + engine.getRuleYear() + '/1/0000000001';
+            mockAPI('get', path, 200, JSON.stringify({ result: false }));
+            engine.isValidControlNumber({
+                transmittalSheet: {
+                    agencyCode: '1',
+                    respondentID: '0000000001'
+            }})
+            .then(function(result) {
+                expect(result.length).to.be(1);
+                expect(result[0]).to.have.property('lineNumber');
+                expect(result[0].lineNumber).to.be('1');
+                expect(result[0]).to.have.property('properties');
+                expect(result[0].properties).to.have.property('agencyCode');
+                expect(result[0].properties).to.have.property('respondentID');
+                expect(result[0].properties.agencyCode).to.be('1');
+                expect(result[0].properties.respondentID).to.be('0000000001');
+                done();
+            });
+        });
     });
 
     describe('isValidMetroArea', function() {

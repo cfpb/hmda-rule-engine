@@ -547,7 +547,11 @@ var resolveError = function(err) {
         return apiGET('isValidControlNumber',
             [hmdaFile.transmittalSheet.agencyCode, hmdaFile.transmittalSheet.respondentID])
         .then(function(response) {
-            return resultFromResponse(response);
+            var result = resultFromResponse(response);
+            if (! result) {
+                return handleArrayErrors(hmdaFile, [1], ['agencyCode', 'respondentID']);
+            }
+            return true;
         });
     };
 
