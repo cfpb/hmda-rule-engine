@@ -423,22 +423,19 @@ var resolveError = function(err) {
             topRule = {'rule': rule};
 
         var countFuncs = [];
-
-        for (var i=0; i < loanApplicationRegisters.length; i++) {
-            var lar = loanApplicationRegisters[i];
-            var countPromise = (function() {
-                return HMDAEngine.execRule(lar, topRule)
+        _.each(loanApplicationRegisters, function(element, index, list) {
+            var countPromise = HMDAEngine.execRule(element, topRule)
                 .then(function(result) {
                     if (result.result.length === 0) {
                         return count += 1;
                     }
                 });
-            }());
             countFuncs.push(countPromise);
-        }
+        });
 
         return Q.all(countFuncs)
-        .then(function(temp) {
+        .then(function() {
+            console.log(count);
             var topLevelObj = {'result': count};
             var topCond = {'rule': cond};
             return HMDAEngine.execRule(topLevelObj, topCond)
@@ -459,30 +456,25 @@ var resolveError = function(err) {
 
         var countFuncs = [];
 
-        for (var i=0; i < loanApplicationRegisters.length; i++) {
-            var lar = loanApplicationRegisters[i];
-            var countPromiseA = (function() {
-                return HMDAEngine.execRule(lar, topruleA)
+        _.each(loanApplicationRegisters, function(element, index, list) {
+            var countPromiseA = HMDAEngine.execRule(element, topruleA)
                 .then(function(result) {
                     if (result.result.length === 0) {
                         return countA += 1;
                     }
                 });
-            }());
             countFuncs.push(countPromiseA);
-            var countPromiseB = (function() {
-                return HMDAEngine.execRule(lar, topruleA)
+            var countPromiseB = HMDAEngine.execRule(element, topruleB)
                 .then(function(result) {
                     if (result.result.length === 0) {
                         return countB += 1;
                     }
                 });
-            }());
             countFuncs.push(countPromiseB);
-        }
+        });
 
         return Q.all(countFuncs)
-        .then(function(temp) {
+        .then(function() {
             var topLevelObj = {'result': countA / countB};
             var topCond = {'rule': cond};
             return HMDAEngine.execRule(topLevelObj, topCond)
