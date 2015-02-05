@@ -1357,6 +1357,21 @@ describe('Engine', function() {
         });
     });
 
+    describe('isTaxIDTheSameAsLastYear', function() {
+        it('should return true when the API response result is true', function(done) {
+            var respondentID = '0000000001';
+            var taxID = '23-0916895';
+            var year = engine.getRuleYear();
+            var path = '/isTaxIDTheSameAsLastYear/' + year + '/' + respondentID + '/' + taxID;
+            mockAPI('get', path, 200, JSON.stringify({result: true}));
+            engine.isTaxIDTheSameAsLastYear(respondentID, taxID)
+            .then(function(result) {
+                expect(result).to.be.true();
+                done();
+            });
+        });
+    });
+
     describe('isValidNumHomePurchaseLoans', function() {
         it('should return true when the number of purchase loans is valid', function(done) {
             var hmdaJson = JSON.parse(JSON.stringify(require('./testdata/home-purchase-loans.json')));

@@ -614,7 +614,10 @@ var resolveError = function(err) {
     };
 
     HMDAEngine.isTaxIDTheSameAsLastYear = function(respondentID, taxID) {
-        return true;
+        return apiGET('isTaxIDTheSameAsLastYear', [respondentID, taxID])
+        .then(function(body) {
+            return resultFromResponse(body);
+        });
     };
 
     /* hmda-macro */
