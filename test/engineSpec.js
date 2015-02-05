@@ -1057,14 +1057,14 @@ describe('Engine', function() {
 
         it('should return true for a passing comparison', function(done) {
             var rule = {
-                'property': 'propertyType',
+                'property': 'filler',
                 'condition': 'equal',
-                'value': '3'
+                'value': 'B'
             };
             var cond = {
                 'property': 'result',
                 'condition': 'less_than',
-                'value': '200'
+                'value': '3'
             };
 
             engine.compareNumEntriesSingle(hmdaJson.hmdaFile.loanApplicationRegisters, rule, cond)
@@ -1076,14 +1076,14 @@ describe('Engine', function() {
 
         it('should return false for a non-passing comparison', function(done) {
             var rule = {
-                'property': 'propertyType',
+                'property': 'filler',
                 'condition': 'equal',
-                'value': '3'
+                'value': 'B'
             };
             var cond = {
                 'property': 'result',
-                'condition': 'less_than',
-                'value': '3'
+                'condition': 'greater_than',
+                'value': '2'
             };
 
             engine.compareNumEntriesSingle(hmdaJson.hmdaFile.loanApplicationRegisters, rule, cond)
