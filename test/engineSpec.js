@@ -959,11 +959,11 @@ describe('Engine', function() {
             done();
         });
 
-        it('should return false for an actionDate that is an invalid date', function(done) {
+        it('should return true for an actionDate that is an invalid date but in the activity year', function(done) {
             var actionDate = '20142014';    // Invalid month
             var activityYear = '2014';
 
-            expect(engine.isActionDateInActivityYear(actionDate, activityYear)).to.be(false);
+            expect(engine.isActionDateInActivityYear(actionDate, activityYear)).to.be(true);
             done();
         });
     });
