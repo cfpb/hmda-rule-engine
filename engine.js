@@ -622,7 +622,12 @@ var resolveError = function(err) {
 
     /* hmda-macro */
     HMDAEngine.isValidNumLoans = function(hmdaFile) {
-        return true;
+        var respondentID = hmdaFile.transmittalSheet.respondentID;
+        var numLoans = hmdaFile.loanApplicationRegisters.length;
+        return apiGET('isValidNumLoans', [numLoans, respondentID])
+        .then(function(body) {
+            return resultFromResponse(body);
+        });
     };
 
     HMDAEngine.isValidNumFannieMaeLoans = function(hmdaFile) {
