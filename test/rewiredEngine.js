@@ -123,10 +123,6 @@ RewiredEngine.isValidNumRefinanceLoans = function(hmdaFile) {
     return true;
 };
 
-RewiredEngine.isValidMsaMdCountyCensusForNonDepository = function(hmdaFile) {
-    return true;
-};
-
 /* ts-quality */
 
 

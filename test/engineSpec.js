@@ -1240,6 +1240,54 @@ describe('Engine', function() {
         });
     });
 
+
+    describe('isValidMsaMdCountyCensusForNonDepository', function() {
+        var hmdaJson = {};
+        
+        beforeEach(function() {
+            hmdaJson = JSON.parse(JSON.stringify(require('./testdata/complete.json')));
+        });
+
+        it('should return true when the respondent is not CRA reporter', function(done) {
+            var path = '/isCraReporter/' + engine.getRuleYear() + '/0123456789';
+            mockAPI('get', path, 200, JSON.stringify({ result: false }));
+            engine.isValidMsaMdCountyCensusForNonDepository(hmdaJson.hmdaFile)
+            .then(function(result) {
+                expect(result).to.be(true);
+                done();
+            });
+        });
+
+        it('should return true if CRA reporter and all the relevant LARs MSAs are good', function(done) {
+            var path = '/isCraReporter/' + engine.getRuleYear() + '/0123456789';
+            mockAPI('get', path, 200, JSON.stringify({ result: true }));
+            path = '/isValidCensusInMSA/'+engine.getRuleYear()+'/06920/06/034/0100.01';
+            mockAPI('get', path, 200, JSON.stringify({ result: true }), true);
+            
+            engine.isValidMsaMdCountyCensusForNonDepository(hmdaJson.hmdaFile)
+            .then(function(result) {
+                expect(result).to.be(true);
+                done();
+            });
+        });
+
+        it('should return false when one of the LARs census tract is NA', function(done) {
+            var path = '/isCraReporter/' + engine.getRuleYear() + '/0123456789';
+            mockAPI('get', path, 200, JSON.stringify({ result: true }));
+            hmdaJson.hmdaFile.loanApplicationRegisters[0].censusTract = 'NA';
+            path = '/isValidCensusInMSA/'+engine.getRuleYear()+'/06920/06/034/0100.01';
+            mockAPI('get', path, 200, JSON.stringify({ result: true }), true);
+            
+            engine.isValidMsaMdCountyCensusForNonDepository(hmdaJson.hmdaFile)
+            .then(function(result) {
+                expect(result[0].lineNumber).to.be('2');
+                expect(result.length).to.be(1);
+                done();
+            });
+        });
+
+    });
+
     describe('isValidMsaMdStateAndCountyCombo', function() {
         it('should return true when the API response result is true', function(done) {
             var path = '/isValidMSAStateCounty/' + engine.getRuleYear() + '/22220/05/143';
@@ -2517,6 +2565,12 @@ describe('Engine', function() {
 
             path = '/isChildFI/'+engine.getRuleYear()+'/0123456789';
             mockAPI('get', path, 200, JSON.stringify({ result: true }));
+
+            // Q030
+            path = '/isCraReporter/'+engine.getRuleYear()+'/0123456789';
+            mockAPI('get', path, 200, JSON.stringify({ result: true }));
+            path = '/isValidCensusInMSA/'+engine.getRuleYear()+'/06920/06/034/0100.01';
+            mockAPI('get', path, 200, JSON.stringify({ result: true }), true);
 
             hmdaJson.hmdaFile.transmittalSheet.parentName = '                              ';
             var errors_quality = require('./testdata/errors-quality.json');
