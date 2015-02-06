@@ -396,7 +396,7 @@ var resolveError = function(err) {
 
     /* lar-syntactical */
     HMDAEngine.isActionDateInActivityYear = function(actionDate, activityYear) {
-        return HMDAEngine.yyyy_mm_dd(actionDate) && HMDAEngine.yyyy(activityYear) && activityYear === actionDate.slice(0,4);
+        return activityYear === actionDate.slice(0,4);
     };
 
     /* lar-quality */
