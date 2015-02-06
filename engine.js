@@ -640,14 +640,23 @@ var resolveError = function(err) {
                 count += 1;
             }
         });
-        return apiGET('isValidNumHomePurchaseLoans', [count, hmdaFile.transmittalSheet.respondentID])
+        return apiGET('isValidNumHomePurchaseLoans', [hmdaFile.transmittalSheet.respondentID, count])
         .then(function(body) {
             return resultFromResponse(body);
         });
     };
 
     HMDAEngine.isValidNumRefinanceLoans = function(hmdaFile) {
-        return true;
+        var count = 0;
+        _.each(hmdaFile.loanApplicationRegisters, function(element, index, next) {
+            if (element.loanPurpose === '3' && _.contains(['1', '6'], element.actionTaken) && _.contains(['1', '2'], element.propertyType) && element.purchaserType !== '0') {
+                count += 1;
+            }
+        });
+        return apiGET('isValidNumRefinanceLoans', [hmdaFile.transmittalSheet.respondentID, count])
+        .then(function(body) {
+            return resultFromResponse(body);
+        });
     };
 
     HMDAEngine.isValidMsaMdCountyCensusForNonDepository = function(hmdaFile) {
