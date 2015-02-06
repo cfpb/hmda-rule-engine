@@ -48,7 +48,9 @@ var handleArrayErrors = function(hmdaFile, lines, properties) {
         if (line === 1) {
             retrieveProps(error, hmdaFile.transmittalSheet, properties);
         } else {
-            retrieveProps(error, hmdaFile.loanApplicationRegisters[line-2], properties);
+            var lar = hmdaFile.loanApplicationRegisters[line-2];
+            retrieveProps(error, lar, properties);
+            error.loanNumber = lar.loanNumber;
         }
         errors.push(error);
     }
@@ -822,6 +824,9 @@ var resolveError = function(err) {
                 var error = {'properties': {}};
 
                 error.lineNumber = topLevelObj.lineNumber;
+                if (topLevelObj.hasOwnProperty('loanNumber')) {
+                    error.loanNumber = topLevelObj.loanNumber;
+                }
                 for (var i = 0; i < args.length; i++) {
                     error.properties[result.args[i]] = args[i];
                 }

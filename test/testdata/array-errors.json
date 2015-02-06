@@ -11,6 +11,7 @@
 		"properties": {
 			"recordID": "2",
 			"filler": "B"
-		}
+		},
+		"loanNumber": "ABCDEFGHIJKLMNOPQRSTUVWXY"
 	}
 ]
