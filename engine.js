@@ -419,14 +419,13 @@ var resolveError = function(err) {
 
     /* hmda-macro */
     HMDAEngine.compareNumEntriesSingle = function(loanApplicationRegisters, rule, cond) {
-        var count = 0,
-            topRule = {'rule': rule};
+        var count = 0;
 
         var countFuncs = [];
-        _.each(loanApplicationRegisters, function(element, index, list) {
-            var countPromise = HMDAEngine.execRule(element, topRule)
+        _.each(loanApplicationRegisters, function(lar) {
+            var countPromise = HMDAEngine.execRule(lar, rule)
                 .then(function(result) {
-                    if (result.result.length === 0) {
+                    if (result.length === 0) {
                         return count += 1;
                     }
                 });
@@ -435,11 +434,11 @@ var resolveError = function(err) {
 
         return Q.all(countFuncs)
         .then(function() {
-            var topLevelObj = {'result': count};
-            var topCond = {'rule': cond};
-            return HMDAEngine.execRule(topLevelObj, topCond)
+            var topLevelObj = {};
+            topLevelObj[cond.property] = count;
+            return HMDAEngine.execRule(topLevelObj, cond)
             .then(function(result) {
-                if (result.result.length === 0) {
+                if (result.length === 0) {
                     return true;
                 }
                 return false;
@@ -449,23 +448,21 @@ var resolveError = function(err) {
 
     HMDAEngine.compareNumEntries = function(loanApplicationRegisters, ruleA, ruleB, cond) {
         var countA = 0,
-            countB = 0,
-            topruleA = {'rule': ruleA},
-            topruleB = {'rule': ruleB};
+            countB = 0;
 
         var countFuncs = [];
 
-        _.each(loanApplicationRegisters, function(element, index, list) {
-            var countPromiseA = HMDAEngine.execRule(element, topruleA)
+        _.each(loanApplicationRegisters, function(lar) {
+            var countPromiseA = HMDAEngine.execRule(lar, ruleA)
                 .then(function(result) {
-                    if (result.result.length === 0) {
+                    if (result.length === 0) {
                         return countA += 1;
                     }
                 });
             countFuncs.push(countPromiseA);
-            var countPromiseB = HMDAEngine.execRule(element, topruleB)
+            var countPromiseB = HMDAEngine.execRule(lar, ruleB)
                 .then(function(result) {
-                    if (result.result.length === 0) {
+                    if (result.length === 0) {
                         return countB += 1;
                     }
                 });
@@ -474,11 +471,11 @@ var resolveError = function(err) {
 
         return Q.all(countFuncs)
         .then(function() {
-            var topLevelObj = {'result': countA / countB};
-            var topCond = {'rule': cond};
-            return HMDAEngine.execRule(topLevelObj, topCond)
+            var topLevelObj = {};
+            topLevelObj[cond.property] = countA / countB;
+            return HMDAEngine.execRule(topLevelObj, cond)
             .then(function(result) {
-                if (result.result.length === 0) {
+                if (result.length === 0) {
                     return true;
                 }
                 return false;
@@ -788,7 +785,6 @@ var resolveError = function(err) {
      */
 
     HMDAEngine.execRule = function(topLevelObj, rule) {
-        var ruleid = rule.hasOwnProperty('id') ? rule.id : '';
         var currentEngine = this;
         var result = {
             argIndex: 0,
@@ -799,7 +795,7 @@ var resolveError = function(err) {
             properties: {}
         };
 
-        currentEngine.parseRule(rule.rule, result);
+        currentEngine.parseRule(rule, result);
         var functionBody = 'return Q.spread([';
         functionBody += result.funcs.join(',');
         functionBody += '], function(';
@@ -831,7 +827,7 @@ var resolveError = function(err) {
                 }
                 promiseResult = [error];
             }
-            return {'ruleid': ruleid, 'result': promiseResult};
+            return promiseResult;
         });
     };
 
@@ -840,14 +836,6 @@ var resolveError = function(err) {
      * API Endpoints
      * -----------------------------------------------------
      */
-
-    var getRule = function(rules, ruleid) {
-        for (var idx in rules) {
-            if (rules[idx].id === ruleid) {
-                return rules[idx];
-            }
-        }
-    };
 
     var addToErrors = function(newErrors, rule, editType, scope) {
         if (errors[editType][rule.id] === undefined) {
@@ -885,22 +873,17 @@ var resolveError = function(err) {
         }
 
         var execRuleFuncs = [];
-        for (var j = 0; j < rules.length; j++) {
-            var currentRule = rules[j];
-            for (var k = 0; k < topLevelObjs.length; k++) {
-                var currentTopLevelObj = topLevelObjs[k];
-                var execRulePromise = (function() {
-                    return currentEngine.execRule(currentTopLevelObj, currentRule)
+        _.each(rules, function(currentRule) {
+            _.each(topLevelObjs, function(currentTopLevelObj) {
+                var execRulePromise = currentEngine.execRule(currentTopLevelObj, currentRule.rule)
                     .then(function(result) {
-                        if (result.result.length !== 0) {
-                            var erroredRule = getRule(rules, result.ruleid);
-                            addToErrors(result.result, erroredRule, editType, scope);
+                        if (result.length !== 0) {
+                            addToErrors(result, currentRule, editType, scope);
                         }
                     });
-                }());
                 execRuleFuncs.push(execRulePromise);
-            }
-        }
+            });
+        });
         return Q.all(execRuleFuncs);
     };
 
