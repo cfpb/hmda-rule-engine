@@ -1372,6 +1372,22 @@ describe('Engine', function() {
         });
     });
 
+    describe('isValidNumLoans', function() {
+        it('should return true when the API response result is true', function(done) {
+            var hmdaFile = JSON.parse(JSON.stringify(require('./testdata/complete.json'))).hmdaFile;
+            var respondentID = hmdaFile.transmittalSheet.respondentID;
+            var numLoans = 3;
+            var year = engine.getRuleYear();
+            var path = '/isValidNumLoans/' + year + '/' + respondentID + '/' + numLoans;
+            mockAPI('get', path, 200, JSON.stringify({result: true}));
+            engine.isValidNumLoans(hmdaFile)
+            .then(function(result) {
+                expect(result).to.be.true();
+                done();
+            });
+        });
+    });
+
     describe('isValidNumHomePurchaseLoans', function() {
         it('should return true when the number of purchase loans is valid', function(done) {
             var hmdaJson = JSON.parse(JSON.stringify(require('./testdata/home-purchase-loans.json')));
