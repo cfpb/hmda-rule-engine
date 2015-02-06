@@ -645,10 +645,6 @@ var resolveError = function(err) {
         return true;
     };
 
-    HMDAEngine.isCraReporter = function(hmdaFile) {
-        return true;
-    };
-
     HMDAEngine.isValidMsaMdCountyCensusForNonDepository = function(hmdaFile) {
         var invalidMSAs = [];
         return apiGET('isCraReporter', [hmdaFile.transmittalSheet.respondentID])
