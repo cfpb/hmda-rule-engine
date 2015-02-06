@@ -1393,7 +1393,7 @@ describe('Engine', function() {
             var hmdaJson = JSON.parse(JSON.stringify(require('./testdata/home-purchase-loans.json')));
 
             var respondentID = '0123456789';
-            var path = '/isValidNumHomePurchaseLoans/' + engine.getRuleYear() + '/10/' + respondentID;
+            var path = '/isValidNumHomePurchaseLoans/' + engine.getRuleYear() + '/' + respondentID + '/10';
             mockAPI('get', path, 200, JSON.stringify({ result: true }));
             engine.isValidNumHomePurchaseLoans(hmdaJson.hmdaFile)
             .then(function(result) {

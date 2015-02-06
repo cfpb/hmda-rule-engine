@@ -640,7 +640,7 @@ var resolveError = function(err) {
                 count += 1;
             }
         });
-        return apiGET('isValidNumHomePurchaseLoans', [count, hmdaFile.transmittalSheet.respondentID])
+        return apiGET('isValidNumHomePurchaseLoans', [hmdaFile.transmittalSheet.respondentID, count])
         .then(function(body) {
             return resultFromResponse(body);
         });
