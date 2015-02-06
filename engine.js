@@ -616,7 +616,7 @@ var resolveError = function(err) {
     HMDAEngine.isValidNumLoans = function(hmdaFile) {
         var respondentID = hmdaFile.transmittalSheet.respondentID;
         var numLoans = hmdaFile.loanApplicationRegisters.length;
-        return apiGET('isValidNumLoans', [numLoans, respondentID])
+        return apiGET('isValidNumLoans', [respondentID, numLoans])
         .then(function(body) {
             return resultFromResponse(body);
         });
