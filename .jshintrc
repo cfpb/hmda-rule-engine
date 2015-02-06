@@ -75,7 +75,7 @@
     // Whether use before define should be forbidden.
     "latedef": false,
     // Whether functions should be allowed to be defined within loops.
-    "loopfunc": false,
+    "loopfunc": true,
     // Whether arguments.caller and arguments.callee should be forbidden.
     "noarg": false,
     // Whether `.` should be forbidden in regexp literals.
