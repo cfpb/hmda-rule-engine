@@ -1378,7 +1378,7 @@ describe('Engine', function() {
             var respondentID = hmdaFile.transmittalSheet.respondentID;
             var numLoans = 3;
             var year = engine.getRuleYear();
-            var path = '/isValidNumLoans/' + year + '/' + numLoans + '/' + respondentID;
+            var path = '/isValidNumLoans/' + year + '/' + respondentID + '/' + numLoans;
             mockAPI('get', path, 200, JSON.stringify({result: true}));
             engine.isValidNumLoans(hmdaFile)
             .then(function(result) {

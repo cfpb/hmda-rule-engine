@@ -435,7 +435,6 @@ var resolveError = function(err) {
 
         return Q.all(countFuncs)
         .then(function() {
-            console.log(count);
             var topLevelObj = {'result': count};
             var topCond = {'rule': cond};
             return HMDAEngine.execRule(topLevelObj, topCond)
