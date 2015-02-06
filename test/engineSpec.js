@@ -1403,6 +1403,21 @@ describe('Engine', function() {
         });
     });
 
+    describe('isValidNumRefinanceLoans', function() {
+        it('should return true when the number of purchase loans is valid', function(done) {
+           var hmdaJson = JSON.parse(JSON.stringify(require('./testdata/refinance-loans.json')));
+
+            var respondentID = '0123456789';
+            var path = '/isValidNumRefinanceLoans/' + engine.getRuleYear() + '/' + respondentID + '/10';
+            mockAPI('get', path, 200, JSON.stringify({ result: true }));
+            engine.isValidNumRefinanceLoans(hmdaJson.hmdaFile)
+            .then(function(result) {
+                expect(result).to.be(true);
+                done();
+            });
+        });
+    });
+
     describe('parseRule', function() {
         var result;
 
