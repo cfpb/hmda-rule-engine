@@ -1378,7 +1378,7 @@ describe('Engine', function() {
             var respondentID = hmdaFile.transmittalSheet.respondentID;
             var numLoans = 3;
             var year = engine.getRuleYear();
-            var path = '/isValidNumLoans/' + year + '/' + numLoans + '/' + respondentID;
+            var path = '/isValidNumLoans/' + year + '/' + respondentID + '/' + numLoans;
             mockAPI('get', path, 200, JSON.stringify({result: true}));
             engine.isValidNumLoans(hmdaFile)
             .then(function(result) {
@@ -1393,9 +1393,24 @@ describe('Engine', function() {
             var hmdaJson = JSON.parse(JSON.stringify(require('./testdata/home-purchase-loans.json')));
 
             var respondentID = '0123456789';
-            var path = '/isValidNumHomePurchaseLoans/' + engine.getRuleYear() + '/10/' + respondentID;
+            var path = '/isValidNumHomePurchaseLoans/' + engine.getRuleYear() + '/' + respondentID + '/10';
             mockAPI('get', path, 200, JSON.stringify({ result: true }));
             engine.isValidNumHomePurchaseLoans(hmdaJson.hmdaFile)
+            .then(function(result) {
+                expect(result).to.be(true);
+                done();
+            });
+        });
+    });
+
+    describe('isValidNumRefinanceLoans', function() {
+        it('should return true when the number of purchase loans is valid', function(done) {
+           var hmdaJson = JSON.parse(JSON.stringify(require('./testdata/refinance-loans.json')));
+
+            var respondentID = '0123456789';
+            var path = '/isValidNumRefinanceLoans/' + engine.getRuleYear() + '/' + respondentID + '/10';
+            mockAPI('get', path, 200, JSON.stringify({ result: true }));
+            engine.isValidNumRefinanceLoans(hmdaJson.hmdaFile)
             .then(function(result) {
                 expect(result).to.be(true);
                 done();
