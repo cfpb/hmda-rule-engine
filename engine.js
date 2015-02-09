@@ -659,7 +659,45 @@ var resolveError = function(err) {
     };
 
     HMDAEngine.isValidMsaMdCountyCensusForNonDepository = function(hmdaFile) {
-        return true;
+        var invalidMSAs = [];
+        return apiGET('isCraReporter', [hmdaFile.transmittalSheet.respondentID])
+        .then(function(response) {
+            var result = resultFromResponse(response);
+            if (result) {
+                var validActionTaken = ['1', '2', '3', '4', '5', '6'];
+                var promises = [];
+                _.each(hmdaFile.loanApplicationRegisters, function(element) {
+                    if (_.contains(validActionTaken, element.actionTaken)) {
+                        if (element.censusTract==='NA') {
+                            invalidMSAs.push(element.lineNumber);
+                        } else {
+                            promises.push(
+                                apiGET('isValidCensusInMSA', [element.metroArea, element.fipsState, 
+                                       element.fipsCounty, element.censusTract])
+                                .then (function (response) {
+                                    if (!resultFromResponse(response)) {
+                                        invalidMSAs.push(element.lineNumber);
+                                    }
+                                })
+                            );
+                        }
+                    }
+                });
+
+                return Q.all(promises)
+                .then(function() {
+                    if (!invalidMSAs.length) {
+                        return true;
+                    } else {
+                        return handleArrayErrors(hmdaFile, invalidMSAs, 
+                            ['metroArea','fipsState','fipsCounty','censusTract']);    
+                    }
+                });
+            } else {
+                return true;
+            }
+        });
+            
     };
 
     /*
