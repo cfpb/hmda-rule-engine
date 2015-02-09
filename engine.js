@@ -612,7 +612,7 @@ var resolveError = function(err) {
     HMDAEngine.isValidNumLoans = function(hmdaFile) {
         var respondentID = hmdaFile.transmittalSheet.respondentID;
         var numLoans = hmdaFile.loanApplicationRegisters.length;
-        return apiGET('isValidNumLoans', [respondentID, numLoans])
+        return apiGET('isValidNumLoans/total', [respondentID, numLoans])
         .then(function(body) {
             return resultFromResponse(body);
         });
@@ -637,7 +637,7 @@ var resolveError = function(err) {
                 count += 1;
             }
         });
-        return apiGET('isValidNumHomePurchaseLoans', [hmdaFile.transmittalSheet.respondentID, count])
+        return apiGET('isValidNumLoans/homePurchase', [hmdaFile.transmittalSheet.respondentID, count])
         .then(function(body) {
             return resultFromResponse(body);
         });
@@ -650,7 +650,7 @@ var resolveError = function(err) {
                 count += 1;
             }
         });
-        return apiGET('isValidNumRefinanceLoans', [hmdaFile.transmittalSheet.respondentID, count])
+        return apiGET('isValidNumLoans/refinance', [hmdaFile.transmittalSheet.respondentID, count])
         .then(function(body) {
             return resultFromResponse(body);
         });
