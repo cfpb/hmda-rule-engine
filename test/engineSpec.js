@@ -2568,7 +2568,7 @@ describe('Engine', function() {
 
             // Q030
             path = '/isCraReporter/'+engine.getRuleYear()+'/0123456789';
-            mockAPI('get', path, 200, JSON.stringify({ result: true }));
+            mockAPI('get', path, 200, JSON.stringify({ result: true }), true);
             path = '/isValidCensusInMSA/'+engine.getRuleYear()+'/06920/06/034/0100.01';
             mockAPI('get', path, 200, JSON.stringify({ result: true }), true);
 
