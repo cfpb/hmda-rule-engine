@@ -80,7 +80,7 @@ var handleUniqueLoanNumberErrors = function(counts) {
 
 var resultFromResponse = function(response) {
     var result = JSON.parse(response);
-    return result.result;
+    return result;
 };
 
 var resolveError = function(err) {
