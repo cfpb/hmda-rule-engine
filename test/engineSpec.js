@@ -16,8 +16,7 @@ var engine = require('../engine'),
 describe('Engine', function() {
 
     before(function(done) {
-        //mockAPIURL = 'http://localhost:' + port;
-        mockAPIURL = 'http://localhost:8000'
+        mockAPIURL = 'http://localhost:' + port;
         mockYEAR = '2013';
         expect(port).to.not.be.undefined();
         expect(port).to.not.be(0);
