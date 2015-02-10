@@ -2527,11 +2527,7 @@ describe('Engine', function() {
             hmdaJson.hmdaFile.loanApplicationRegisters[2].loanNumber = '2000000000000000000000000';
             rewiredEngine.runSyntactical('2013')
             .then(function(result) {
-                console.log('WEE!');
                 expect(Object.keys(rewiredEngine.getErrors().syntactical).length).to.be(0);
-                done();
-            }).catch(function(err) {
-                console.log(err.message);
                 done();
             });
         });
@@ -2550,9 +2546,6 @@ describe('Engine', function() {
             rewiredEngine.runSyntactical('2013')
             .then(function(result) {
                 expect(_.isEqual(rewiredEngine.getErrors(), errors_syntactical)).to.be(true);
-                done();
-            }).catch(function(err) {
-                console.log(err.message);
                 done();
             });
         });
