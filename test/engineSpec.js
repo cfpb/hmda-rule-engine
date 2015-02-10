@@ -16,7 +16,8 @@ var engine = require('../engine'),
 describe('Engine', function() {
 
     before(function(done) {
-        mockAPIURL = 'http://localhost:' + port;
+        //mockAPIURL = 'http://localhost:' + port;
+        mockAPIURL = 'http://localhost:8000'
         mockYEAR = '2013';
         expect(port).to.not.be.undefined();
         expect(port).to.not.be(0);
@@ -1243,7 +1244,7 @@ describe('Engine', function() {
 
     describe('isValidMsaMdCountyCensusForNonDepository', function() {
         var hmdaJson = {};
-        
+
         beforeEach(function() {
             hmdaJson = JSON.parse(JSON.stringify(require('./testdata/complete.json')));
         });
@@ -1263,7 +1264,7 @@ describe('Engine', function() {
             mockAPI('get', path, 200, JSON.stringify({ result: true }));
             path = '/isValidCensusInMSA/'+engine.getRuleYear()+'/06920/06/034/0100.01';
             mockAPI('get', path, 200, JSON.stringify({ result: true }), true);
-            
+
             engine.isValidMsaMdCountyCensusForNonDepository(hmdaJson.hmdaFile)
             .then(function(result) {
                 expect(result).to.be(true);
@@ -1277,7 +1278,7 @@ describe('Engine', function() {
             hmdaJson.hmdaFile.loanApplicationRegisters[0].censusTract = 'NA';
             path = '/isValidCensusInMSA/'+engine.getRuleYear()+'/06920/06/034/0100.01';
             mockAPI('get', path, 200, JSON.stringify({ result: true }), true);
-            
+
             engine.isValidMsaMdCountyCensusForNonDepository(hmdaJson.hmdaFile)
             .then(function(result) {
                 expect(result[0].lineNumber).to.be('2');
@@ -2527,7 +2528,11 @@ describe('Engine', function() {
             hmdaJson.hmdaFile.loanApplicationRegisters[2].loanNumber = '2000000000000000000000000';
             rewiredEngine.runSyntactical('2013')
             .then(function(result) {
+                console.log('WEE!');
                 expect(Object.keys(rewiredEngine.getErrors().syntactical).length).to.be(0);
+                done();
+            }).catch(function(err) {
+                console.log(err.message);
                 done();
             });
         });
@@ -2546,6 +2551,9 @@ describe('Engine', function() {
             rewiredEngine.runSyntactical('2013')
             .then(function(result) {
                 expect(_.isEqual(rewiredEngine.getErrors(), errors_syntactical)).to.be(true);
+                done();
+            }).catch(function(err) {
+                console.log(err.message);
                 done();
             });
         });

@@ -7,9 +7,12 @@ var hmdajson = require('./lib/hmdajson'),
     _ = require('underscore'),
     brijSpec = require('brij-spec'),
     stream = require('stream'),
-    request = require('then-request'),
+    GET = require('./lib/promise-http-get'),
     moment = require('moment'),
-    Q = require('q');
+    Q = require('q'),
+    CONCURRENT_RULES = 10;
+
+Q.map = require('q-map').map;
 
 var resolveArg = function(arg, contextList) {
     var tokens = arg.split('.');
@@ -76,17 +79,18 @@ var handleUniqueLoanNumberErrors = function(counts) {
 };
 
 var resultFromResponse = function(response) {
-    var body = response.getBody('utf8');
-    var result = JSON.parse(body);
-    return result;
+    var result = JSON.parse(response);
+    return result.result;
 };
 
 var resolveError = function(err) {
     if (err.message && err.message === 'Failed to resolve argument!') {
-        var msg = 'Rule-spec error: Invalid property\nProperty: ' + err.property + ' not found!';
-        return Q.reject(new Error(msg));
+        return Q.reject(new Error('Rule-spec error: Invalid property\nProperty: ' + err.property + ' not found!'));
+    } else if (err.message && err.message === 'connect ECONNREFUSED') {
+        return Q.reject(new Error('There was a problem connecting to the HMDA server. Please check your connection or try again later.'));
+    } else {
+        return Q.reject(err);
     }
-    return Q.reject(new Error('There was a problem connecting to the HMDA server. Please check your connection or try again later.'));
 };
 
 (function() {
@@ -511,7 +515,7 @@ var resolveError = function(err) {
 
     var apiGET = function(funcName, params) {
         var url = HMDAEngine.getAPIURL()+'/'+funcName+'/'+HMDAEngine.getRuleYear()+'/'+params.join('/');
-        return request('GET', url);
+        return GET(url);
     };
 
     /* ts-syntactical */
@@ -624,7 +628,7 @@ var resolveError = function(err) {
         var numFannieLoans = 0,
             numLoans = 0;
         _.each(hmdaFile.loanApplicationRegisters, function(element, index, next) {
-            if (_.contains(['1', '3'], element.loanPurpose) && _.contains(['1', '6'], element.actionTaken) && 
+            if (_.contains(['1', '3'], element.loanPurpose) && _.contains(['1', '6'], element.actionTaken) &&
                 _.contains(['1', '2'], element.propertyType)) {
                 numLoans++;
                 if (_.contains(['1', '3'], element.purchaserType)) {
@@ -694,7 +698,7 @@ var resolveError = function(err) {
                             invalidMSAs.push(element.lineNumber);
                         } else {
                             promises.push(
-                                apiGET('isValidCensusInMSA', [element.metroArea, element.fipsState, 
+                                apiGET('isValidCensusInMSA', [element.metroArea, element.fipsState,
                                        element.fipsCounty, element.censusTract])
                                 .then (function (response) {
                                     if (!resultFromResponse(response)) {
@@ -711,15 +715,15 @@ var resolveError = function(err) {
                     if (!invalidMSAs.length) {
                         return true;
                     } else {
-                        return handleArrayErrors(hmdaFile, invalidMSAs, 
-                            ['metroArea','fipsState','fipsCounty','censusTract']);    
+                        return handleArrayErrors(hmdaFile, invalidMSAs,
+                            ['metroArea','fipsState','fipsCounty','censusTract']);
                     }
                 });
             } else {
                 return true;
             }
         });
-            
+
     };
 
     /*
@@ -917,39 +921,61 @@ var resolveError = function(err) {
         }
     };
 
+    var getExecRulePromise = function(args) {
+        //console.time(args.scope + ' ' + args.rule.id);
+        return HMDAEngine.execRule(args.topLevelObj, args.rule.rule)
+        .then(function(result) {
+            if (result.length !== 0) {
+                addToErrors(result, args.rule, args.editType, args.scope);
+            }
+            //console.timeEnd(args.scope + ' ' + args.rule.id);
+        });
+    };
+
     HMDAEngine.runEdits = function(year, scope, editType) {
         var currentEngine = this;
         currentEngine.setRuleYear(year);
         var rules = hmdaRuleSpec.getEdits(year, scope, editType);
 
-        var topLevelObjs = [];
+        var topLevelObj;
         switch (scope) {
             case 'ts':
-                topLevelObjs.push(currentEngine.getHmdaJson().hmdaFile.transmittalSheet);
+                topLevelObj = currentEngine.getHmdaJson().hmdaFile.transmittalSheet;
                 break;
             case 'lar':
-                for (var i = 0; i < currentEngine.getHmdaJson().hmdaFile.loanApplicationRegisters.length; i++) {
-                   topLevelObjs.push(currentEngine.getHmdaJson().hmdaFile.loanApplicationRegisters[i]);
-                }
+                topLevelObj = currentEngine.getHmdaJson().hmdaFile.loanApplicationRegisters;
                 break;
             case 'hmda':
-                topLevelObjs.push(currentEngine.getHmdaJson());
+                topLevelObj = currentEngine.getHmdaJson();
                 break;
         }
 
-        var execRuleFuncs = [];
-        _.each(rules, function(currentRule) {
-            _.each(topLevelObjs, function(currentTopLevelObj) {
-                var execRulePromise = currentEngine.execRule(currentTopLevelObj, currentRule.rule)
-                    .then(function(result) {
-                        if (result.length !== 0) {
-                            addToErrors(result, currentRule, editType, scope);
-                        }
-                    });
-                execRuleFuncs.push(execRulePromise);
+        var execRuleArgs = [];
+        var addToExecRuleArgs = function(topLevelObj) {
+            _.each(rules, function(currentRule) {
+                execRuleArgs.push({
+                    'topLevelObj': topLevelObj,
+                    'rule': currentRule,
+                    'scope': scope,
+                    'editType': editType
+                });
             });
-        });
-        return Q.all(execRuleFuncs);
+        };
+
+        if (_.isArray(topLevelObj)) {
+            _.each(topLevelObj, function(currentTopLevelObj) {
+                addToExecRuleArgs(currentTopLevelObj);
+            });
+        } else {
+            addToExecRuleArgs(topLevelObj);
+        }
+
+        console.log('total rule executions for ' + scope + ' ' + editType + ': ' + execRuleArgs.length);
+
+        return Q.map(execRuleArgs, function(args) {
+            return getExecRulePromise(args);
+        }, CONCURRENT_RULES);
+
     };
 
     HMDAEngine.runSyntactical = function(year) {

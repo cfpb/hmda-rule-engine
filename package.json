@@ -39,7 +39,7 @@
     "line-chomper": "^0.4.5",
     "moment": "^2.9.0",
     "q": "^1.1.2",
-    "then-request": "^2.1.0",
+    "q-map": "^0.2.0",
     "underscore": "^1.7.0"
   }
 }
