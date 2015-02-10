@@ -1451,6 +1451,21 @@ describe('Engine', function() {
         });
     });
 
+    describe('isValidFannieFreddieLoans', function() {
+        it('should return true when the number of purchase loans is valid', function(done) {
+           var hmdaJson = JSON.parse(JSON.stringify(require('./testdata/fanniefreddie-loans.json')));
+
+            var respondentID = '0000413208';
+            var path = '/isValidNumLoans/fannieMae/' + engine.getRuleYear() + '/' + respondentID + '/6/3';
+            mockAPI('get', path, 200, JSON.stringify({ result: true }));
+            engine.isValidNumFannieMaeLoans(hmdaJson.hmdaFile)
+            .then(function(result) {
+                expect(result).to.be(true);
+                done();
+            });
+        });
+    });
+
     describe('isValidNumRefinanceLoans', function() {
         it('should return true when the number of purchase loans is valid', function(done) {
            var hmdaJson = JSON.parse(JSON.stringify(require('./testdata/refinance-loans.json')));
