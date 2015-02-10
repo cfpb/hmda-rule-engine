@@ -78,7 +78,7 @@ var handleUniqueLoanNumberErrors = function(counts) {
 var resultFromResponse = function(response) {
     var body = response.getBody('utf8');
     var result = JSON.parse(body);
-    return result.result;
+    return result;
 };
 
 var resolveError = function(err) {
@@ -518,7 +518,7 @@ var resolveError = function(err) {
     HMDAEngine.isTimestampLaterThanDatabase = function(respondentId, timestamp) {
         return apiGET('isValidTimestamp', [respondentId, timestamp])
         .then(function(response) {
-            return resultFromResponse(response);
+            return resultFromResponse(response).result;
         });
     };
 
@@ -527,7 +527,7 @@ var resolveError = function(err) {
         return apiGET('isValidControlNumber',
             [hmdaFile.transmittalSheet.agencyCode, hmdaFile.transmittalSheet.respondentID])
         .then(function(response) {
-            var result = resultFromResponse(response);
+            var result = resultFromResponse(response).result;
             if (! result) {
                 return handleArrayErrors(hmdaFile, [1], ['agencyCode', 'respondentID']);
             }
@@ -542,28 +542,28 @@ var resolveError = function(err) {
         }
         return apiGET('isValidMSA', [metroArea])
         .then(function(response) {
-            return resultFromResponse(response);
+            return resultFromResponse(response).result;
         });
     };
 
     HMDAEngine.isValidMsaMdStateAndCountyCombo = function(metroArea, fipsState, fipsCounty) {
         return apiGET('isValidMSAStateCounty', [metroArea, fipsState, fipsCounty])
         .then(function(response) {
-            return resultFromResponse(response);
+            return resultFromResponse(response).result;
         });
     };
 
     HMDAEngine.isValidStateAndCounty = function(fipsState, fipsCounty) {
         return apiGET('isValidStateCounty', [fipsState, fipsCounty])
         .then(function(response) {
-            return resultFromResponse(response);
+            return resultFromResponse(response).result;
         });
     };
 
     HMDAEngine.isValidCensusTractCombo = function(censusTract, metroArea, fipsState, fipsCounty) {
         return apiGET('isValidCensusTractCombo', [fipsState, fipsCounty, metroArea, censusTract])
         .then(function(response) {
-            return resultFromResponse(response);
+            return resultFromResponse(response).result;
         });
     };
 
@@ -571,7 +571,7 @@ var resolveError = function(err) {
     HMDAEngine.isRespondentMBS = function(respondentID) {
         return apiGET('isRespondentMBS', [respondentID])
         .then(function(response) {
-            return resultFromResponse(response);
+            return resultFromResponse(response).result;
         });
     };
 
@@ -579,7 +579,7 @@ var resolveError = function(err) {
     HMDAEngine.isValidStateCountyCensusTractCombo = function(metroArea, fipsState, fipsCounty, censusTract) {
         return apiGET('isValidCensusCombination', [fipsState, fipsCounty, censusTract])
         .then(function(response) {
-            var result = resultFromResponse(response);
+            var result = resultFromResponse(response).result;
             if ((result && metroArea !== 'NA') || (!result && metroArea !== 'NA')) {
                 return true;
             }
@@ -599,14 +599,14 @@ var resolveError = function(err) {
     HMDAEngine.isChildFI = function(respondentID) {
         return apiGET('isChildFI', [respondentID])
         .then(function(body) {
-            return resultFromResponse(body);
+            return resultFromResponse(body).result;
         });
     };
 
     HMDAEngine.isTaxIDTheSameAsLastYear = function(respondentID, taxID) {
         return apiGET('isTaxIDTheSameAsLastYear', [respondentID, taxID])
         .then(function(body) {
-            return resultFromResponse(body);
+            return resultFromResponse(body).result;
         });
     };
 
@@ -614,14 +614,36 @@ var resolveError = function(err) {
     HMDAEngine.isValidNumLoans = function(hmdaFile) {
         var respondentID = hmdaFile.transmittalSheet.respondentID;
         var numLoans = hmdaFile.loanApplicationRegisters.length;
-        return apiGET('isValidNumLoans', [respondentID, numLoans])
+        return apiGET('isValidNumLoans/total', [respondentID, numLoans])
         .then(function(body) {
-            return resultFromResponse(body);
+            return resultFromResponse(body).result;
         });
     };
 
     HMDAEngine.isValidNumFannieMaeLoans = function(hmdaFile) {
-        return true;
+        var numFannieLoans = 0,
+            numLoans = 0;
+        _.each(hmdaFile.loanApplicationRegisters, function(element, index, next) {
+            if (_.contains(['1', '3'], element.loanPurpose) && _.contains(['1', '6'], element.actionTaken) && 
+                _.contains(['1', '2'], element.propertyType)) {
+                numLoans++;
+                if (_.contains(['1', '3'], element.purchaserType)) {
+                    numFannieLoans ++;
+                }
+            }
+        });
+        return apiGET('isValidNumLoans/fannieMae', [hmdaFile.transmittalSheet.respondentID, numLoans, numFannieLoans])
+        .then(function(body) {
+            var result = resultFromResponse(body);
+            if (result.result) {
+                return true;
+            } else {
+                result.currentLoans = numLoans;
+                result.currentFannieLoans = numFannieLoans;
+                var error = [{'properties': result}];
+                return error;
+            }
+        });
     };
 
     HMDAEngine.isValidNumGinnieMaeFHALoans = function(hmdaFile) {
@@ -639,9 +661,9 @@ var resolveError = function(err) {
                 count += 1;
             }
         });
-        return apiGET('isValidNumHomePurchaseLoans', [hmdaFile.transmittalSheet.respondentID, count])
+        return apiGET('isValidNumLoans/homePurchase', [hmdaFile.transmittalSheet.respondentID, count])
         .then(function(body) {
-            return resultFromResponse(body);
+            return resultFromResponse(body).result;
         });
     };
 
@@ -652,9 +674,9 @@ var resolveError = function(err) {
                 count += 1;
             }
         });
-        return apiGET('isValidNumRefinanceLoans', [hmdaFile.transmittalSheet.respondentID, count])
+        return apiGET('isValidNumLoans/refinance', [hmdaFile.transmittalSheet.respondentID, count])
         .then(function(body) {
-            return resultFromResponse(body);
+            return resultFromResponse(body).result;
         });
     };
 
@@ -662,7 +684,7 @@ var resolveError = function(err) {
         var invalidMSAs = [];
         return apiGET('isCraReporter', [hmdaFile.transmittalSheet.respondentID])
         .then(function(response) {
-            var result = resultFromResponse(response);
+            var result = resultFromResponse(response).result;
             if (result) {
                 var validActionTaken = ['1', '2', '3', '4', '5', '6'];
                 var promises = [];
