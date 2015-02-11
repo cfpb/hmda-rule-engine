@@ -631,7 +631,7 @@ var resolveError = function(err) {
             numLoans = 0;
         _.each(hmdaFile.loanApplicationRegisters, function(element, index, next) {
             if (_.contains(['1', '3'], element.loanPurpose) && _.contains(['1', '6'], element.actionTaken) &&
-                _.contains(['1', '2'], element.propertyType)) {
+                _.contains(['1', '2'], element.propertyType) && (element.loanType === '1')) {
                 numLoans++;
                 if (_.contains(['1', '3'], element.purchaserType)) {
                     numFannieLoans ++;
