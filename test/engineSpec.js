@@ -1468,7 +1468,7 @@ describe('Engine', function() {
 
     describe('isValidNumGinnieMaeFHALoans', function() {
         it('should return true when the number of ginnie fha loans is valid', function(done) {
-            var hmdaJson = require('./testdata/ginnie-fha-loans.json');
+            var hmdaJson = JSON.parse(JSON.stringify(require('./testdata/ginnie-fha-loans.json')));
             
             var respondentID = '0000413208';
             var path = '/isValidNumLoans/ginnieMaeFHA/' + engine.getRuleYear() + '/' + respondentID + '/6/3';
