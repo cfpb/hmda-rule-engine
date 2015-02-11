@@ -952,30 +952,21 @@ var resolveError = function(err) {
                 break;
         }
 
-        var execRuleArgs = [];
-        var addToExecRuleArgs = function(topLevelObj) {
-            _.each(rules, function(currentRule) {
-                execRuleArgs.push({
-                    'topLevelObj': topLevelObj,
-                    'rule': currentRule,
-                    'scope': scope,
-                    'editType': editType
-                });
-            });
-        };
-
-        if (_.isArray(topLevelObj)) {
-            _.each(topLevelObj, function(currentTopLevelObj) {
-                addToExecRuleArgs(currentTopLevelObj);
-            });
-        } else {
-            addToExecRuleArgs(topLevelObj);
-        }
-
-        console.log('total rule executions for ' + scope + ' ' + editType + ': ' + execRuleArgs.length);
-
-        return Q.map(execRuleArgs, function(args) {
-            return currentEngine.getExecRulePromise(args);
+        return Q.map(rules, function(currentRule) {
+            var args = {
+                'topLevelObj': topLevelObj,
+                'rule': currentRule,
+                'scope': scope,
+                'editType': editType
+            };
+            if (_.isArray(topLevelObj)) {
+                return Q.map(topLevelObj, function(currentTopLevelObj) {
+                    args.topLevelObj = currentTopLevelObj;
+                    return currentEngine.getExecRulePromise(args);
+                }, CONCURRENT_RULES);
+            } else {
+                return currentEngine.getExecRulePromise(args);
+            }
         }, CONCURRENT_RULES);
 
     };
