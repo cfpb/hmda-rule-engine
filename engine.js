@@ -653,7 +653,29 @@ var resolveError = function(err) {
     };
 
     HMDAEngine.isValidNumGinnieMaeFHALoans = function(hmdaFile) {
-        return true;
+        var numGinnieLoans = 0,
+            numLoans = 0;
+        _.each(hmdaFile.loanApplicationRegisters, function(element, index, next) {
+            if (_.contains(['1', '3'], element.loanPurpose) && _.contains(['1', '6'], element.actionTaken) &&
+                _.contains(['1', '2'], element.propertyType) && (element.loanType === '2')) {
+                numLoans++;
+                if (element.purchaserType === '2') {
+                    numGinnieLoans ++;
+                }
+            }
+        });
+        return this.apiGET('isValidNumLoans/ginnieMaeFHA', [hmdaFile.transmittalSheet.respondentID, numLoans, numGinnieLoans])
+        .then(function(body) {
+            var result = resultFromResponse(body);
+            if (result.result) {
+                return true;
+            } else {
+                result.currentLoans = numLoans;
+                result.currentGinnieLoans = numGinnieLoans;
+                var error = [{'properties': result}];
+                return error;
+            }
+        });
     };
 
     HMDAEngine.isValidNumGinnieMaeVALoans = function(hmdaFile) {

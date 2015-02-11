@@ -1452,13 +1452,28 @@ describe('Engine', function() {
     });
 
     describe('isValidFannieFreddieLoans', function() {
-        it('should return true when the number of purchase loans is valid', function(done) {
-           var hmdaJson = JSON.parse(JSON.stringify(require('./testdata/fanniefreddie-loans.json')));
+        it('should return true when the number of fannie/freddie loans is valid', function(done) {
+            var hmdaJson = JSON.parse(JSON.stringify(require('./testdata/fanniefreddie-loans.json')));
 
             var respondentID = '0000413208';
             var path = '/isValidNumLoans/fannieMae/' + engine.getRuleYear() + '/' + respondentID + '/6/3';
             mockAPI('get', path, 200, JSON.stringify({ result: true }));
             engine.isValidNumFannieMaeLoans(hmdaJson.hmdaFile)
+            .then(function(result) {
+                expect(result).to.be(true);
+                done();
+            });
+        });
+    });
+
+    describe('isValidNumGinnieMaeFHALoans', function() {
+        it('should return true when the number of ginnie fha loans is valid', function(done) {
+            var hmdaJson = require('./testdata/ginnie-fha-loans.json');
+            
+            var respondentID = '0000413208';
+            var path = '/isValidNumLoans/ginnieMaeFHA/' + engine.getRuleYear() + '/' + respondentID + '/6/3';
+            mockAPI('get', path, 200, JSON.stringify({ result: true }));
+            engine.isValidNumGinnieMaeFHALoans(hmdaJson.hmdaFile)
             .then(function(result) {
                 expect(result).to.be(true);
                 done();
