@@ -1243,7 +1243,7 @@ describe('Engine', function() {
 
     describe('isValidMsaMdCountyCensusForNonDepository', function() {
         var hmdaJson = {};
-        
+
         beforeEach(function() {
             hmdaJson = JSON.parse(JSON.stringify(require('./testdata/complete.json')));
         });
@@ -1263,7 +1263,7 @@ describe('Engine', function() {
             mockAPI('get', path, 200, JSON.stringify({ result: true }));
             path = '/isValidCensusInMSA/'+engine.getRuleYear()+'/06920/06/034/0100.01';
             mockAPI('get', path, 200, JSON.stringify({ result: true }), true);
-            
+
             engine.isValidMsaMdCountyCensusForNonDepository(hmdaJson.hmdaFile)
             .then(function(result) {
                 expect(result).to.be(true);
@@ -1277,7 +1277,7 @@ describe('Engine', function() {
             hmdaJson.hmdaFile.loanApplicationRegisters[0].censusTract = 'NA';
             path = '/isValidCensusInMSA/'+engine.getRuleYear()+'/06920/06/034/0100.01';
             mockAPI('get', path, 200, JSON.stringify({ result: true }), true);
-            
+
             engine.isValidMsaMdCountyCensusForNonDepository(hmdaJson.hmdaFile)
             .then(function(result) {
                 expect(result[0].lineNumber).to.be('2');
