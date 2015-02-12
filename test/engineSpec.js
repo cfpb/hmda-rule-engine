@@ -1481,6 +1481,21 @@ describe('Engine', function() {
         });
     });
 
+    describe('isValidNumGinnieMaeVALoans', function() {
+        it('should return true when the number of ginnie loans is valid', function(done) {
+            var hmdaJson = JSON.parse(JSON.stringify(require('./testdata/ginnie-loans.json')));
+            
+            var respondentID = '0000413208';
+            var path = '/isValidNumLoans/ginnieMae/' + engine.getRuleYear() + '/' + respondentID + '/6/3';
+            mockAPI('get', path, 200, JSON.stringify({ result: true }));
+            engine.isValidNumGinnieMaeVALoans(hmdaJson.hmdaFile)
+            .then(function(result) {
+                expect(result).to.be(true);
+                done();
+            });
+        });
+    });
+
     describe('isValidNumRefinanceLoans', function() {
         it('should return true when the number of purchase loans is valid', function(done) {
            var hmdaJson = JSON.parse(JSON.stringify(require('./testdata/refinance-loans.json')));
