@@ -1483,10 +1483,10 @@ describe('Engine', function() {
 
     describe('isValidNumGinnieMaeVALoans', function() {
         it('should return true when the number of ginnie loans is valid', function(done) {
-            var hmdaJson = JSON.parse(JSON.stringify(require('./testdata/ginnie-loans.json')));
+            var hmdaJson = JSON.parse(JSON.stringify(require('./testdata/ginnie-va-loans.json')));
             
             var respondentID = '0000413208';
-            var path = '/isValidNumLoans/ginnieMae/' + engine.getRuleYear() + '/' + respondentID + '/6/3';
+            var path = '/isValidNumLoans/ginnieMaeVA/' + engine.getRuleYear() + '/' + respondentID + '/6/3';
             mockAPI('get', path, 200, JSON.stringify({ result: true }));
             engine.isValidNumGinnieMaeVALoans(hmdaJson.hmdaFile)
             .then(function(result) {

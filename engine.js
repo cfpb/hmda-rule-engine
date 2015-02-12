@@ -690,7 +690,7 @@ var resolveError = function(err) {
                 }
             }
         });
-        return this.apiGET('isValidNumLoans/ginnieMae', [hmdaFile.transmittalSheet.respondentID, numLoans, numGinnieLoans])
+        return this.apiGET('isValidNumLoans/ginnieMaeVA', [hmdaFile.transmittalSheet.respondentID, numLoans, numGinnieLoans])
         .then(function(body) {
             var result = resultFromResponse(body);
             if (result.result) {
