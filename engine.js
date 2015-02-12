@@ -428,18 +428,15 @@ var resolveError = function(err) {
         var currentEngine = this,
             count = 0;
 
-        var countFuncs = [];
-        _.each(loanApplicationRegisters, function(lar) {
-            var countPromise = currentEngine.execRule(lar, rule)
-                .then(function(result) {
-                    if (result.length === 0) {
-                        return count += 1;
-                    }
-                });
-            countFuncs.push(countPromise);
-        });
-
-        return Q.all(countFuncs)
+        return Q.map(loanApplicationRegisters, function(lar) {
+            return currentEngine.execRule(lar, rule)
+            .then(function(result) {
+                if (result.length === 0) {
+                    count += 1;
+                }
+                return;
+            });
+        }, CONCURRENT_RULES)
         .then(function() {
             var topLevelObj = {};
             topLevelObj[cond.property] = count;
@@ -458,26 +455,24 @@ var resolveError = function(err) {
             countA = 0,
             countB = 0;
 
-        var countFuncs = [];
-
-        _.each(loanApplicationRegisters, function(lar) {
-            var countPromiseA = currentEngine.execRule(lar, ruleA)
+        return Q.map(loanApplicationRegisters, function(lar) {
+            return currentEngine.execRule(lar, ruleA)
+            .then(function(result) {
+                if (result.length === 0) {
+                    countA += 1;
+                }
+                return;
+            })
+            .then(function() {
+                return currentEngine.execRule(lar, ruleB)
                 .then(function(result) {
                     if (result.length === 0) {
-                        return countA += 1;
+                        countB += 1;
                     }
+                    return;
                 });
-            countFuncs.push(countPromiseA);
-            var countPromiseB = currentEngine.execRule(lar, ruleB)
-                .then(function(result) {
-                    if (result.length === 0) {
-                        return countB += 1;
-                    }
-                });
-            countFuncs.push(countPromiseB);
-        });
-
-        return Q.all(countFuncs)
+            });
+        }, CONCURRENT_RULES)
         .then(function() {
             var topLevelObj = {};
             topLevelObj[cond.property] = countA / countB;
@@ -903,11 +898,10 @@ var resolveError = function(err) {
 
         return new Function(functionBody).apply(this, args)
         .then(function(funcResult) {
-            var promiseResult;
             if (funcResult === true) {
-                promiseResult = [];
+                return [];
             } else if (topLevelObj.hmdaFile) {
-                promiseResult = funcResult;
+                return funcResult;
             } else {
                 var error = {'properties': {}};
 
@@ -918,9 +912,8 @@ var resolveError = function(err) {
                 for (var i = 0; i < args.length; i++) {
                     error.properties[result.args[i]] = args[i];
                 }
-                promiseResult = [error];
+                return [error];
             }
-            return promiseResult;
         });
     };
 

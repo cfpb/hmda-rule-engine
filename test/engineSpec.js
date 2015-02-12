@@ -1106,9 +1106,9 @@ describe('Engine', function() {
 
         it('should return true for a passing comparison', function(done) {
             var ruleA = {
-                'property': 'propertyType',
+                'property': 'filler',
                 'condition': 'equal',
-                'value': '3'
+                'value': 'B'
             };
             var ruleB = {
                 'property': 'recordID',
@@ -1118,7 +1118,7 @@ describe('Engine', function() {
             var cond = {
                 'property': 'result',
                 'condition': 'greater_than',
-                'value': '.8'
+                'value': '.6'
             };
 
             engine.compareNumEntries(hmdaJson.hmdaFile.loanApplicationRegisters, ruleA, ruleB, cond)
@@ -1130,9 +1130,9 @@ describe('Engine', function() {
 
         it('should return false for a non-passing comparison', function(done) {
             var ruleA = {
-                'property': 'propertyType',
+                'property': 'filler',
                 'condition': 'equal',
-                'value': '3'
+                'value': 'B'
             };
             var ruleB = {
                 'property': 'recordID',
@@ -1142,7 +1142,7 @@ describe('Engine', function() {
             var cond = {
                 'property': 'result',
                 'condition': 'less_than',
-                'value': '.8'
+                'value': '.6'
             };
 
             engine.compareNumEntries(hmdaJson.hmdaFile.loanApplicationRegisters, ruleA, ruleB, cond)
@@ -1469,7 +1469,7 @@ describe('Engine', function() {
     describe('isValidNumGinnieMaeFHALoans', function() {
         it('should return true when the number of ginnie fha loans is valid', function(done) {
             var hmdaJson = JSON.parse(JSON.stringify(require('./testdata/ginnie-fha-loans.json')));
-            
+
             var respondentID = '0000413208';
             var path = '/isValidNumLoans/ginnieMaeFHA/' + engine.getRuleYear() + '/' + respondentID + '/6/3';
             mockAPI('get', path, 200, JSON.stringify({ result: true }));
