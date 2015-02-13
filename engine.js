@@ -744,29 +744,25 @@ var resolveError = function(err) {
             invalidMSAs = [];
         return currentEngine.apiGET('isCraReporter', [hmdaFile.transmittalSheet.respondentID])
         .then(function(response) {
-            var result = resultFromResponse(response).result;
-            if (result) {
+            if (resultFromResponse(response).result) {
                 var validActionTaken = ['1', '2', '3', '4', '5', '6'];
-                var promises = [];
-                _.each(hmdaFile.loanApplicationRegisters, function(element) {
+                return Q.map(hmdaFile.loanApplicationRegisters, function(element) {
                     if (_.contains(validActionTaken, element.actionTaken)) {
                         if (element.censusTract==='NA') {
                             invalidMSAs.push(element.lineNumber);
+                            return Q.resolve();
                         } else {
-                            promises.push(
-                                currentEngine.apiGET('isValidCensusInMSA', [element.metroArea, element.fipsState,
-                                       element.fipsCounty, element.censusTract])
-                                .then (function (response) {
-                                    if (!resultFromResponse(response)) {
-                                        invalidMSAs.push(element.lineNumber);
-                                    }
-                                })
-                            );
+                            return currentEngine.apiGET('isValidCensusInMSA', [element.metroArea, element.fipsState,
+                                   element.fipsCounty, element.censusTract])
+                            .then(function (response) {
+                                if (!resultFromResponse(response).result) {
+                                    invalidMSAs.push(element.lineNumber);
+                                }
+                            });
                         }
                     }
-                });
-
-                return Q.all(promises)
+                    return Q.resolve();
+                }, CONCURRENT_RULES)
                 .then(function() {
                     if (!invalidMSAs.length) {
                         return true;
