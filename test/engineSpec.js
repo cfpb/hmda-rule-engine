@@ -1069,13 +1069,14 @@ describe('Engine', function() {
 
             engine.compareNumEntriesSingle(hmdaJson.hmdaFile.loanApplicationRegisters, rule, cond)
             .then(function(result) {
-                expect(result).to.be(true);
+                expect(result instanceof Array).to.be(false);
                 done();
             });
         });
 
-        it('should return false for a non-passing comparison', function(done) {
+        it('should return error for a non-passing comparison', function(done) {
             var rule = {
+                'label': 'Total Filler',
                 'property': 'filler',
                 'condition': 'equal',
                 'value': 'B'
@@ -1088,7 +1089,11 @@ describe('Engine', function() {
 
             engine.compareNumEntriesSingle(hmdaJson.hmdaFile.loanApplicationRegisters, rule, cond)
             .then(function(result) {
-                expect(result).to.be(false);
+                expect(result instanceof Array).to.be(true);
+                expect(result.length).to.be(1);
+                expect(result[0]).to.have.property('properties');
+                expect(result[0].properties).to.have.property('Total Filler');
+                expect(result[0].properties['Total Filler']).to.be(2);
                 done();
             });
         });
@@ -1123,7 +1128,7 @@ describe('Engine', function() {
 
             engine.compareNumEntries(hmdaJson.hmdaFile.loanApplicationRegisters, ruleA, ruleB, cond)
             .then(function(result) {
-                expect(result).to.be(true);
+                expect(result instanceof Array).to.be(false);
                 done();
             });
         });
@@ -1147,7 +1152,9 @@ describe('Engine', function() {
 
             engine.compareNumEntries(hmdaJson.hmdaFile.loanApplicationRegisters, ruleA, ruleB, cond)
             .then(function(result) {
-                expect(result).to.be(false);
+                expect(result instanceof Array).to.be.true();
+                expect(result.length).to.be(1);
+                expect(result[0]).to.have.property('properties');
                 done();
             });
         });

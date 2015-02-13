@@ -440,12 +440,17 @@ var resolveError = function(err) {
         .then(function() {
             var topLevelObj = {};
             topLevelObj[cond.property] = count;
+            var calculations = {'properties': {}};
+            if (rule.hasOwnProperty('label')) {
+                calculations.properties[rule.label] = count;
+            }
             return currentEngine.execRule(topLevelObj, cond)
             .then(function(result) {
                 if (result.length === 0) {
-                    return true;
+                    return calculations;
                 }
-                return false;
+                // A non-empty array is considered an error in execRule
+                return [calculations];
             });
         });
     };
@@ -476,12 +481,27 @@ var resolveError = function(err) {
         .then(function() {
             var topLevelObj = {};
             topLevelObj[cond.property] = countA / countB;
+            var calculations = {'properties': {}};
+            if (ruleA.hasOwnProperty('label')) {
+                calculations.properties[ruleA.label] = countA;
+            }
+            if (ruleB.hasOwnProperty('label')) {
+                calculations.properties[ruleB.label] = countB;
+            }
+            if (cond.hasOwnProperty('label')) {
+                calculations.properties[cond.label] = (topLevelObj[cond.property] * 100).toFixed(2);
+            }
+            // Divide by 0
+            if (countB === 0) {
+                return calculations;
+            }
             return currentEngine.execRule(topLevelObj, cond)
             .then(function(result) {
                 if (result.length === 0) {
-                    return true;
+                    return calculations;
                 }
-                return false;
+                // A non-empty array is considered an error in execRule
+                return [calculations];
             });
         });
 
@@ -942,7 +962,7 @@ var resolveError = function(err) {
         //console.time(args.scope + ' ' + args.rule.id);
         return this.execRule(args.topLevelObj, args.rule.rule)
         .then(function(result) {
-            if (result.length !== 0) {
+            if (_.isArray(result) && result.length !== 0) {
                 addToErrors(result, args.rule, args.editType, args.scope);
             }
             //console.timeEnd(args.scope + ' ' + args.rule.id);
