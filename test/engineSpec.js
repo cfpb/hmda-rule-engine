@@ -736,6 +736,174 @@ describe('Engine', function() {
         });
     });
 
+    describe('accumulatedIf', function() {
+        it('should return an empty array when the if condition fails', function(done) {
+            var hmdaJson = JSON.parse(JSON.stringify(require('./testdata/complete.json')));
+            var ifCond = {
+                'property': 'hmdaFile',
+                'condition': 'call',
+                'function': 'compareNumEntriesSingle',
+                'args': [
+                    'hmdaFile.loanApplicationRegisters',
+                    {
+                        'label': 'Total multifamily applications',
+                        'property': 'propertyType',
+                        'condition': 'equal',
+                        'value': '3'
+                    },
+                    {
+                        'property': 'result',
+                        'condition': 'less_than',
+                        'value': '1'
+                    }
+                ]
+            };
+            var thenCond = {
+                'property': 'hmdaFile',
+                'condition': 'call',
+                'function': 'compareNumEntries',
+                'args': [
+                    'hmdaFile.loanApplicationRegisters',
+                    {
+                        'label': 'Total single family applications',
+                        'property': 'propertyType',
+                        'condition': 'equal',
+                        'value': '1'
+                    },
+                    {
+                        'label': 'Total loans',
+                        'property': 'recordID',
+                        'condition': 'equal',
+                        'value': '2'
+                    },
+                    {
+                        'property': 'result',
+                        'condition': 'less_than',
+                        'value': '.1',
+                        'label': 'Single Family % of Total Loan Applications'
+                    }
+                ]
+            };
+            engine.accumulatedIf(hmdaJson.hmdaFile, ifCond, thenCond)
+            .then(function(result) {
+                expect(Array.isArray(result) && result.length === 0).to.be.true();
+                done();
+            });
+        });
+
+        it('should return an empty array when both conditions pass', function(done) {
+            var hmdaJson = JSON.parse(JSON.stringify(require('./testdata/complete.json')));
+            var ifCond = {
+                'property': 'hmdaFile',
+                'condition': 'call',
+                'function': 'compareNumEntriesSingle',
+                'args': [
+                    'hmdaFile.loanApplicationRegisters',
+                    {
+                        'label': 'Total multifamily applications',
+                        'property': 'propertyType',
+                        'condition': 'equal',
+                        'value': '3'
+                    },
+                    {
+                        'property': 'result',
+                        'condition': 'greater_than',
+                        'value': '1'
+                    }
+                ]
+            };
+            var thenCond = {
+                'property': 'hmdaFile',
+                'condition': 'call',
+                'function': 'compareNumEntries',
+                'args': [
+                    'hmdaFile.loanApplicationRegisters',
+                    {
+                        'label': 'Total single family applications',
+                        'property': 'propertyType',
+                        'condition': 'equal',
+                        'value': '1'
+                    },
+                    {
+                        'label': 'Total loans',
+                        'property': 'recordID',
+                        'condition': 'equal',
+                        'value': '2'
+                    },
+                    {
+                        'property': 'result',
+                        'condition': 'less_than',
+                        'value': '.1',
+                        'label': 'Single Family % of Total Loan Applications'
+                    }
+                ]
+            };
+            engine.accumulatedIf(hmdaJson.hmdaFile, ifCond, thenCond)
+            .then(function(result) {
+                expect(Array.isArray(result) && result.length === 0).to.be.true();
+                done();
+            });
+        });
+
+        it('should return an array with an error object when the if condition passes but the then condition fails', function(done) {
+            var hmdaJson = JSON.parse(JSON.stringify(require('./testdata/complete.json')));
+            var ifCond = {
+                'property': 'hmdaFile',
+                'condition': 'call',
+                'function': 'compareNumEntriesSingle',
+                'args': [
+                    'hmdaFile.loanApplicationRegisters',
+                    {
+                        'label': 'Total multifamily applications',
+                        'property': 'propertyType',
+                        'condition': 'equal',
+                        'value': '3'
+                    },
+                    {
+                        'property': 'result',
+                        'condition': 'greater_than',
+                        'value': '1'
+                    }
+                ]
+            };
+            var thenCond = {
+                'property': 'hmdaFile',
+                'condition': 'call',
+                'function': 'compareNumEntries',
+                'args': [
+                    'hmdaFile.loanApplicationRegisters',
+                    {
+                        'label': 'Total single family applications',
+                        'property': 'propertyType',
+                        'condition': 'equal',
+                        'value': '1'
+                    },
+                    {
+                        'label': 'Total loans',
+                        'property': 'recordID',
+                        'condition': 'equal',
+                        'value': '2'
+                    },
+                    {
+                        'property': 'result',
+                        'condition': 'greater_than',
+                        'value': '.1',
+                        'label': 'Single Family % of Total Loan Applications'
+                    }
+                ]
+            };
+            engine.accumulatedIf(hmdaJson.hmdaFile, ifCond, thenCond)
+            .then(function(result) {
+                expect(Array.isArray(result) && result.length === 1).to.be.true();
+                expect(result[0].properties['Total multifamily applications']).to.be(3);
+                expect(result[0].properties['Total single family applications']).to.be(0);
+                expect(result[0].properties['Total loans']).to.be(3);
+                expect(result[0].properties['Single Family % of Total Loan Applications']).to.be('0.00');
+                done();
+            });
+        });
+    });
+
     describe('hasRecordIdentifiersForEachRow', function() {
         it('should return true when the HMDA file has correct record identifiers for each row', function(done) {
             var hmdaFile = {
