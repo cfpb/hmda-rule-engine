@@ -93,6 +93,17 @@ var resolveError = function(err) {
     }
 };
 
+var accumulateResult = function(ifResult, thenResult) {
+    var result = {'properties': {}};
+    var thenKeys = _.keys(thenResult[0].properties);
+    result.properties = ifResult.properties;
+
+    for (var i = 0; i < thenKeys.length; i++) {
+        result.properties[thenKeys[i]] = thenResult[0].properties[thenKeys[i]];
+    }
+    return result;
+};
+
 (function() {
 
     // Set root (global) scope
@@ -345,6 +356,23 @@ var resolveError = function(err) {
      * Custom Non-API functions
      * -----------------------------------------------------
      */
+
+    HMDAEngine.accumulatedIf = function(hmdaFile, ifCond, thenCond) {
+        var currentEngine = this;
+        return currentEngine.execRule({'hmdaFile': hmdaFile}, ifCond)
+        .then(function(ifResult) {
+            if (ifResult.length !== 0 && _.isArray(ifResult)) {
+                return [];
+            }
+            return currentEngine.execRule({'hmdaFile': hmdaFile}, thenCond)
+            .then(function(thenResult) {
+                if (thenResult.length !== 0 && _.isArray(thenResult)) {
+                    return [accumulateResult(ifResult, thenResult)];
+                }
+                return [];
+            });
+        });
+    };
 
     /* hmda-syntactical */
     HMDAEngine.hasRecordIdentifiersForEachRow = function(hmdaFile) {
