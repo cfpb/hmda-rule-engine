@@ -737,53 +737,54 @@ describe('Engine', function() {
     });
 
     describe('accumulatedIf', function() {
+        var hmdaJson = JSON.parse(JSON.stringify(require('./testdata/complete.json')));
+        var ifCond = {
+            'property': 'hmdaFile',
+            'condition': 'call',
+            'function': 'compareNumEntriesSingle',
+            'args': [
+                'hmdaFile.loanApplicationRegisters',
+                {
+                    'label': 'Total multifamily applications',
+                    'property': 'propertyType',
+                    'condition': 'equal',
+                    'value': '3'
+                },
+                {
+                    'property': 'result',
+                    'condition': 'less_than',
+                    'value': '1'
+                }
+            ]
+        };
+        var thenCond = {
+            'property': 'hmdaFile',
+            'condition': 'call',
+            'function': 'compareNumEntries',
+            'args': [
+                'hmdaFile.loanApplicationRegisters',
+                {
+                    'label': 'Total single family applications',
+                    'property': 'propertyType',
+                    'condition': 'equal',
+                    'value': '1'
+                },
+                {
+                    'label': 'Total loans',
+                    'property': 'recordID',
+                    'condition': 'equal',
+                    'value': '2'
+                },
+                {
+                    'property': 'result',
+                    'condition': 'less_than',
+                    'value': '.1',
+                    'label': 'Single Family % of Total Loan Applications'
+                }
+            ]
+        };
+
         it('should return an empty array when the if condition fails', function(done) {
-            var hmdaJson = JSON.parse(JSON.stringify(require('./testdata/complete.json')));
-            var ifCond = {
-                'property': 'hmdaFile',
-                'condition': 'call',
-                'function': 'compareNumEntriesSingle',
-                'args': [
-                    'hmdaFile.loanApplicationRegisters',
-                    {
-                        'label': 'Total multifamily applications',
-                        'property': 'propertyType',
-                        'condition': 'equal',
-                        'value': '3'
-                    },
-                    {
-                        'property': 'result',
-                        'condition': 'less_than',
-                        'value': '1'
-                    }
-                ]
-            };
-            var thenCond = {
-                'property': 'hmdaFile',
-                'condition': 'call',
-                'function': 'compareNumEntries',
-                'args': [
-                    'hmdaFile.loanApplicationRegisters',
-                    {
-                        'label': 'Total single family applications',
-                        'property': 'propertyType',
-                        'condition': 'equal',
-                        'value': '1'
-                    },
-                    {
-                        'label': 'Total loans',
-                        'property': 'recordID',
-                        'condition': 'equal',
-                        'value': '2'
-                    },
-                    {
-                        'property': 'result',
-                        'condition': 'less_than',
-                        'value': '.1',
-                        'label': 'Single Family % of Total Loan Applications'
-                    }
-                ]
-            };
             engine.accumulatedIf(hmdaJson.hmdaFile, ifCond, thenCond)
             .then(function(result) {
                 expect(Array.isArray(result) && result.length === 0).to.be.true();
@@ -792,52 +793,7 @@ describe('Engine', function() {
         });
 
         it('should return an empty array when both conditions pass', function(done) {
-            var hmdaJson = JSON.parse(JSON.stringify(require('./testdata/complete.json')));
-            var ifCond = {
-                'property': 'hmdaFile',
-                'condition': 'call',
-                'function': 'compareNumEntriesSingle',
-                'args': [
-                    'hmdaFile.loanApplicationRegisters',
-                    {
-                        'label': 'Total multifamily applications',
-                        'property': 'propertyType',
-                        'condition': 'equal',
-                        'value': '3'
-                    },
-                    {
-                        'property': 'result',
-                        'condition': 'greater_than',
-                        'value': '1'
-                    }
-                ]
-            };
-            var thenCond = {
-                'property': 'hmdaFile',
-                'condition': 'call',
-                'function': 'compareNumEntries',
-                'args': [
-                    'hmdaFile.loanApplicationRegisters',
-                    {
-                        'label': 'Total single family applications',
-                        'property': 'propertyType',
-                        'condition': 'equal',
-                        'value': '1'
-                    },
-                    {
-                        'label': 'Total loans',
-                        'property': 'recordID',
-                        'condition': 'equal',
-                        'value': '2'
-                    },
-                    {
-                        'property': 'result',
-                        'condition': 'less_than',
-                        'value': '.1',
-                        'label': 'Single Family % of Total Loan Applications'
-                    }
-                ]
-            };
+            ifCond.args[2].condition = 'greater_than';
             engine.accumulatedIf(hmdaJson.hmdaFile, ifCond, thenCond)
             .then(function(result) {
                 expect(Array.isArray(result) && result.length === 0).to.be.true();
@@ -846,52 +802,8 @@ describe('Engine', function() {
         });
 
         it('should return an array with an error object when the if condition passes but the then condition fails', function(done) {
-            var hmdaJson = JSON.parse(JSON.stringify(require('./testdata/complete.json')));
-            var ifCond = {
-                'property': 'hmdaFile',
-                'condition': 'call',
-                'function': 'compareNumEntriesSingle',
-                'args': [
-                    'hmdaFile.loanApplicationRegisters',
-                    {
-                        'label': 'Total multifamily applications',
-                        'property': 'propertyType',
-                        'condition': 'equal',
-                        'value': '3'
-                    },
-                    {
-                        'property': 'result',
-                        'condition': 'greater_than',
-                        'value': '1'
-                    }
-                ]
-            };
-            var thenCond = {
-                'property': 'hmdaFile',
-                'condition': 'call',
-                'function': 'compareNumEntries',
-                'args': [
-                    'hmdaFile.loanApplicationRegisters',
-                    {
-                        'label': 'Total single family applications',
-                        'property': 'propertyType',
-                        'condition': 'equal',
-                        'value': '1'
-                    },
-                    {
-                        'label': 'Total loans',
-                        'property': 'recordID',
-                        'condition': 'equal',
-                        'value': '2'
-                    },
-                    {
-                        'property': 'result',
-                        'condition': 'greater_than',
-                        'value': '.1',
-                        'label': 'Single Family % of Total Loan Applications'
-                    }
-                ]
-            };
+            ifCond.args[2].condition = 'greater_than';
+            thenCond.args[3].condition = 'greater_than';
             engine.accumulatedIf(hmdaJson.hmdaFile, ifCond, thenCond)
             .then(function(result) {
                 expect(Array.isArray(result) && result.length === 1).to.be.true();
