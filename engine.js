@@ -639,10 +639,8 @@ var resolveError = function(err) {
             if (result.result) {
                 return true;
             } else {
-                result.currentLoans = numLoans;
-                result.currentFannieLoans = numFannieLoans;
-                var error = [{'properties': result}];
-                return error;
+                delete result.result;
+                return [{'properties': result}];
             }
         });
     };
@@ -665,10 +663,8 @@ var resolveError = function(err) {
             if (result.result) {
                 return true;
             } else {
-                result.currentLoans = numLoans;
-                result.currentGinnieLoans = numGinnieLoans;
-                var error = [{'properties': result}];
-                return error;
+                delete result.result;
+                return [{'properties': result}];
             }
         });
     };
@@ -691,10 +687,8 @@ var resolveError = function(err) {
             if (result.result) {
                 return true;
             } else {
-                result.currentLoans = numLoans;
-                result.currentGinnieLoans = numGinnieLoans;
-                var error = [{'properties': result}];
-                return error;
+                delete result.result;
+                return [{'properties': result}];
             }
         });
     };
