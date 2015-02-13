@@ -687,10 +687,8 @@ var accumulateResult = function(ifResult, thenResult) {
             if (result.result) {
                 return true;
             } else {
-                result.currentLoans = numLoans;
-                result.currentFannieLoans = numFannieLoans;
-                var error = [{'properties': result}];
-                return error;
+                delete result.result;
+                return [{'properties': result}];
             }
         });
     };
@@ -713,10 +711,8 @@ var accumulateResult = function(ifResult, thenResult) {
             if (result.result) {
                 return true;
             } else {
-                result.currentLoans = numLoans;
-                result.currentGinnieLoans = numGinnieLoans;
-                var error = [{'properties': result}];
-                return error;
+                delete result.result;
+                return [{'properties': result}];
             }
         });
     };
