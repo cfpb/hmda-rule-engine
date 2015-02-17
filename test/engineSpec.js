@@ -1269,7 +1269,7 @@ describe('Engine', function() {
         });
 
         it('should return false for an invalid number of multifamily loans', function(done) {
-            expect(engine.isValidNumMultifamilyLoans(hmdaJson.hmdaFile)).to.be(false);
+            expect(engine.isValidNumMultifamilyLoans(hmdaJson.hmdaFile) instanceof Array).to.be(true);
             done();
         });
     });

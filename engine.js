@@ -554,8 +554,20 @@ var accumulateResult = function(ifResult, thenResult) {
             }
             totalAmount += +element.loanAmount;
         });
+        var percentOfAllLoans = multifamilyCount / hmdaFile.loanApplicationRegisters.length;
+        var percentOfAllDollars = multifamilyAmount / totalAmount;
+        var calculations = {'properties': {}};
+        calculations.properties['Total Multifamily Loans'] = multifamilyCount;
+        calculations.properties['Total Loans'] = hmdaFile.loanApplicationRegisters.length;
+        calculations.properties['% of Total Loans'] = (percentOfAllLoans*100).toFixed(2);
+        calculations.properties['Total Dollar Amount of Multifamily Loans'] = multifamilyAmount;
+        calculations.properties['Total Dollar Amount of All Loans'] = totalAmount;
+        calculations.properties['% of Total Dollar Amount'] = (percentOfAllDollars*100).toFixed(2);
 
-        return ((multifamilyCount / hmdaFile.loanApplicationRegisters.length) < 0.1) || ((multifamilyAmount / totalAmount) < 0.1);
+        if ((percentOfAllLoans < 0.1) || (percentOfAllDollars < 0.1)) {
+            return true;
+        }
+        return [calculations];
     };
 
     /*
