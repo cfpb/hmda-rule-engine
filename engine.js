@@ -448,7 +448,14 @@ var accumulateResult = function(ifResult, thenResult) {
 
     /* ts-quality */
     HMDAEngine.checkTotalLARCount = function(hmdaFile) {
-        return parseInt(hmdaFile.transmittalSheet.totalLineEntries) === hmdaFile.loanApplicationRegisters.length;
+        var result = parseInt(hmdaFile.transmittalSheet.totalLineEntries) === hmdaFile.loanApplicationRegisters.length;
+        if (!result) {
+            var error = {'properties': {}};
+            error.properties['Total Loan/Application records reported in transmittal sheet'] = hmdaFile.transmittalSheet.totalLineEntries;
+            error.properties['Total Loan/Application records in file'] = hmdaFile.loanApplicationRegisters.length;
+            return [error];
+        }
+        return result;
     };
 
     /* hmda-macro */
