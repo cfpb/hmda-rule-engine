@@ -1119,8 +1119,8 @@ describe('Engine', function() {
             done();
         });
 
-        it('should return false for an invalid lar count', function(done) {
-            expect(engine.checkTotalLARCount(hmdaJson.hmdaFile)).to.be(false);
+        it('should return error array for an invalid lar count', function(done) {
+            expect(engine.checkTotalLARCount(hmdaJson.hmdaFile) instanceof Array).to.be(true);
             done();
         });
     });
@@ -1269,7 +1269,7 @@ describe('Engine', function() {
         });
 
         it('should return false for an invalid number of multifamily loans', function(done) {
-            expect(engine.isValidNumMultifamilyLoans(hmdaJson.hmdaFile)).to.be(false);
+            expect(engine.isValidNumMultifamilyLoans(hmdaJson.hmdaFile) instanceof Array).to.be(true);
             done();
         });
     });
@@ -1571,7 +1571,7 @@ describe('Engine', function() {
     describe('isValidNumGinnieMaeVALoans', function() {
         it('should return true when the number of ginnie loans is valid', function(done) {
             var hmdaJson = JSON.parse(JSON.stringify(require('./testdata/ginnie-va-loans.json')));
-            
+
             var respondentID = '0000413208';
             var path = '/isValidNumLoans/ginnieMaeVA/' + engine.getRuleYear() + '/' + respondentID + '/6/3';
             mockAPI('get', path, 200, JSON.stringify({ result: true }));

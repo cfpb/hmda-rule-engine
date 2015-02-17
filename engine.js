@@ -448,7 +448,14 @@ var accumulateResult = function(ifResult, thenResult) {
 
     /* ts-quality */
     HMDAEngine.checkTotalLARCount = function(hmdaFile) {
-        return parseInt(hmdaFile.transmittalSheet.totalLineEntries) === hmdaFile.loanApplicationRegisters.length;
+        var result = parseInt(hmdaFile.transmittalSheet.totalLineEntries) === hmdaFile.loanApplicationRegisters.length;
+        if (!result) {
+            var error = {'properties': {}};
+            error.properties['Total Loan/Application records reported in transmittal sheet'] = hmdaFile.transmittalSheet.totalLineEntries;
+            error.properties['Total Loan/Application records in file'] = hmdaFile.loanApplicationRegisters.length;
+            return [error];
+        }
+        return result;
     };
 
     /* hmda-macro */
@@ -547,8 +554,20 @@ var accumulateResult = function(ifResult, thenResult) {
             }
             totalAmount += +element.loanAmount;
         });
+        var percentOfAllLoans = multifamilyCount / hmdaFile.loanApplicationRegisters.length;
+        var percentOfAllDollars = multifamilyAmount / totalAmount;
+        var calculations = {'properties': {}};
+        calculations.properties['Total Multifamily Loans'] = multifamilyCount;
+        calculations.properties['Total Loans'] = hmdaFile.loanApplicationRegisters.length;
+        calculations.properties['% of Total Loans'] = (percentOfAllLoans*100).toFixed(2);
+        calculations.properties['Total Dollar Amount of Multifamily Loans'] = multifamilyAmount;
+        calculations.properties['Total Dollar Amount of All Loans'] = totalAmount;
+        calculations.properties['% of Total Dollar Amount'] = (percentOfAllDollars*100).toFixed(2);
 
-        return ((multifamilyCount / hmdaFile.loanApplicationRegisters.length) < 0.1) || ((multifamilyAmount / totalAmount) < 0.1);
+        if ((percentOfAllLoans < 0.1) || (percentOfAllDollars < 0.1)) {
+            return true;
+        }
+        return [calculations];
     };
 
     /*
@@ -557,6 +576,16 @@ var accumulateResult = function(ifResult, thenResult) {
      * TODO - Replace with actual impl
      * -----------------------------------------------------
      */
+
+    var resultBodyAsError = function(body) {
+        var result = resultFromResponse(body);
+        if (result.result) {
+            return true;
+        } else {
+            delete result.result;
+            return [{'properties': result}];
+        }
+    };
 
     HMDAEngine.apiGET = function(funcName, params) {
         var url = this.getAPIURL()+'/'+funcName+'/'+this.getRuleYear()+'/'+params.join('/');
@@ -655,7 +684,7 @@ var accumulateResult = function(ifResult, thenResult) {
     HMDAEngine.isTaxIDTheSameAsLastYear = function(respondentID, taxID) {
         return this.apiGET('isTaxIDTheSameAsLastYear', [respondentID, taxID])
         .then(function(body) {
-            return resultFromResponse(body).result;
+            return resultBodyAsError(body);
         });
     };
 
@@ -665,7 +694,7 @@ var accumulateResult = function(ifResult, thenResult) {
         var numLoans = hmdaFile.loanApplicationRegisters.length;
         return this.apiGET('isValidNumLoans/total', [respondentID, numLoans])
         .then(function(body) {
-            return resultFromResponse(body).result;
+            return resultBodyAsError(body);
         });
     };
 
@@ -683,13 +712,7 @@ var accumulateResult = function(ifResult, thenResult) {
         });
         return this.apiGET('isValidNumLoans/fannieMae', [hmdaFile.transmittalSheet.respondentID, numLoans, numFannieLoans])
         .then(function(body) {
-            var result = resultFromResponse(body);
-            if (result.result) {
-                return true;
-            } else {
-                delete result.result;
-                return [{'properties': result}];
-            }
+            return resultBodyAsError(body);
         });
     };
 
@@ -707,13 +730,7 @@ var accumulateResult = function(ifResult, thenResult) {
         });
         return this.apiGET('isValidNumLoans/ginnieMaeFHA', [hmdaFile.transmittalSheet.respondentID, numLoans, numGinnieLoans])
         .then(function(body) {
-            var result = resultFromResponse(body);
-            if (result.result) {
-                return true;
-            } else {
-                delete result.result;
-                return [{'properties': result}];
-            }
+            return resultBodyAsError(body);
         });
     };
 
@@ -731,13 +748,7 @@ var accumulateResult = function(ifResult, thenResult) {
         });
         return this.apiGET('isValidNumLoans/ginnieMaeVA', [hmdaFile.transmittalSheet.respondentID, numLoans, numGinnieLoans])
         .then(function(body) {
-            var result = resultFromResponse(body);
-            if (result.result) {
-                return true;
-            } else {
-                delete result.result;
-                return [{'properties': result}];
-            }
+            return resultBodyAsError(body);
         });
     };
 
@@ -750,7 +761,7 @@ var accumulateResult = function(ifResult, thenResult) {
         });
         return this.apiGET('isValidNumLoans/homePurchase', [hmdaFile.transmittalSheet.respondentID, count])
         .then(function(body) {
-            return resultFromResponse(body).result;
+            return resultBodyAsError(body);
         });
     };
 
@@ -763,7 +774,7 @@ var accumulateResult = function(ifResult, thenResult) {
         });
         return this.apiGET('isValidNumLoans/refinance', [hmdaFile.transmittalSheet.respondentID, count])
         .then(function(body) {
-            return resultFromResponse(body).result;
+            return resultBodyAsError(body);
         });
     };
 
