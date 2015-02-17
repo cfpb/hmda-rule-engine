@@ -684,7 +684,7 @@ var accumulateResult = function(ifResult, thenResult) {
     HMDAEngine.isTaxIDTheSameAsLastYear = function(respondentID, taxID) {
         return this.apiGET('isTaxIDTheSameAsLastYear', [respondentID, taxID])
         .then(function(body) {
-            return resultFromResponse(body).result;
+            return resultBodyAsError(body);
         });
     };
 
