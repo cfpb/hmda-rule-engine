@@ -565,6 +565,16 @@ var accumulateResult = function(ifResult, thenResult) {
      * -----------------------------------------------------
      */
 
+    var resultBodyAsError = function(body) {
+        var result = resultFromResponse(body);
+        if (result.result) {
+            return true;
+        } else {
+            delete result.result;
+            return [{'properties': result}];
+        }
+    };
+
     HMDAEngine.apiGET = function(funcName, params) {
         var url = this.getAPIURL()+'/'+funcName+'/'+this.getRuleYear()+'/'+params.join('/');
         return GET(url);
@@ -672,7 +682,7 @@ var accumulateResult = function(ifResult, thenResult) {
         var numLoans = hmdaFile.loanApplicationRegisters.length;
         return this.apiGET('isValidNumLoans/total', [respondentID, numLoans])
         .then(function(body) {
-            return resultFromResponse(body).result;
+            return resultBodyAsError(body);
         });
     };
 
@@ -690,13 +700,7 @@ var accumulateResult = function(ifResult, thenResult) {
         });
         return this.apiGET('isValidNumLoans/fannieMae', [hmdaFile.transmittalSheet.respondentID, numLoans, numFannieLoans])
         .then(function(body) {
-            var result = resultFromResponse(body);
-            if (result.result) {
-                return true;
-            } else {
-                delete result.result;
-                return [{'properties': result}];
-            }
+            return resultBodyAsError(body);
         });
     };
 
@@ -714,13 +718,7 @@ var accumulateResult = function(ifResult, thenResult) {
         });
         return this.apiGET('isValidNumLoans/ginnieMaeFHA', [hmdaFile.transmittalSheet.respondentID, numLoans, numGinnieLoans])
         .then(function(body) {
-            var result = resultFromResponse(body);
-            if (result.result) {
-                return true;
-            } else {
-                delete result.result;
-                return [{'properties': result}];
-            }
+            return resultBodyAsError(body);
         });
     };
 
@@ -738,13 +736,7 @@ var accumulateResult = function(ifResult, thenResult) {
         });
         return this.apiGET('isValidNumLoans/ginnieMaeVA', [hmdaFile.transmittalSheet.respondentID, numLoans, numGinnieLoans])
         .then(function(body) {
-            var result = resultFromResponse(body);
-            if (result.result) {
-                return true;
-            } else {
-                delete result.result;
-                return [{'properties': result}];
-            }
+            return resultBodyAsError(body);
         });
     };
 
@@ -757,7 +749,7 @@ var accumulateResult = function(ifResult, thenResult) {
         });
         return this.apiGET('isValidNumLoans/homePurchase', [hmdaFile.transmittalSheet.respondentID, count])
         .then(function(body) {
-            return resultFromResponse(body).result;
+            return resultBodyAsError(body);
         });
     };
 
@@ -770,7 +762,7 @@ var accumulateResult = function(ifResult, thenResult) {
         });
         return this.apiGET('isValidNumLoans/refinance', [hmdaFile.transmittalSheet.respondentID, count])
         .then(function(body) {
-            return resultFromResponse(body).result;
+            return resultBodyAsError(body);
         });
     };
 
