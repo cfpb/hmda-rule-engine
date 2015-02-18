@@ -35,7 +35,7 @@
   },
   "dependencies": {
     "brij-spec": "0.0.4",
-    "hmda-rule-spec": "cfpb/hmda-rule-spec#milestone5",
+    "hmda-rule-spec": "cfpb/hmda-rule-spec#milestone6",
     "line-chomper": "^0.4.5",
     "moment": "^2.9.0",
     "q": "^1.1.2",
