@@ -594,7 +594,7 @@ var accumulateResult = function(ifResult, thenResult) {
 
     /* ts-syntactical */
     HMDAEngine.isTimestampLaterThanDatabase = function(respondentId, agencyCode, timestamp) {
-        return this.apiGET('isValidTimestamp', [respondentId, agencyCode, timestamp])
+        return this.apiGET('isValidTimestamp', [agencyCode, respondentId, timestamp])
         .then(function(response) {
             return resultFromResponse(response).result;
         });
@@ -647,7 +647,7 @@ var accumulateResult = function(ifResult, thenResult) {
 
     /* ts-validity */
     HMDAEngine.isRespondentMBS = function(respondentID, agencyCode) {
-        return this.apiGET('isRespondentMBS', [respondentID, agencyCode])
+        return this.apiGET('isRespondentMBS', [agencyCode, respondentID])
         .then(function(response) {
             return resultFromResponse(response).result;
         });
@@ -675,14 +675,14 @@ var accumulateResult = function(ifResult, thenResult) {
 
     /* ts-quality */
     HMDAEngine.isChildFI = function(respondentID, agencyCode) {
-        return this.apiGET('isChildFI', [respondentID, agencyCode])
+        return this.apiGET('isChildFI', [agencyCode, respondentID])
         .then(function(body) {
             return resultFromResponse(body).result;
         });
     };
 
     HMDAEngine.isTaxIDTheSameAsLastYear = function(respondentID, agencyCode, taxID) {
-        return this.apiGET('isTaxIDTheSameAsLastYear', [respondentID, agencyCode, taxID])
+        return this.apiGET('isTaxIDTheSameAsLastYear', [agencyCode, respondentID, taxID])
         .then(function(body) {
             return resultBodyAsError(body);
         });
@@ -693,7 +693,7 @@ var accumulateResult = function(ifResult, thenResult) {
         var respondentID = hmdaFile.transmittalSheet.respondentID;
         var agencyCode = hmdaFile.transmittalSheet.agencyCode;
         var numLoans = hmdaFile.loanApplicationRegisters.length;
-        return this.apiGET('isValidNumLoans/total', [respondentID, agencyCode, numLoans])
+        return this.apiGET('isValidNumLoans/total', [agencyCode, respondentID, numLoans])
         .then(function(body) {
             return resultBodyAsError(body);
         });
@@ -714,7 +714,7 @@ var accumulateResult = function(ifResult, thenResult) {
 
         var respondentID = hmdaFile.transmittalSheet.respondentID,
             agencyCode = hmdaFile.transmittalSheet.agencyCode;
-        return this.apiGET('isValidNumLoans/fannieMae', [respondentID, agencyCode, numLoans, numFannieLoans])
+        return this.apiGET('isValidNumLoans/fannieMae', [agencyCode, respondentID, numLoans, numFannieLoans])
         .then(function(body) {
             return resultBodyAsError(body);
         });
@@ -735,7 +735,7 @@ var accumulateResult = function(ifResult, thenResult) {
 
         var respondentID = hmdaFile.transmittalSheet.respondentID,
             agencyCode = hmdaFile.transmittalSheet.agencyCode;
-        return this.apiGET('isValidNumLoans/ginnieMaeFHA', [respondentID, agencyCode, numLoans, numGinnieLoans])
+        return this.apiGET('isValidNumLoans/ginnieMaeFHA', [agencyCode, respondentID, numLoans, numGinnieLoans])
         .then(function(body) {
             return resultBodyAsError(body);
         });
@@ -756,7 +756,7 @@ var accumulateResult = function(ifResult, thenResult) {
 
         var respondentID = hmdaFile.transmittalSheet.respondentID,
             agencyCode = hmdaFile.transmittalSheet.agencyCode;
-        return this.apiGET('isValidNumLoans/ginnieMaeVA', [respondentID, agencyCode, numLoans, numGinnieLoans])
+        return this.apiGET('isValidNumLoans/ginnieMaeVA', [agencyCode, respondentID, numLoans, numGinnieLoans])
         .then(function(body) {
             return resultBodyAsError(body);
         });
@@ -772,7 +772,7 @@ var accumulateResult = function(ifResult, thenResult) {
 
         var respondentID = hmdaFile.transmittalSheet.respondentID,
             agencyCode = hmdaFile.transmittalSheet.agencyCode;
-        return this.apiGET('isValidNumLoans/homePurchase', [respondentID, agencyCode, count])
+        return this.apiGET('isValidNumLoans/homePurchase', [agencyCode, respondentID, count])
         .then(function(body) {
             return resultBodyAsError(body);
         });
@@ -788,7 +788,7 @@ var accumulateResult = function(ifResult, thenResult) {
 
         var respondentID = hmdaFile.transmittalSheet.respondentID,
             agencyCode = hmdaFile.transmittalSheet.agencyCode;
-        return this.apiGET('isValidNumLoans/refinance', [respondentID, agencyCode, count])
+        return this.apiGET('isValidNumLoans/refinance', [agencyCode, respondentID, count])
         .then(function(body) {
             return resultBodyAsError(body);
         });
