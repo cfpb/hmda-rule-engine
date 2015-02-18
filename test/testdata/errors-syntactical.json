@@ -36,21 +36,24 @@
                     "properties": {
                         "actionDate": "20130119",
                         "hmdaFile.transmittalSheet.activityYear": "2014"
-                    }
+                    },
+                    "loanNumber": "ABCDEFGHIJKLMNOPQRSTUVWXY"
                 },
                 {
                     "lineNumber": "3",
                     "properties": {
                         "actionDate": "20130119",
                         "hmdaFile.transmittalSheet.activityYear": "2014"
-                    }
+                    },
+                    "loanNumber": "ABCDEFGHIJKLMNOPQRSTUVWXY"
                 },
                 {
                     "lineNumber": "4",
                     "properties": {
                         "actionDate": "20130119",
                         "hmdaFile.transmittalSheet.activityYear": "2014"
-                    }
+                    },
+                    "loanNumber": "ABCDEFGHIJKLMNOPQRSTUVWXY"
                 }
             ]
         },

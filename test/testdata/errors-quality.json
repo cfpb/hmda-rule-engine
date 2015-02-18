@@ -33,7 +33,8 @@
                         "applicantSex": "1",
                         "applicationReceivedDate": "20130117",
                         "actionTaken": "5"
-                    }
+                    },
+                    "loanNumber": "ABCDEFGHIJKLMNOPQRSTUVWXY"
                 },
                 {
                     "lineNumber": "3",
@@ -43,7 +44,8 @@
                         "applicantSex": "1",
                         "applicationReceivedDate": "20130117",
                         "actionTaken": "5"
-                    }
+                    },
+                    "loanNumber": "ABCDEFGHIJKLMNOPQRSTUVWXY"
                 },
                 {
                     "lineNumber": "4",
@@ -53,7 +55,8 @@
                         "applicantSex": "1",
                         "applicationReceivedDate": "20130117",
                         "actionTaken": "5"
-                    }
+                    },
+                    "loanNumber": "ABCDEFGHIJKLMNOPQRSTUVWXY"
                 }
             ]
         },
@@ -66,19 +69,22 @@
                     "lineNumber": "2",
                     "properties": {
                         "applicantIncome": "9000"
-                    }
+                    },
+                    "loanNumber": "ABCDEFGHIJKLMNOPQRSTUVWXY"
                 },
                 {
                     "lineNumber": "3",
                     "properties": {
                         "applicantIncome": "9000"
-                    }
+                    },
+                    "loanNumber": "ABCDEFGHIJKLMNOPQRSTUVWXY"
                 },
                 {
                     "lineNumber": "4",
                     "properties": {
                         "applicantIncome": "9000"
-                    }
+                    },
+                    "loanNumber": "ABCDEFGHIJKLMNOPQRSTUVWXY"
                 }
             ]
         },
@@ -92,21 +98,24 @@
                     "properties": {
                         "loanType": "4",
                         "propertyType": "3"
-                    }
+                    },
+                    "loanNumber": "ABCDEFGHIJKLMNOPQRSTUVWXY"
                 },
                 {
                     "lineNumber": "3",
                     "properties": {
                         "loanType": "4",
                         "propertyType": "3"
-                    }
+                    },
+                    "loanNumber": "ABCDEFGHIJKLMNOPQRSTUVWXY"
                 },
                 {
                     "lineNumber": "4",
                     "properties": {
                         "loanType": "4",
                         "propertyType": "3"
-                    }
+                    },
+                    "loanNumber": "ABCDEFGHIJKLMNOPQRSTUVWXY"
                 }
             ]
         }

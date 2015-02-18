@@ -3,7 +3,7 @@
 		"lineNumber": "1",
 		"properties": {
 			"recordID": "1",
-			"filler": " "
+			"filler": ""
 		}
 	},
 	{
@@ -11,6 +11,7 @@
 		"properties": {
 			"recordID": "2",
 			"filler": "B"
-		}
+		},
+		"loanNumber": "ABCDEFGHIJKLMNOPQRSTUVWXY"
 	}
 ]
