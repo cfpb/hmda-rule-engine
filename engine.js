@@ -594,7 +594,7 @@ var accumulateResult = function(ifResult, thenResult) {
 
     /* ts-syntactical */
     HMDAEngine.isTimestampLaterThanDatabase = function(respondentId, agencyCode, timestamp) {
-        return this.apiGET('isValidTimestamp', [respondentId, timestamp])
+        return this.apiGET('isValidTimestamp', [respondentId, agencyCode, timestamp])
         .then(function(response) {
             return resultFromResponse(response).result;
         });
@@ -682,7 +682,7 @@ var accumulateResult = function(ifResult, thenResult) {
     };
 
     HMDAEngine.isTaxIDTheSameAsLastYear = function(respondentID, agencyCode, taxID) {
-        return this.apiGET('isTaxIDTheSameAsLastYear', [respondentID, taxID])
+        return this.apiGET('isTaxIDTheSameAsLastYear', [respondentID, agencyCode, taxID])
         .then(function(body) {
             return resultBodyAsError(body);
         });
@@ -691,8 +691,9 @@ var accumulateResult = function(ifResult, thenResult) {
     /* hmda-macro */
     HMDAEngine.isValidNumLoans = function(hmdaFile) {
         var respondentID = hmdaFile.transmittalSheet.respondentID;
+        var agencyCode = hmdaFile.transmittalSheet.agencyCode;
         var numLoans = hmdaFile.loanApplicationRegisters.length;
-        return this.apiGET('isValidNumLoans/total', [respondentID, numLoans])
+        return this.apiGET('isValidNumLoans/total', [respondentID, agencyCode, numLoans])
         .then(function(body) {
             return resultBodyAsError(body);
         });
@@ -710,7 +711,10 @@ var accumulateResult = function(ifResult, thenResult) {
                 }
             }
         });
-        return this.apiGET('isValidNumLoans/fannieMae', [hmdaFile.transmittalSheet.respondentID, numLoans, numFannieLoans])
+
+        var respondentID = hmdaFile.transmittalSheet.respondentID,
+            agencyCode = hmdaFile.transmittalSheet.agencyCode;
+        return this.apiGET('isValidNumLoans/fannieMae', [respondentID, agencyCode, numLoans, numFannieLoans])
         .then(function(body) {
             return resultBodyAsError(body);
         });
@@ -728,7 +732,10 @@ var accumulateResult = function(ifResult, thenResult) {
                 }
             }
         });
-        return this.apiGET('isValidNumLoans/ginnieMaeFHA', [hmdaFile.transmittalSheet.respondentID, numLoans, numGinnieLoans])
+
+        var respondentID = hmdaFile.transmittalSheet.respondentID,
+            agencyCode = hmdaFile.transmittalSheet.agencyCode;
+        return this.apiGET('isValidNumLoans/ginnieMaeFHA', [respondentID, agencyCode, numLoans, numGinnieLoans])
         .then(function(body) {
             return resultBodyAsError(body);
         });
@@ -746,7 +753,10 @@ var accumulateResult = function(ifResult, thenResult) {
                 }
             }
         });
-        return this.apiGET('isValidNumLoans/ginnieMaeVA', [hmdaFile.transmittalSheet.respondentID, numLoans, numGinnieLoans])
+
+        var respondentID = hmdaFile.transmittalSheet.respondentID,
+            agencyCode = hmdaFile.transmittalSheet.agencyCode;
+        return this.apiGET('isValidNumLoans/ginnieMaeVA', [respondentID, agencyCode, numLoans, numGinnieLoans])
         .then(function(body) {
             return resultBodyAsError(body);
         });
@@ -759,7 +769,10 @@ var accumulateResult = function(ifResult, thenResult) {
                 count += 1;
             }
         });
-        return this.apiGET('isValidNumLoans/homePurchase', [hmdaFile.transmittalSheet.respondentID, count])
+
+        var respondentID = hmdaFile.transmittalSheet.respondentID,
+            agencyCode = hmdaFile.transmittalSheet.agencyCode;
+        return this.apiGET('isValidNumLoans/homePurchase', [respondentID, agencyCode, count])
         .then(function(body) {
             return resultBodyAsError(body);
         });
@@ -772,7 +785,10 @@ var accumulateResult = function(ifResult, thenResult) {
                 count += 1;
             }
         });
-        return this.apiGET('isValidNumLoans/refinance', [hmdaFile.transmittalSheet.respondentID, count])
+
+        var respondentID = hmdaFile.transmittalSheet.respondentID,
+            agencyCode = hmdaFile.transmittalSheet.agencyCode;
+        return this.apiGET('isValidNumLoans/refinance', [respondentID, agencyCode, count])
         .then(function(body) {
             return resultBodyAsError(body);
         });

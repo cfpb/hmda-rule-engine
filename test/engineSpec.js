@@ -1469,7 +1469,7 @@ describe('Engine', function() {
         it('should return true when API call to isValidTimestamp API call result is true', function(done) {
             var respondentId = '0000001195';
             var timestamp = '201501010000';
-            var path =  '/isValidTimestamp/' + engine.getRuleYear() + '/' + respondentId + '/' + timestamp;
+            var path =  '/isValidTimestamp/' + engine.getRuleYear() + '/' + respondentId + '/9/' + timestamp;
             mockAPI('get', path, 200, JSON.stringify({ result: true }));
             engine.isTimestampLaterThanDatabase(respondentId, '9', timestamp)
             .then(function(result) {
@@ -1497,7 +1497,7 @@ describe('Engine', function() {
             var respondentID = '0000000001';
             var taxID = '23-0916895';
             var year = engine.getRuleYear();
-            var path = '/isTaxIDTheSameAsLastYear/' + year + '/' + respondentID + '/' + taxID;
+            var path = '/isTaxIDTheSameAsLastYear/' + year + '/' + respondentID + '/9/' + taxID;
             mockAPI('get', path, 200, JSON.stringify({result: true}));
             engine.isTaxIDTheSameAsLastYear(respondentID, '9', taxID)
             .then(function(result) {
@@ -1513,7 +1513,7 @@ describe('Engine', function() {
             var respondentID = hmdaFile.transmittalSheet.respondentID;
             var numLoans = 3;
             var year = engine.getRuleYear();
-            var path = '/isValidNumLoans/total/' + year + '/' + respondentID + '/' + numLoans;
+            var path = '/isValidNumLoans/total/' + year + '/' + respondentID + '/9/' + numLoans;
             mockAPI('get', path, 200, JSON.stringify({result: true}));
             engine.isValidNumLoans(hmdaFile)
             .then(function(result) {
@@ -1528,7 +1528,7 @@ describe('Engine', function() {
             var hmdaJson = JSON.parse(JSON.stringify(require('./testdata/home-purchase-loans.json')));
 
             var respondentID = '0123456789';
-            var path = '/isValidNumLoans/homePurchase/' + engine.getRuleYear() + '/' + respondentID + '/10';
+            var path = '/isValidNumLoans/homePurchase/' + engine.getRuleYear() + '/' + respondentID + '/9/10';
             mockAPI('get', path, 200, JSON.stringify({ result: true }));
             engine.isValidNumHomePurchaseLoans(hmdaJson.hmdaFile)
             .then(function(result) {
@@ -1543,7 +1543,7 @@ describe('Engine', function() {
             var hmdaJson = JSON.parse(JSON.stringify(require('./testdata/fanniefreddie-loans.json')));
 
             var respondentID = '0000413208';
-            var path = '/isValidNumLoans/fannieMae/' + engine.getRuleYear() + '/' + respondentID + '/6/3';
+            var path = '/isValidNumLoans/fannieMae/' + engine.getRuleYear() + '/' + respondentID + '/9/6/3';
             mockAPI('get', path, 200, JSON.stringify({ result: true }));
             engine.isValidNumFannieMaeLoans(hmdaJson.hmdaFile)
             .then(function(result) {
@@ -1558,7 +1558,7 @@ describe('Engine', function() {
             var hmdaJson = JSON.parse(JSON.stringify(require('./testdata/ginnie-fha-loans.json')));
 
             var respondentID = '0000413208';
-            var path = '/isValidNumLoans/ginnieMaeFHA/' + engine.getRuleYear() + '/' + respondentID + '/6/3';
+            var path = '/isValidNumLoans/ginnieMaeFHA/' + engine.getRuleYear() + '/' + respondentID + '/9/6/3';
             mockAPI('get', path, 200, JSON.stringify({ result: true }));
             engine.isValidNumGinnieMaeFHALoans(hmdaJson.hmdaFile)
             .then(function(result) {
@@ -1573,7 +1573,7 @@ describe('Engine', function() {
             var hmdaJson = JSON.parse(JSON.stringify(require('./testdata/ginnie-va-loans.json')));
 
             var respondentID = '0000413208';
-            var path = '/isValidNumLoans/ginnieMaeVA/' + engine.getRuleYear() + '/' + respondentID + '/6/3';
+            var path = '/isValidNumLoans/ginnieMaeVA/' + engine.getRuleYear() + '/' + respondentID + '/9/6/3';
             mockAPI('get', path, 200, JSON.stringify({ result: true }));
             engine.isValidNumGinnieMaeVALoans(hmdaJson.hmdaFile)
             .then(function(result) {
@@ -1588,7 +1588,7 @@ describe('Engine', function() {
            var hmdaJson = JSON.parse(JSON.stringify(require('./testdata/refinance-loans.json')));
 
             var respondentID = '0123456789';
-            var path = '/isValidNumLoans/refinance/' + engine.getRuleYear() + '/' + respondentID + '/10';
+            var path = '/isValidNumLoans/refinance/' + engine.getRuleYear() + '/' + respondentID + '/9/10';
             mockAPI('get', path, 200, JSON.stringify({ result: true }));
             engine.isValidNumRefinanceLoans(hmdaJson.hmdaFile)
             .then(function(result) {
@@ -2637,7 +2637,7 @@ describe('Engine', function() {
 
         it('should return an unmodified set of errors for passing syntactical edits', function(done) {
             // S013
-            var path = '/isValidTimestamp/'+engine.getRuleYear()+'/0123456789/201301171330';
+            var path = '/isValidTimestamp/'+engine.getRuleYear()+'/0123456789/9/201301171330';
             mockAPI('get', path, 200, JSON.stringify({ result: true }), true);
 
             hmdaJson.hmdaFile.loanApplicationRegisters[1].loanNumber = '1000000000000000000000000';
@@ -2655,7 +2655,7 @@ describe('Engine', function() {
             rewiredEngine.setHmdaJson(hmdaJson);
 
             // S013
-            var path = '/isValidTimestamp/'+engine.getRuleYear()+'/0123456789/cat';
+            var path = '/isValidTimestamp/'+engine.getRuleYear()+'/0123456789/9/cat';
             mockAPI('get', path, 200, JSON.stringify({ result: true }), true);
 
             var errors_syntactical = require('./testdata/errors-syntactical.json');
