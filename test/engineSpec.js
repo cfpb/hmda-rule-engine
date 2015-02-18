@@ -1423,9 +1423,9 @@ describe('Engine', function() {
 
     describe('isRespondentMBS', function() {
         it('should return true when the API response result is true', function(done) {
-            var path = '/isRespondentMBS/' + engine.getRuleYear() + '/0000000001';
+            var path = '/isRespondentMBS/' + engine.getRuleYear() + '/0000000001/9';
             mockAPI('get', path, 200, JSON.stringify({ result: true }));
-            engine.isRespondentMBS('0000000001')
+            engine.isRespondentMBS('0000000001', '9')
             .then(function(result) {
                 expect(result).to.be(true);
                 done();
@@ -1471,7 +1471,7 @@ describe('Engine', function() {
             var timestamp = '201501010000';
             var path =  '/isValidTimestamp/' + engine.getRuleYear() + '/' + respondentId + '/' + timestamp;
             mockAPI('get', path, 200, JSON.stringify({ result: true }));
-            engine.isTimestampLaterThanDatabase(respondentId, timestamp)
+            engine.isTimestampLaterThanDatabase(respondentId, '9', timestamp)
             .then(function(result) {
                 expect(result).to.be.true();
                 done();
@@ -1482,9 +1482,9 @@ describe('Engine', function() {
     describe('isChildFI', function() {
         it('should return true when the API response result is true', function(done) {
             var respondentID = '1';
-            var path = '/isChildFI/'+engine.getRuleYear()+'/'+respondentID;
+            var path = '/isChildFI/' + engine.getRuleYear() + '/' + respondentID + '/9';
             mockAPI('get', path, 200, JSON.stringify({ result: true }));
-            engine.isChildFI(respondentID)
+            engine.isChildFI(respondentID, '9')
             .then(function(result) {
                 expect(result).to.be.true();
                 done();
@@ -1499,7 +1499,7 @@ describe('Engine', function() {
             var year = engine.getRuleYear();
             var path = '/isTaxIDTheSameAsLastYear/' + year + '/' + respondentID + '/' + taxID;
             mockAPI('get', path, 200, JSON.stringify({result: true}));
-            engine.isTaxIDTheSameAsLastYear(respondentID, taxID)
+            engine.isTaxIDTheSameAsLastYear(respondentID, '9', taxID)
             .then(function(result) {
                 expect(result).to.be.true();
                 done();
@@ -2723,17 +2723,17 @@ describe('Engine', function() {
 
         it('should return a modified set of errors for failing quality edits', function(done) {
               // Q029
-            var path = '/isValidCensusCombination/'+engine.getRuleYear()+'/06/034/0100.01';
-            mockAPI('get', path, 200, JSON.stringify({ result: true }), true);
+            var path = '/isValidCensusCombination/' + engine.getRuleYear() + '/06/034/0100.01';
+            mockAPI('get', path, 200, JSON.stringify({result: true}), true);
 
-            path = '/isChildFI/'+engine.getRuleYear()+'/0123456789';
-            mockAPI('get', path, 200, JSON.stringify({ result: true }));
+            path = '/isChildFI/' + engine.getRuleYear() + '/0123456789/9';
+            mockAPI('get', path, 200, JSON.stringify({result: true}));
 
             // Q030
-            path = '/isCraReporter/'+engine.getRuleYear()+'/0123456789';
-            mockAPI('get', path, 200, JSON.stringify({ result: true }), true);
-            path = '/isValidCensusInMSA/'+engine.getRuleYear()+'/06920/06/034/0100.01';
-            mockAPI('get', path, 200, JSON.stringify({ result: true }), true);
+            path = '/isCraReporter/' + engine.getRuleYear() + '/0123456789';
+            mockAPI('get', path, 200, JSON.stringify({result: true}), true);
+            path = '/isValidCensusInMSA/' + engine.getRuleYear() + '/06920/06/034/0100.01';
+            mockAPI('get', path, 200, JSON.stringify({result: true}), true);
 
             hmdaJson.hmdaFile.transmittalSheet.parentName = '                              ';
             var errors_quality = require('./testdata/errors-quality.json');

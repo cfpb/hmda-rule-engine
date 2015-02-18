@@ -593,7 +593,7 @@ var accumulateResult = function(ifResult, thenResult) {
     };
 
     /* ts-syntactical */
-    HMDAEngine.isTimestampLaterThanDatabase = function(respondentId, timestamp) {
+    HMDAEngine.isTimestampLaterThanDatabase = function(respondentId, agencyCode, timestamp) {
         return this.apiGET('isValidTimestamp', [respondentId, timestamp])
         .then(function(response) {
             return resultFromResponse(response).result;
@@ -646,8 +646,8 @@ var accumulateResult = function(ifResult, thenResult) {
     };
 
     /* ts-validity */
-    HMDAEngine.isRespondentMBS = function(respondentID) {
-        return this.apiGET('isRespondentMBS', [respondentID])
+    HMDAEngine.isRespondentMBS = function(respondentID, agencyCode) {
+        return this.apiGET('isRespondentMBS', [respondentID, agencyCode])
         .then(function(response) {
             return resultFromResponse(response).result;
         });
@@ -665,23 +665,23 @@ var accumulateResult = function(ifResult, thenResult) {
         });
     };
 
-    HMDAEngine.isNotIndependentMortgageCoOrMBS = function(respondentID) {
+    HMDAEngine.isNotIndependentMortgageCoOrMBS = function(respondentID, agencyCode) {
         return true;
     };
 
-    HMDAEngine.isMetroAreaOnRespondentPanel = function(metroArea, respondentID) {
+    HMDAEngine.isMetroAreaOnRespondentPanel = function(metroArea, respondentID, agencyCode) {
         return true;
     };
 
     /* ts-quality */
-    HMDAEngine.isChildFI = function(respondentID) {
-        return this.apiGET('isChildFI', [respondentID])
+    HMDAEngine.isChildFI = function(respondentID, agencyCode) {
+        return this.apiGET('isChildFI', [respondentID, agencyCode])
         .then(function(body) {
             return resultFromResponse(body).result;
         });
     };
 
-    HMDAEngine.isTaxIDTheSameAsLastYear = function(respondentID, taxID) {
+    HMDAEngine.isTaxIDTheSameAsLastYear = function(respondentID, agencyCode, taxID) {
         return this.apiGET('isTaxIDTheSameAsLastYear', [respondentID, taxID])
         .then(function(body) {
             return resultBodyAsError(body);
