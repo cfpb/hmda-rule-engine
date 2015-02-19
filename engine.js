@@ -190,7 +190,7 @@ var accumulateResult = function(ifResult, thenResult) {
 
     HMDAEngine.setDebug = function(bool) {
         DEBUG = bool;
-    }
+    };
 
     /*
      * -----------------------------------------------------
