@@ -53,22 +53,22 @@ var runAll = function(year) {
     .then(function() {
         return runQualMacroAll(year);
     });
-}
+};
 
 var runThen = function(year) {
     return runSynValThen(year)
     .then(function() {
         return runQualMacroThen(year);
     });
-}
+};
 
 var runHarness = function(fn, year, apiurl, debug, asthen) {
     var promise = runAll;
     engine.setAPIURL('http://localhost:8000');
-    if (debug !== undefined && debug == 'y') {
+    if (debug !== undefined && debug === 'y') {
         engine.setDebug(true);
     }
-    if (asthen !== undefined && asthen == 'y') {
+    if (asthen !== undefined && asthen === 'y') {
         promise = runThen;
     }
 
@@ -101,21 +101,21 @@ var runHarness = function(fn, year, apiurl, debug, asthen) {
 
 var run = function() {
     if (process.argv.length < 5) {
-        console.error("");
-        console.error("Usage: ./run FILENAME YEAR APIURL [DEBUG] [RUN AS THEN, NOT ALL]");
-        console.error("");
-        console.error("EX: ./run ./testdata/bank.dat 2013 http://localhost:9000 y y");
-        console.error("");
+        console.error('');
+        console.error('Usage: ./run FILENAME YEAR APIURL [DEBUG] [RUN AS THEN, NOT ALL]');
+        console.error('');
+        console.error('EX: ./run ./testdata/bank.dat 2013 http://localhost:9000 y y');
+        console.error('');
         process.exit(1);
     }
 
     var fn = process.argv[2];
     var year = process.argv[3];
-    var apiurl = process.argv[4]
+    var apiurl = process.argv[4];
     var debug = process.argv[5];
     var asthen = process.argv[6];
     runHarness(fn, year, apiurl, debug, asthen);
-}
+};
 
 module.exports = runHarness;
 if (process.argv.length) {
