@@ -1,0 +1,3 @@
+#!/usr/bin/env sh
+
+./harness.js "${@:1}" > edit-timing.txt && ./convert2csv.js
