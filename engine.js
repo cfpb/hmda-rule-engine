@@ -144,7 +144,8 @@ var accumulateResult = function(ifResult, thenResult) {
             validity: {},
             quality: {},
             macro: {}
-        };
+        },
+        DEBUG = false;
 
     HMDAEngine.setAPIURL = function(url) {
         _API_BASE_URL = url;
@@ -185,6 +186,10 @@ var accumulateResult = function(ifResult, thenResult) {
 
     HMDAEngine.setHmdaJson = function(newHmdaJson) {
         _HMDA_JSON = newHmdaJson;
+    };
+
+    HMDAEngine.setDebug = function(bool) {
+        DEBUG = bool;
     };
 
     /*
@@ -1026,13 +1031,17 @@ var accumulateResult = function(ifResult, thenResult) {
     };
 
     HMDAEngine.getExecRulePromise = function(args) {
-        //console.time(args.scope + ' ' + args.rule.id);
+        if (DEBUG) {
+            console.time('    ' + args.rule.id + ':' + args.scope + ':' + (args.topLevelObj.hasOwnProperty('loanNumber') ? args.topLevelObj.loanNumber: ''));
+        }
         return this.execRule(args.topLevelObj, args.rule.rule)
         .then(function(result) {
             if (_.isArray(result) && result.length !== 0) {
                 addToErrors(result, args.rule, args.editType, args.scope);
             }
-            //console.timeEnd(args.scope + ' ' + args.rule.id);
+            if (DEBUG) {
+                console.timeEnd('    ' + args.rule.id + ':' + args.scope + ':' + (args.topLevelObj.hasOwnProperty('loanNumber') ? args.topLevelObj.loanNumber: ''));
+            }
         });
     };
 
