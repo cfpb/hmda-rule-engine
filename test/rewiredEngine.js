@@ -85,11 +85,11 @@ RewiredEngine.isValidCensusTractCombo = function(censusTract, metroArea, fipsSta
 
 /* lar-quality */
 
-RewiredEngine.isNotIndependentMortgageCoOrMBS = function(respondentID) {
+RewiredEngine.isNotIndependentMortgageCoOrMBS = function(respondentID, agencyCode) {
     return true;
 };
 
-RewiredEngine.isMetroAreaOnRespondentPanel = function(metroArea, respondentID) {
+RewiredEngine.isMetroAreaOnRespondentPanel = function(metroArea, respondentID, agencyCode) {
     return true;
 };
 
@@ -124,9 +124,7 @@ RewiredEngine.isValidNumRefinanceLoans = function(hmdaFile) {
 };
 
 /* ts-quality */
-
-
-RewiredEngine.isTaxIDTheSameAsLastYear = function(respondentID, taxID) {
+RewiredEngine.isTaxIDTheSameAsLastYear = function(respondentID, agencyCode, taxID) {
     return true;
 };
 

@@ -593,8 +593,8 @@ var accumulateResult = function(ifResult, thenResult) {
     };
 
     /* ts-syntactical */
-    HMDAEngine.isTimestampLaterThanDatabase = function(respondentId, timestamp) {
-        return this.apiGET('isValidTimestamp', [respondentId, timestamp])
+    HMDAEngine.isTimestampLaterThanDatabase = function(respondentId, agencyCode, timestamp) {
+        return this.apiGET('isValidTimestamp', [agencyCode, respondentId, timestamp])
         .then(function(response) {
             return resultFromResponse(response).result;
         });
@@ -646,8 +646,8 @@ var accumulateResult = function(ifResult, thenResult) {
     };
 
     /* ts-validity */
-    HMDAEngine.isRespondentMBS = function(respondentID) {
-        return this.apiGET('isRespondentMBS', [respondentID])
+    HMDAEngine.isRespondentMBS = function(respondentID, agencyCode) {
+        return this.apiGET('isRespondentMBS', [agencyCode, respondentID])
         .then(function(response) {
             return resultFromResponse(response).result;
         });
@@ -665,24 +665,24 @@ var accumulateResult = function(ifResult, thenResult) {
         });
     };
 
-    HMDAEngine.isNotIndependentMortgageCoOrMBS = function(respondentID) {
+    HMDAEngine.isNotIndependentMortgageCoOrMBS = function(respondentID, agencyCode) {
         return true;
     };
 
-    HMDAEngine.isMetroAreaOnRespondentPanel = function(metroArea, respondentID) {
+    HMDAEngine.isMetroAreaOnRespondentPanel = function(metroArea, respondentID, agencyCode) {
         return true;
     };
 
     /* ts-quality */
-    HMDAEngine.isChildFI = function(respondentID) {
-        return this.apiGET('isChildFI', [respondentID])
+    HMDAEngine.isChildFI = function(respondentID, agencyCode) {
+        return this.apiGET('isChildFI', [agencyCode, respondentID])
         .then(function(body) {
             return resultFromResponse(body).result;
         });
     };
 
-    HMDAEngine.isTaxIDTheSameAsLastYear = function(respondentID, taxID) {
-        return this.apiGET('isTaxIDTheSameAsLastYear', [respondentID, taxID])
+    HMDAEngine.isTaxIDTheSameAsLastYear = function(respondentID, agencyCode, taxID) {
+        return this.apiGET('isTaxIDTheSameAsLastYear', [agencyCode, respondentID, taxID])
         .then(function(body) {
             return resultBodyAsError(body);
         });
@@ -691,8 +691,9 @@ var accumulateResult = function(ifResult, thenResult) {
     /* hmda-macro */
     HMDAEngine.isValidNumLoans = function(hmdaFile) {
         var respondentID = hmdaFile.transmittalSheet.respondentID;
+        var agencyCode = hmdaFile.transmittalSheet.agencyCode;
         var numLoans = hmdaFile.loanApplicationRegisters.length;
-        return this.apiGET('isValidNumLoans/total', [respondentID, numLoans])
+        return this.apiGET('isValidNumLoans/total', [agencyCode, respondentID, numLoans])
         .then(function(body) {
             return resultBodyAsError(body);
         });
@@ -710,7 +711,10 @@ var accumulateResult = function(ifResult, thenResult) {
                 }
             }
         });
-        return this.apiGET('isValidNumLoans/fannieMae', [hmdaFile.transmittalSheet.respondentID, numLoans, numFannieLoans])
+
+        var respondentID = hmdaFile.transmittalSheet.respondentID,
+            agencyCode = hmdaFile.transmittalSheet.agencyCode;
+        return this.apiGET('isValidNumLoans/fannieMae', [agencyCode, respondentID, numLoans, numFannieLoans])
         .then(function(body) {
             return resultBodyAsError(body);
         });
@@ -728,7 +732,10 @@ var accumulateResult = function(ifResult, thenResult) {
                 }
             }
         });
-        return this.apiGET('isValidNumLoans/ginnieMaeFHA', [hmdaFile.transmittalSheet.respondentID, numLoans, numGinnieLoans])
+
+        var respondentID = hmdaFile.transmittalSheet.respondentID,
+            agencyCode = hmdaFile.transmittalSheet.agencyCode;
+        return this.apiGET('isValidNumLoans/ginnieMaeFHA', [agencyCode, respondentID, numLoans, numGinnieLoans])
         .then(function(body) {
             return resultBodyAsError(body);
         });
@@ -746,7 +753,10 @@ var accumulateResult = function(ifResult, thenResult) {
                 }
             }
         });
-        return this.apiGET('isValidNumLoans/ginnieMaeVA', [hmdaFile.transmittalSheet.respondentID, numLoans, numGinnieLoans])
+
+        var respondentID = hmdaFile.transmittalSheet.respondentID,
+            agencyCode = hmdaFile.transmittalSheet.agencyCode;
+        return this.apiGET('isValidNumLoans/ginnieMaeVA', [agencyCode, respondentID, numLoans, numGinnieLoans])
         .then(function(body) {
             return resultBodyAsError(body);
         });
@@ -759,7 +769,10 @@ var accumulateResult = function(ifResult, thenResult) {
                 count += 1;
             }
         });
-        return this.apiGET('isValidNumLoans/homePurchase', [hmdaFile.transmittalSheet.respondentID, count])
+
+        var respondentID = hmdaFile.transmittalSheet.respondentID,
+            agencyCode = hmdaFile.transmittalSheet.agencyCode;
+        return this.apiGET('isValidNumLoans/homePurchase', [agencyCode, respondentID, count])
         .then(function(body) {
             return resultBodyAsError(body);
         });
@@ -772,7 +785,10 @@ var accumulateResult = function(ifResult, thenResult) {
                 count += 1;
             }
         });
-        return this.apiGET('isValidNumLoans/refinance', [hmdaFile.transmittalSheet.respondentID, count])
+
+        var respondentID = hmdaFile.transmittalSheet.respondentID,
+            agencyCode = hmdaFile.transmittalSheet.agencyCode;
+        return this.apiGET('isValidNumLoans/refinance', [agencyCode, respondentID, count])
         .then(function(body) {
             return resultBodyAsError(body);
         });
