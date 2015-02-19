@@ -118,6 +118,6 @@ var run = function() {
 };
 
 module.exports = runHarness;
-if (process.argv.length) {
+if (process.argv.length && process.argv[1] === __dirname +'/harness.js') {
     run();
 }
