@@ -671,11 +671,17 @@ var accumulateResult = function(ifResult, thenResult) {
     };
 
     HMDAEngine.isNotIndependentMortgageCoOrMBS = function(respondentID, agencyCode) {
-        return true;
+        return this.apiGET('isNotIndependentMortgageCoOrMBS', [agencyCode, respondentID])
+        .then(function(response) {
+            return resultFromResponse(response).result;
+        });
     };
 
     HMDAEngine.isMetroAreaOnRespondentPanel = function(metroArea, respondentID, agencyCode) {
-        return true;
+        return this.apiGET('isMetroAreaOnRespondentPanel', [agencyCode, respondentID, metroArea])
+        .then(function(response) {
+            return resultFromResponse(response).result;
+        });
     };
 
     /* ts-quality */
