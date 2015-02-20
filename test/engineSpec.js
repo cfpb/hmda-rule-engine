@@ -1433,8 +1433,8 @@ describe('Engine', function() {
         });
     });
 
-    describe('isValidStateCountyCensusTract', function() {
-        it('should return true when API call to isValidStateCounty API call result is true', function(done) {
+    describe('isValidStateCountyCensusTractCombo', function() {
+        it('should return true when API call to isValidCensusCombination result is true', function(done) {
             var metroArea = '35100';
             var state = '37';
             var county = '103';
@@ -1460,6 +1460,37 @@ describe('Engine', function() {
             engine.isValidStateCountyCensusTractCombo(metroArea, state, county, tract)
             .then(function(result) {
                 expect(result).to.be.false();
+                done();
+            });
+        });
+    });
+
+    describe('isNotIndependentMortgageCoOrMBS', function() {
+        it('should return true when the API response result is true', function(done) {
+            var agencyCode = '1';
+            var respondentID = '1';
+            var path = '/isNotIndependentMortgageCoOrMBS/' + engine.getRuleYear() + '/' +
+                agencyCode + '/' + respondentID;
+            mockAPI('get', path, 200, JSON.stringify({ result: true }));
+            engine.isNotIndependentMortgageCoOrMBS(respondentID, agencyCode)
+            .then(function(result) {
+                expect(result).to.be.true();
+                done();
+            });
+        });
+    });
+
+    describe('isMetroAreaOnRespondentPanel', function() {
+        it('should return true when the API response result is true', function(done) {
+            var respondentID = '1';
+            var agencyCode = '1';
+            var metroArea = '1';
+            var path = '/isMetroAreaOnRespondentPanel/' + engine.getRuleYear() + '/' +
+                agencyCode + '/' + respondentID + '/' + metroArea;
+            mockAPI('get', path, 200, JSON.stringify({ result: true }));
+            engine.isMetroAreaOnRespondentPanel(metroArea, respondentID, agencyCode)
+            .then(function(result) {
+                expect(result).to.be.true();
                 done();
             });
         });
