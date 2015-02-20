@@ -1130,41 +1130,73 @@ var accumulateResult = function(ifResult, thenResult) {
     };
 
     HMDAEngine.runSyntactical = function(year) {
+        if (DEBUG) {
+            console.time('time to run syntactical rules');
+        }
         return Q.all([
             this.runEdits(year, 'ts', 'syntactical'),
             this.runEdits(year, 'lar', 'syntactical'),
             this.runEdits(year, 'hmda', 'syntactical')
         ])
+        .then(function() {
+            if (DEBUG) {
+                console.timeEnd('time to run syntactical rules');
+            }
+        })
         .fail(function(err) {
             return resolveError(err);
         });
     };
 
     HMDAEngine.runValidity = function(year) {
+        if (DEBUG) {
+            console.time('time to run validity rules');
+        }
         return Q.all([
             this.runEdits(year, 'ts', 'validity'),
             this.runEdits(year, 'lar', 'validity')
         ])
+        .then(function() {
+            if (DEBUG) {
+                console.timeEnd('time to run validity rules');
+            }
+        })
         .fail(function(err) {
             return resolveError(err);
         });
     };
 
     HMDAEngine.runQuality = function(year) {
+        if (DEBUG) {
+            console.time('time to run quality rules');
+        }
         return Q.all([
             this.runEdits(year, 'ts', 'quality'),
             this.runEdits(year, 'lar', 'quality'),
             this.runEdits(year, 'hmda', 'quality')
         ])
+        .then(function() {
+            if (DEBUG) {
+                console.timeEnd('time to run quality rules');
+            }
+        })
         .fail(function(err) {
             return resolveError(err);
         });
     };
 
     HMDAEngine.runMacro = function(year) {
+        if (DEBUG) {
+            console.time('time to run macro rules');
+        }
         return Q.all([
             this.runEdits(year, 'hmda', 'macro')
         ])
+        .then(function() {
+            if (DEBUG) {
+                console.timeEnd('time to run macro rules');
+            }
+        })
         .fail(function(err) {
             return resolveError(err);
         });

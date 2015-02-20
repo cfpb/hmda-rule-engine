@@ -7,45 +7,25 @@ var engine = require('../engine');
 var fs = require('fs');
 
 var runSynValThen = function(year) {
-    console.time('time to run syntactical rules');
     return engine.runSyntactical(year)
     .then(function() {
-        console.timeEnd('time to run syntactical rules');
-        console.time('time to run validity rules');
-        return engine.runValidity(year)
-        .then(function() {
-            console.timeEnd('time to run validity rules');
-        });
+        return engine.runValidity(year);
     });
 };
 
 var runSynValAll = function(year) {
-    console.time('time to run syntactical and validity rules');
-    return Q.all([engine.runSyntactical(year), engine.runValidity(year)])
-    .then(function() {
-        console.timeEnd('time to run syntactical and validity rules');
-    });
+    return Q.all([engine.runSyntactical(year), engine.runValidity(year)]);
 };
 
 var runQualMacroThen = function(year) {
-    console.time('time to run quality rules');
     return engine.runQuality(year)
     .then(function() {
-        console.timeEnd('time to run quality rules');
-        console.time('time to run macro rules');
-        return engine.runMacro(year)
-        .then(function() {
-            console.timeEnd('time to run macro rules');
-        });
+        return engine.runMacro(year);
     });
 };
 
 var runQualMacroAll = function(year) {
-    console.time('time to run quality and macro rules');
-    return Q.all([engine.runQuality(year), engine.runMacro(year)])
-    .then(function() {
-        console.timeEnd('time to run quality and macro rules');
-    });
+    return Q.all([engine.runQuality(year), engine.runMacro(year)]);
 };
 
 var runAll = function(year) {
