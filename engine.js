@@ -1203,9 +1203,17 @@ var accumulateResult = function(ifResult, thenResult) {
     };
 
     HMDAEngine.runSpecial = function(year) {
+        if (DEBUG) {
+            console.time('time to run special rules');
+        }
         return Q.all([
             this.runEdits(year, 'lar', 'special')
         ])
+        .then(function() {
+            if (DEBUG) {
+                console.timeEnd('time to run special rules');
+            }
+        })
         .fail(function(err) {
             return resolveError(err);
         });
