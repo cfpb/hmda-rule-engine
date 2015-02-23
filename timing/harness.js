@@ -32,6 +32,9 @@ var runAll = function(year) {
     return runSynValAll(year)
     .then(function() {
         return runQualMacroAll(year);
+    })
+    .then(function() {
+        return engine.runSpecial(year);
     });
 };
 
@@ -39,6 +42,9 @@ var runThen = function(year) {
     return runSynValThen(year)
     .then(function() {
         return runQualMacroThen(year);
+    })
+    .then(function() {
+        return engine.runSpecial(year);
     });
 };
 
