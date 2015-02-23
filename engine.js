@@ -1202,6 +1202,15 @@ var accumulateResult = function(ifResult, thenResult) {
         });
     };
 
+    HMDAEngine.runSpecial = function(year) {
+        return Q.all([
+            this.runEdits(year, 'lar', 'special')
+        ])
+        .fail(function(err) {
+            return resolveError(err);
+        });
+    };
+
 }.call((function() {
   return (typeof module !== 'undefined' && module.exports &&
     typeof window === 'undefined') ? global : window;
