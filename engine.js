@@ -628,12 +628,24 @@ var accumulateResult = function(ifResult, thenResult) {
 
     /* hmda-syntactical */
     HMDAEngine.isValidControlNumber = function(hmdaFile) {
+        var agencyCode = hmdaFile.transmittalSheet.agencyCode,
+            respondentID = hmdaFile.transmittalSheet.respondentID;
         return this.apiGET('isValidControlNumber',
-            [hmdaFile.transmittalSheet.agencyCode, hmdaFile.transmittalSheet.respondentID])
+            [agencyCode, respondentID])
         .then(function(response) {
             var result = resultFromResponse(response).result;
-            if (! result) {
+            if (!result) {
                 return handleArrayErrors(hmdaFile, [1], ['agencyCode', 'respondentID']);
+            } else {
+                var lineNumbers = [];
+                _.each(hmdaFile.loanApplicationRegisters, function(element, index, list) {
+                    if (element.agencyCode !== agencyCode || element.respondentID !== respondentID) {
+                        lineNumbers.push(index + 2);
+                    }
+                });
+                if (lineNumbers.length !== 0) {
+                    return handleArrayErrors(hmdaFile, lineNumbers, ['agencyCode', 'respondentID']);
+                }
             }
             return true;
         });
