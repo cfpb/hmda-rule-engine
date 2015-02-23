@@ -2821,4 +2821,34 @@ describe('Engine', function() {
         //     });
         // });
     });
+
+    describe('runSpecial', function() {
+        var hmdaJson = {};
+        var topLevelObj = {};
+
+        beforeEach(function() {
+            hmdaJson = JSON.parse(JSON.stringify(require('./testdata/complete.json')));
+            topLevelObj = hmdaJson.hmdaFile.transmittalSheet;
+            rewiredEngine.setHmdaJson(hmdaJson);
+            rewiredEngine.clearErrors();
+        });
+
+        it('should return an unmodified set of errors for passing macro edits', function(done) {
+            var errors = {
+                'syntactical': {},
+                'validity': {},
+                'quality': {},
+                'macro': {},
+            };
+
+            var path = '/isValidCensusCombination/' + engine.getRuleYear() + '/06/034/0100.01';
+            mockAPI('get', path, 200, JSON.stringify({result: true}), true);
+
+            rewiredEngine.runSpecial('2013')
+            .then(function(result) {
+                expect(_.isEqual(rewiredEngine.getErrors(), errors)).to.be.true();
+                done();
+            });
+        });
+    });
 });
