@@ -1288,6 +1288,7 @@ describe('Engine', function() {
                 done();
             });
         });
+
         it('should return error array when API response result is false', function(done) {
             var path = '/isValidControlNumber/' + engine.getRuleYear() + '/1/0000000001';
             mockAPI('get', path, 200, JSON.stringify({ result: false }));
@@ -1305,6 +1306,25 @@ describe('Engine', function() {
                 expect(result[0].properties).to.have.property('respondentID');
                 expect(result[0].properties.agencyCode).to.be('1');
                 expect(result[0].properties.respondentID).to.be('0000000001');
+                done();
+            });
+        });
+
+        it('should return an error array when the API response is true but the control number is not consistent across the file', function(done) {
+            var path = '/isValidControlNumber/' + engine.getRuleYear() + '/9/0123456789';
+            mockAPI('get', path, 200, JSON.stringify({result: true}), true);
+
+            var hmdaJson = JSON.parse(JSON.stringify(require('./testdata/complete.json')));
+            hmdaJson.hmdaFile.loanApplicationRegisters[0].respondentID = 'cat';
+            engine.isValidControlNumber(hmdaJson.hmdaFile)
+            .then(function(result) {
+                expect(result.length).to.be(1);
+                expect(result[0].lineNumber).to.be('2');
+                expect(result[0].loanNumber).to.be('ABCDEFGHIJKLMNOPQRSTUVWXY');
+                expect(result[0].properties).to.have.property('agencyCode');
+                expect(result[0].properties).to.have.property('respondentID');
+                expect(result[0].properties.agencyCode).to.be('9');
+                expect(result[0].properties.respondentID).to.be('cat');
                 done();
             });
         });
