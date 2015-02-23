@@ -2822,6 +2822,7 @@ describe('Engine', function() {
                 'validity': {},
                 'quality': {},
                 'macro': {},
+                'special': {}
             };
 
             rewiredEngine.runMacro('2013')
@@ -2853,12 +2854,13 @@ describe('Engine', function() {
             rewiredEngine.clearErrors();
         });
 
-        it('should return an unmodified set of errors for passing macro edits', function(done) {
+        it('should return an unmodified set of errors for passing special edits', function(done) {
             var errors = {
                 'syntactical': {},
                 'validity': {},
                 'quality': {},
                 'macro': {},
+                'special': {}
             };
 
             var path = '/isValidCensusCombination/' + engine.getRuleYear() + '/06/034/0100.01';
