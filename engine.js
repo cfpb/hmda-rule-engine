@@ -659,11 +659,21 @@ var accumulateResult = function(ifResult, thenResult) {
     };
 
     /* lar-quality */
-    HMDAEngine.isValidStateCountyCensusTractCombo = function(metroArea, fipsState, fipsCounty, censusTract) {
-        return this.apiGET('isValidCensusCombination', [fipsState, fipsCounty, censusTract])
+    HMDAEngine.isValidStateCountyCensusTractCombo = function(recordID, metroArea, fipsState, fipsCounty, censusTract) {
+       console.log('Ima getting ' + metroArea + ',' + fipsState + ',' + fipsCounty + ',' + censusTract);
+       return this.apiGET('isValidCensusCombination', [fipsState, fipsCounty, censusTract])
         .then(function(response) {
-            var result = resultFromResponse(response).result;
-            if ((result && metroArea !== 'NA') || (!result && metroArea !== 'NA')) {
+            var result = resultFromResponse(response);
+            if (result.result) {
+                if ((metroArea === 'NA' && result.msa_code!=='') || metroArea!==result.msa_code) {
+                    var error = {'properties': {}};
+                    error.properties['Recommended MSA/MD'] = result.msa_code;
+                    error.properties['LAR number'] = recordID;
+                    error.properties['Reported State Code'] = fipsState;
+                    error.properties['Reported County Code'] = fipsCounty;
+                    error.properties['Reported Census Tract'] = censusTract;
+                    return [error];
+                }
                 return true;
             }
             return false;
