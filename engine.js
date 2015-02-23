@@ -143,7 +143,8 @@ var accumulateResult = function(ifResult, thenResult) {
             syntactical: {},
             validity: {},
             quality: {},
-            macro: {}
+            macro: {},
+            special: {}
         },
         DEBUG = 0;
 
@@ -168,7 +169,8 @@ var accumulateResult = function(ifResult, thenResult) {
             syntactical: {},
             validity: {},
             quality: {},
-            macro: {}
+            macro: {},
+            special: {}
         };
     };
 
