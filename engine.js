@@ -660,7 +660,6 @@ var accumulateResult = function(ifResult, thenResult) {
 
     /* lar-quality */
     HMDAEngine.isValidStateCountyCensusTractCombo = function(recordID, metroArea, fipsState, fipsCounty, censusTract) {
-       console.log('Ima getting ' + metroArea + ',' + fipsState + ',' + fipsCounty + ',' + censusTract);
        return this.apiGET('isValidCensusCombination', [fipsState, fipsCounty, censusTract])
         .then(function(response) {
             var result = resultFromResponse(response);
