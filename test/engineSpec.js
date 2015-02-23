@@ -1649,6 +1649,19 @@ describe('Engine', function() {
         });
     });
 
+    describe('getMSAName', function() {
+        it('should return an msa name when given an msa code', function(done) {
+            var msaCode = '35100';
+            var path = '/getMSAName/' + engine.getRuleYear() + '/' + msaCode;
+            mockAPI('get', path, 200, JSON.stringify({ msaName: 'New Bern, NC' }));
+            engine.getMSAName(msaCode)
+            .then(function(msaName) {
+                expect(msaName).to.be('New Bern, NC');
+                done();
+            });
+        });
+    });
+
     describe('parseRule', function() {
         var result;
 

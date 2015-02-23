@@ -874,7 +874,13 @@ var accumulateResult = function(ifResult, thenResult) {
                 return true;
             }
         });
+    };
 
+    HMDAEngine.getMSAName = function(msaCode) {
+        return this.apiGET('getMSAName', [msaCode])
+        .then(function(response) {
+            return resultFromResponse(response).msaName;
+        });
     };
 
     /*
