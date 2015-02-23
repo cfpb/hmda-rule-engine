@@ -305,5 +305,6 @@
         }
     },
     "quality": {},
-    "macro": {}
+    "macro": {},
+    "special": {}
 }
