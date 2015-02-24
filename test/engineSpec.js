@@ -2886,4 +2886,29 @@ describe('Engine', function() {
             });
         });
     });
+
+    describe('getTotalsByMSA', function() {
+        var hmdaJson = {};
+
+        beforeEach(function() {
+            hmdaJson = JSON.parse(JSON.stringify(require('./testdata/loans-to-total.json')));
+        });
+
+        it('should group the LARs by metro area and calculate totals', function(done) {
+            var result = engine.getTotalsByMSA(hmdaJson.hmdaFile.loanApplicationRegisters);
+            expect(result[0].msaCode).to.be('06920');
+            expect(result[0].totalLAR).to.be(9);
+            expect(result[0].totalLoanAmount).to.be(90000);
+            expect(result[0].totalHomePurchase).to.be(7);
+            expect(result[0].totalHomeImprovement).to.be(0);
+            expect(result[0].totalRefinance).to.be(2);
+            expect(result[1].msaCode).to.be('35100');
+            expect(result[1].totalLAR).to.be(3);
+            expect(result[1].totalLoanAmount).to.be(30000);
+            expect(result[1].totalFHA).to.be(2);
+            expect(result[1].totalVA).to.be(0);
+            expect(result[1].totalFSA).to.be(1);
+            done();
+        });
+    });
 });

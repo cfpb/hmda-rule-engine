@@ -570,6 +570,50 @@ var accumulateResult = function(ifResult, thenResult) {
 
     };
 
+    HMDAEngine.getTotalsByMSA = function(loanApplicationRegisters) {
+        return _.chain(loanApplicationRegisters)
+        .groupBy('metroArea')
+        .map(function(value, key) {
+            var msaName = HMDAEngine.getMSAName(key);
+            var result = {msaCode: key, msaName: msaName, totalLAR: 0, totalLoanAmount: 0, totalConventional: 0, totalFHA: 0, totalVA: 0, totalFSA: 0,
+                total1To4Family: 0, totalMFD: 0, totalMultifamily: 0, totalHomePurchase: 0, totalHomeImprovement: 0, totalRefinance: 0};
+
+            _.each(value, function(element) {
+                result.totalLAR++;
+                result.totalLoanAmount += +element.loanAmount;
+
+                if (element.loanType === '1') {
+                    result.totalConventional++;
+                } else if (element.loanType === '2') {
+                    result.totalFHA++;
+                } else if (element.loanType === '3') {
+                    result.totalVA++;
+                } else if (element.loanType === '4') {
+                    result.totalFSA++;
+                }
+
+                if (element.propertyType === '1') {
+                    result.total1To4Family++;
+                } else if (element.propertyType === '2') {
+                    result.totalMFD++;
+                } else if (element.propertyType === '3') {
+                    result.totalMultifamily++;
+                }
+
+                if (element.loanPurpose === '1') {
+                    result.totalHomePurchase++;
+                } else if (element.loanPurpose === '2') {
+                    result.totalHomeImprovement++;
+                } else if (element.loanPurpose === '3') {
+                    result.totalRefinance++;
+                }
+            });
+            return result;
+        })
+        .sortBy('msaCode')
+        .value();
+    };
+
     HMDAEngine.isValidNumMultifamilyLoans = function(hmdaFile) {
         var multifamilyCount = 0,
             multifamilyAmount = 0,
