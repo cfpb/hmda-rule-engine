@@ -34,6 +34,7 @@
     "spec-xunit-file": "0.0.1-2"
   },
   "dependencies": {
+    "bluebird": "^2.9.12",
     "brij-spec": "0.0.4",
     "hmda-rule-spec": "cfpb/hmda-rule-spec#milestone6",
     "line-chomper": "^0.4.5",
