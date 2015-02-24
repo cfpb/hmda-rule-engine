@@ -11,7 +11,6 @@ var hmdajson = require('./lib/hmdajson'),
     GET = require('./lib/promise-http-get'),
     moment = require('moment'),
     Promise = require('bluebird'),
-    ForerunnerDB = require('forerunnerdb'),
     CONCURRENT_RULES = 10;
 
 var resolveArg = function(arg, contextList) {
@@ -146,7 +145,8 @@ var accumulateResult = function(ifResult, thenResult) {
             macro: {},
             special: {}
         },
-        localdb = new ForerunnerDB(),
+        _LOCAL_DB,
+        _USE_LOCAL_DB = false,
         DEBUG = 0;
 
     HMDAEngine.setAPIURL = function(url) {
@@ -195,6 +195,10 @@ var accumulateResult = function(ifResult, thenResult) {
         DEBUG = level;
     };
 
+    HMDAEngine.setUseLocalDB = function(bool) {
+        _USE_LOCAL_DB = bool;
+    };
+
     /*
      * -----------------------------------------------------
      * Convenience
@@ -207,22 +211,6 @@ var accumulateResult = function(ifResult, thenResult) {
 
     HMDAEngine.getFileSpec = function(year) {
         return hmdaRuleSpec.getFileSpec(year);
-    };
-
-    var isValidCensusCombination = function(censusparams) {
-        var query = {};
-
-        for (var param in censusparams) {
-            if (censusparams[param]!==undefined && censusparams[param]!=='NA') {
-                query[param] = censusparams[param];
-            }
-        }
-
-        var result = localdb.collection('census').find(query);
-        if (result.length === 0 || (censusparams.tract === 'NA' && result[0].small_county !== '1')) {
-            return false;
-        }
-        return true;
     };
 
     /*
@@ -720,37 +708,47 @@ var accumulateResult = function(ifResult, thenResult) {
         if (metroArea === 'NA') {
             return true;
         }
-        // return this.apiGET('isValidMSA', [metroArea])
-        // .then(function(response) {
-        //     return resultFromResponse(response).result;
-        // });
-        var result = localdb.collection('census').find({'msa_code': metroArea});
-        return result.length !== 0;
+        if (_USE_LOCAL_DB) {
+            // Do something
+        } else {
+            return this.apiGET('isValidMSA', [metroArea])
+            .then(function(response) {
+                return resultFromResponse(response).result;
+            });
+        }
     };
 
     HMDAEngine.isValidMsaMdStateAndCountyCombo = function(metroArea, fipsState, fipsCounty) {
-        // return this.apiGET('isValidMSAStateCounty', [metroArea, fipsState, fipsCounty])
-        // .then(function(response) {
-        //     return resultFromResponse(response).result;
-        // });
-        return isValidCensusCombination({'msa_code': metroArea, 'state_code': fipsState, 'county_code': fipsCounty});
+        if (_USE_LOCAL_DB) {
+            // Do something
+        } else {
+            return this.apiGET('isValidMSAStateCounty', [metroArea, fipsState, fipsCounty])
+            .then(function(response) {
+                return resultFromResponse(response).result;
+            });
+        }
     };
 
     HMDAEngine.isValidStateAndCounty = function(fipsState, fipsCounty) {
-        // return this.apiGET('isValidStateCounty', [fipsState, fipsCounty])
-        // .then(function(response) {
-        //     return resultFromResponse(response).result;
-        // });
-        return isValidCensusCombination({'state_code': fipsState, 'county_code': fipsCounty});
+        if (_USE_LOCAL_DB) {
+            // Do something
+        } else {
+            return this.apiGET('isValidStateCounty', [fipsState, fipsCounty])
+            .then(function(response) {
+                return resultFromResponse(response).result;
+            });
+        }
     };
 
     HMDAEngine.isValidCensusTractCombo = function(censusTract, metroArea, fipsState, fipsCounty) {
-        // return this.apiGET('isValidCensusTractCombo', [fipsState, fipsCounty, metroArea, censusTract])
-        // .then(function(response) {
-        //     return resultFromResponse(response).result;
-        // });
-        return isValidCensusCombination({'msa_code':metroArea, 'state_code': fipsState,
-            'county_code': fipsCounty, 'tract': censusTract});
+        if (_USE_LOCAL_DB) {
+            // Do something
+        } else {
+            return this.apiGET('isValidCensusTractCombo', [fipsState, fipsCounty, metroArea, censusTract])
+            .then(function(response) {
+                return resultFromResponse(response).result;
+            });
+        }
     };
 
     /* ts-validity */
@@ -1300,25 +1298,32 @@ var accumulateResult = function(ifResult, thenResult) {
         });
     };
 
+    var loadValidityLocalDB = function(currentEngine, year) {
+        return currentEngine.apiGET('censusForYear', [])
+        .then(function(body) {
+            // Do something
+        });
+    };
+
     HMDAEngine.runValidity = function(year) {
         var currentEngine = this;
+        var validityPromise = Q.all([
+            currentEngine.runEdits(year, 'ts', 'validity'),
+            currentEngine.runEdits(year, 'lar', 'validity')
+        ]);
         if (DEBUG) {
             console.time('time to run validity rules');
         }
-        // localdb.collection('census').load(function (err) {
-        //     if (err) {
-        //         console.log('collection load err!');
-        //     }
-        // });
-        return currentEngine.apiGET('censusForYear', [])
-        .then(function(body) {
-            localdb.collection('census').setData(body);
-            localdb.collection('census').ensureIndex({msa_code:1});
-            return Promise.all([
-            currentEngine.runEdits(year, 'ts', 'validity'),
-            currentEngine.runEdits(year, 'lar', 'validity')
-            ]);
-        })
+        if (_USE_LOCAL_DB) {
+            validityPromise = loadValidityLocalDB(currentEngine, year)
+            .then(function() {
+                return Promise.all([
+                    currentEngine.runEdits(year, 'ts', 'validity'),
+                    currentEngine.runEdits(year, 'lar', 'validity')
+                ]);
+            });
+        }
+        return validityPromise
         .then(function() {
             if (DEBUG) {
                 console.timeEnd('time to run validity rules');
