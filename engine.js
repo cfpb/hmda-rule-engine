@@ -143,9 +143,10 @@ var accumulateResult = function(ifResult, thenResult) {
             syntactical: {},
             validity: {},
             quality: {},
-            macro: {}
+            macro: {},
+            special: {}
         },
-        DEBUG = false;
+        DEBUG = 0;
 
     HMDAEngine.setAPIURL = function(url) {
         _API_BASE_URL = url;
@@ -168,7 +169,8 @@ var accumulateResult = function(ifResult, thenResult) {
             syntactical: {},
             validity: {},
             quality: {},
-            macro: {}
+            macro: {},
+            special: {}
         };
     };
 
@@ -188,8 +190,8 @@ var accumulateResult = function(ifResult, thenResult) {
         _HMDA_JSON = newHmdaJson;
     };
 
-    HMDAEngine.setDebug = function(bool) {
-        DEBUG = bool;
+    HMDAEngine.setDebug = function(level) {
+        DEBUG = level;
     };
 
     /*
@@ -363,13 +365,21 @@ var accumulateResult = function(ifResult, thenResult) {
      */
 
     HMDAEngine.accumulatedIf = function(hmdaFile, ifCond, thenCond) {
-        var currentEngine = this;
-        return currentEngine.execRule({'hmdaFile': hmdaFile}, ifCond)
+        var currentEngine = this,
+            ifCondId,
+            thenCondId;
+
+        if (DEBUG > 1) {
+            ifCondId = '- accumulatedIf';
+            thenCondId = '- accumulatedThen';
+        }
+
+        return currentEngine.execRule({'hmdaFile': hmdaFile}, ifCond, ifCondId)
         .then(function(ifResult) {
             if (ifResult.length !== 0 && _.isArray(ifResult)) {
                 return [];
             }
-            return currentEngine.execRule({'hmdaFile': hmdaFile}, thenCond)
+            return currentEngine.execRule({'hmdaFile': hmdaFile}, thenCond, thenCondId)
             .then(function(thenResult) {
                 if (thenResult.length !== 0 && _.isArray(thenResult)) {
                     return [accumulateResult(ifResult, thenResult)];
@@ -466,17 +476,24 @@ var accumulateResult = function(ifResult, thenResult) {
     /* hmda-macro */
     HMDAEngine.compareNumEntriesSingle = function(loanApplicationRegisters, rule, cond) {
         var currentEngine = this,
-            count = 0;
+            count = 0,
+            ruleid,
+            condid;
+
+        if (DEBUG > 1) {
+            ruleid = '- compareNumEntriesSingleRule';
+            condid = '- compareNumEntriesSingleCond';
+        }
 
         return Q.map(loanApplicationRegisters, function(lar) {
-            return currentEngine.execRule(lar, rule)
+            return currentEngine.execRule(lar, rule, ruleid)
             .then(function(result) {
                 if (result.length === 0) {
                     count += 1;
                 }
                 return;
             });
-        }, CONCURRENT_RULES)
+        })
         .then(function() {
             var topLevelObj = {};
             topLevelObj[cond.property] = count;
@@ -484,7 +501,7 @@ var accumulateResult = function(ifResult, thenResult) {
             if (rule.hasOwnProperty('label')) {
                 calculations.properties[rule.label] = count;
             }
-            return currentEngine.execRule(topLevelObj, cond)
+            return currentEngine.execRule(topLevelObj, cond, condid)
             .then(function(result) {
                 if (result.length === 0) {
                     return calculations;
@@ -498,18 +515,24 @@ var accumulateResult = function(ifResult, thenResult) {
     HMDAEngine.compareNumEntries = function(loanApplicationRegisters, ruleA, ruleB, cond) {
         var currentEngine = this,
             countA = 0,
-            countB = 0;
+            countB = 0,
+            ruleAid,
+            ruleBid,
+            condid;
+
+        if (DEBUG > 1) {
+            ruleAid = '- compareNumEntriesRuleA';
+            ruleBid = '- compareNumEntriesRuleB';
+            condid = '- compareNumEntriesCond';
+        }
 
         return Q.map(loanApplicationRegisters, function(lar) {
-            return currentEngine.execRule(lar, ruleA)
+            return currentEngine.execRule(lar, ruleA, ruleAid)
             .then(function(result) {
                 if (result.length === 0) {
                     countA += 1;
                 }
-                return;
-            })
-            .then(function() {
-                return currentEngine.execRule(lar, ruleB)
+                return currentEngine.execRule(lar, ruleB, ruleBid)
                 .then(function(result) {
                     if (result.length === 0) {
                         countB += 1;
@@ -517,7 +540,7 @@ var accumulateResult = function(ifResult, thenResult) {
                     return;
                 });
             });
-        }, CONCURRENT_RULES)
+        })
         .then(function() {
             var topLevelObj = {};
             topLevelObj[cond.property] = countA / countB;
@@ -535,7 +558,7 @@ var accumulateResult = function(ifResult, thenResult) {
             if (countB === 0) {
                 return calculations;
             }
-            return currentEngine.execRule(topLevelObj, cond)
+            return currentEngine.execRule(topLevelObj, cond, condid)
             .then(function(result) {
                 if (result.length === 0) {
                     return calculations;
@@ -607,12 +630,24 @@ var accumulateResult = function(ifResult, thenResult) {
 
     /* hmda-syntactical */
     HMDAEngine.isValidControlNumber = function(hmdaFile) {
+        var agencyCode = hmdaFile.transmittalSheet.agencyCode,
+            respondentID = hmdaFile.transmittalSheet.respondentID;
         return this.apiGET('isValidControlNumber',
-            [hmdaFile.transmittalSheet.agencyCode, hmdaFile.transmittalSheet.respondentID])
+            [agencyCode, respondentID])
         .then(function(response) {
             var result = resultFromResponse(response).result;
-            if (! result) {
+            if (!result) {
                 return handleArrayErrors(hmdaFile, [1], ['agencyCode', 'respondentID']);
+            } else {
+                var lineNumbers = [];
+                _.each(hmdaFile.loanApplicationRegisters, function(element, index, list) {
+                    if (element.agencyCode !== agencyCode || element.respondentID !== respondentID) {
+                        lineNumbers.push(index + 2);
+                    }
+                });
+                if (lineNumbers.length !== 0) {
+                    return handleArrayErrors(hmdaFile, lineNumbers, ['agencyCode', 'respondentID']);
+                }
             }
             return true;
         });
@@ -680,11 +715,17 @@ var accumulateResult = function(ifResult, thenResult) {
     };
 
     HMDAEngine.isNotIndependentMortgageCoOrMBS = function(respondentID, agencyCode) {
-        return true;
+        return this.apiGET('isNotIndependentMortgageCoOrMBS', [agencyCode, respondentID])
+        .then(function(response) {
+            return resultFromResponse(response).result;
+        });
     };
 
     HMDAEngine.isMetroAreaOnRespondentPanel = function(metroArea, respondentID, agencyCode) {
-        return true;
+        return this.apiGET('isMetroAreaOnRespondentPanel', [agencyCode, respondentID, metroArea])
+        .then(function(response) {
+            return resultFromResponse(response).result;
+        });
     };
 
     /* ts-quality */
@@ -844,7 +885,13 @@ var accumulateResult = function(ifResult, thenResult) {
                 return true;
             }
         });
+    };
 
+    HMDAEngine.getMSAName = function(msaCode) {
+        return this.apiGET('getMSAName', [msaCode])
+        .then(function(response) {
+            return resultFromResponse(response).msaName;
+        });
     };
 
     /*
@@ -971,7 +1018,7 @@ var accumulateResult = function(ifResult, thenResult) {
      * -----------------------------------------------------
      */
 
-    HMDAEngine.execRule = function(topLevelObj, rule) {
+    HMDAEngine.execRule = function(topLevelObj, rule, ruleid) {
         var result = {
             argIndex: 0,
             args: [],
@@ -997,8 +1044,14 @@ var accumulateResult = function(ifResult, thenResult) {
             }
         });
 
+        if (ruleid) {
+            console.time('    ' + ruleid);
+        }
         return new Function(functionBody).apply(this, args)
         .then(function(funcResult) {
+            if (ruleid) {
+                console.timeEnd('    ' + ruleid);
+            }
             if (funcResult === true) {
                 return [];
             } else if (topLevelObj.hmdaFile) {
@@ -1040,16 +1093,16 @@ var accumulateResult = function(ifResult, thenResult) {
     };
 
     HMDAEngine.getExecRulePromise = function(args) {
-        if (DEBUG) {
-            console.time('    ' + args.rule.id + ':' + args.scope + ':' + (args.topLevelObj.hasOwnProperty('loanNumber') ? args.topLevelObj.loanNumber: ''));
+        if (DEBUG > 2) {
+            console.time('    ' + args.rule.id + ' - ' + args.scope + (args.topLevelObj.hasOwnProperty('loanNumber') ? ' - ' + args.topLevelObj.loanNumber : ''));
         }
         return this.execRule(args.topLevelObj, args.rule.rule)
         .then(function(result) {
             if (_.isArray(result) && result.length !== 0) {
                 addToErrors(result, args.rule, args.editType, args.scope);
             }
-            if (DEBUG) {
-                console.timeEnd('    ' + args.rule.id + ':' + args.scope + ':' + (args.topLevelObj.hasOwnProperty('loanNumber') ? args.topLevelObj.loanNumber: ''));
+            if (DEBUG > 2) {
+                console.timeEnd('    ' + args.rule.id + ' - ' + args.scope + (args.topLevelObj.hasOwnProperty('loanNumber') ? ' - ' + args.topLevelObj.loanNumber : ''));
             }
         });
     };
@@ -1073,6 +1126,9 @@ var accumulateResult = function(ifResult, thenResult) {
         }
 
         return Q.map(rules, function(currentRule) {
+            if (DEBUG > 0) {
+                console.time('    ' + currentRule.id + ' - ' + scope);
+            }
             var args = {
                 'topLevelObj': topLevelObj,
                 'rule': currentRule,
@@ -1083,50 +1139,110 @@ var accumulateResult = function(ifResult, thenResult) {
                 return Q.map(topLevelObj, function(currentTopLevelObj) {
                     args.topLevelObj = currentTopLevelObj;
                     return currentEngine.getExecRulePromise(args);
-                }, CONCURRENT_RULES);
+                }, CONCURRENT_RULES)
+                .then(function() {
+                    if (DEBUG > 0) {
+                        console.timeEnd('    ' + currentRule.id + ' - ' + scope);
+                    }
+                });
             } else {
-                return currentEngine.getExecRulePromise(args);
+                return currentEngine.getExecRulePromise(args)
+                .then(function() {
+                    if (DEBUG > 0) {
+                        console.timeEnd('    ' + currentRule.id + ' - ' + scope);
+                    }
+                });
             }
+
         }, CONCURRENT_RULES);
 
     };
 
     HMDAEngine.runSyntactical = function(year) {
+        if (DEBUG) {
+            console.time('time to run syntactical rules');
+        }
         return Q.all([
             this.runEdits(year, 'ts', 'syntactical'),
             this.runEdits(year, 'lar', 'syntactical'),
             this.runEdits(year, 'hmda', 'syntactical')
         ])
+        .then(function() {
+            if (DEBUG) {
+                console.timeEnd('time to run syntactical rules');
+            }
+        })
         .fail(function(err) {
             return resolveError(err);
         });
     };
 
     HMDAEngine.runValidity = function(year) {
+        if (DEBUG) {
+            console.time('time to run validity rules');
+        }
         return Q.all([
             this.runEdits(year, 'ts', 'validity'),
             this.runEdits(year, 'lar', 'validity')
         ])
+        .then(function() {
+            if (DEBUG) {
+                console.timeEnd('time to run validity rules');
+            }
+        })
         .fail(function(err) {
             return resolveError(err);
         });
     };
 
     HMDAEngine.runQuality = function(year) {
+        if (DEBUG) {
+            console.time('time to run quality rules');
+        }
         return Q.all([
             this.runEdits(year, 'ts', 'quality'),
             this.runEdits(year, 'lar', 'quality'),
             this.runEdits(year, 'hmda', 'quality')
         ])
+        .then(function() {
+            if (DEBUG) {
+                console.timeEnd('time to run quality rules');
+            }
+        })
         .fail(function(err) {
             return resolveError(err);
         });
     };
 
     HMDAEngine.runMacro = function(year) {
+        if (DEBUG) {
+            console.time('time to run macro rules');
+        }
         return Q.all([
             this.runEdits(year, 'hmda', 'macro')
         ])
+        .then(function() {
+            if (DEBUG) {
+                console.timeEnd('time to run macro rules');
+            }
+        })
+        .fail(function(err) {
+            return resolveError(err);
+        });
+    };
+
+    HMDAEngine.runSpecial = function(year) {
+        if (DEBUG) {
+            console.time('time to run special rules');
+        }
+        return Q.all([
+            this.runEdits(year, 'lar', 'special')
+        ])
+        .then(function() {
+            if (DEBUG) {
+                console.timeEnd('time to run special rules');
+            }
+        })
         .fail(function(err) {
             return resolveError(err);
         });

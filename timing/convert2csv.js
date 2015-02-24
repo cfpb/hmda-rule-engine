@@ -8,17 +8,18 @@ var chomp = require('line-chomper').chomp;
 var _ = require('underscore');
 var fs = require('fs');
 
-var outBuffer = fs.createWriteStream(outFN);
+try {
+    fs.unlinkSync(outFN);
+} catch (e) {
+    // don't care, file doesn't exist
+}
 
-var header = 'Edit ID,Scope,LAR Number,Runtime in Seconds\n';
+var header = 'Info,Runtime in Seconds\n';
 
 var convert = function() {
-    outBuffer.write(header);
+    fs.appendFileSync(outFN, header);
     chomp(inFN, function(err, lines) {
         _.each(lines, function(line) {
-            if (line.indexOf('time') !== -1) {
-                line = line.replace(':',':::');
-            }
             var arr = _.map(line.split(':'), function(field) {
                 field = field.trim();
                 if (field.indexOf('ms') !== -1) {
@@ -29,7 +30,7 @@ var convert = function() {
                 return field;
             });
             var csvline = arr.join(',');
-            outBuffer.write(csvline+'\n');
+            fs.appendFileSync(outFN, csvline+'\n');
         });
     });
 };

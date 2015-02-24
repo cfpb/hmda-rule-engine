@@ -1288,6 +1288,7 @@ describe('Engine', function() {
                 done();
             });
         });
+
         it('should return error array when API response result is false', function(done) {
             var path = '/isValidControlNumber/' + engine.getRuleYear() + '/1/0000000001';
             mockAPI('get', path, 200, JSON.stringify({ result: false }));
@@ -1305,6 +1306,25 @@ describe('Engine', function() {
                 expect(result[0].properties).to.have.property('respondentID');
                 expect(result[0].properties.agencyCode).to.be('1');
                 expect(result[0].properties.respondentID).to.be('0000000001');
+                done();
+            });
+        });
+
+        it('should return an error array when the API response is true but the control number is not consistent across the file', function(done) {
+            var path = '/isValidControlNumber/' + engine.getRuleYear() + '/9/0123456789';
+            mockAPI('get', path, 200, JSON.stringify({result: true}), true);
+
+            var hmdaJson = JSON.parse(JSON.stringify(require('./testdata/complete.json')));
+            hmdaJson.hmdaFile.loanApplicationRegisters[0].respondentID = 'cat';
+            engine.isValidControlNumber(hmdaJson.hmdaFile)
+            .then(function(result) {
+                expect(result.length).to.be(1);
+                expect(result[0].lineNumber).to.be('2');
+                expect(result[0].loanNumber).to.be('ABCDEFGHIJKLMNOPQRSTUVWXY');
+                expect(result[0].properties).to.have.property('agencyCode');
+                expect(result[0].properties).to.have.property('respondentID');
+                expect(result[0].properties.agencyCode).to.be('9');
+                expect(result[0].properties.respondentID).to.be('cat');
                 done();
             });
         });
@@ -1433,8 +1453,8 @@ describe('Engine', function() {
         });
     });
 
-    describe('isValidStateCountyCensusTract', function() {
-        it('should return true when API call to isValidStateCounty API call result is true', function(done) {
+    describe('isValidStateCountyCensusTractCombo', function() {
+        it('should return true when API call to isValidCensusCombination result is true', function(done) {
             var metroArea = '35100';
             var state = '37';
             var county = '103';
@@ -1463,6 +1483,37 @@ describe('Engine', function() {
             .then(function(result) {
                 console.log(result[0].properties);
                 expect(result[0].properties['Recommended MSA/MD']).to.be('35100');
+                done();
+            });
+        });
+    });
+
+    describe('isNotIndependentMortgageCoOrMBS', function() {
+        it('should return true when the API response result is true', function(done) {
+            var agencyCode = '1';
+            var respondentID = '1';
+            var path = '/isNotIndependentMortgageCoOrMBS/' + engine.getRuleYear() + '/' +
+                agencyCode + '/' + respondentID;
+            mockAPI('get', path, 200, JSON.stringify({ result: true }));
+            engine.isNotIndependentMortgageCoOrMBS(respondentID, agencyCode)
+            .then(function(result) {
+                expect(result).to.be.true();
+                done();
+            });
+        });
+    });
+
+    describe('isMetroAreaOnRespondentPanel', function() {
+        it('should return true when the API response result is true', function(done) {
+            var respondentID = '1';
+            var agencyCode = '1';
+            var metroArea = '1';
+            var path = '/isMetroAreaOnRespondentPanel/' + engine.getRuleYear() + '/' +
+                agencyCode + '/' + respondentID + '/' + metroArea;
+            mockAPI('get', path, 200, JSON.stringify({ result: true }));
+            engine.isMetroAreaOnRespondentPanel(metroArea, respondentID, agencyCode)
+            .then(function(result) {
+                expect(result).to.be.true();
                 done();
             });
         });
@@ -1596,6 +1647,19 @@ describe('Engine', function() {
             engine.isValidNumRefinanceLoans(hmdaJson.hmdaFile)
             .then(function(result) {
                 expect(result).to.be(true);
+                done();
+            });
+        });
+    });
+
+    describe('getMSAName', function() {
+        it('should return an msa name when given an msa code', function(done) {
+            var msaCode = '35100';
+            var path = '/getMSAName/' + engine.getRuleYear() + '/' + msaCode;
+            mockAPI('get', path, 200, JSON.stringify({ msaName: 'New Bern, NC' }));
+            engine.getMSAName(msaCode)
+            .then(function(msaName) {
+                expect(msaName).to.be('New Bern, NC');
                 done();
             });
         });
@@ -2774,6 +2838,7 @@ describe('Engine', function() {
                 'validity': {},
                 'quality': {},
                 'macro': {},
+                'special': {}
             };
 
             rewiredEngine.runMacro('2013')
@@ -2792,5 +2857,36 @@ describe('Engine', function() {
         //         done();
         //     });
         // });
+    });
+
+    describe('runSpecial', function() {
+        var hmdaJson = {};
+        var topLevelObj = {};
+
+        beforeEach(function() {
+            hmdaJson = JSON.parse(JSON.stringify(require('./testdata/complete.json')));
+            topLevelObj = hmdaJson.hmdaFile.transmittalSheet;
+            rewiredEngine.setHmdaJson(hmdaJson);
+            rewiredEngine.clearErrors();
+        });
+
+        it('should return an unmodified set of errors for passing special edits', function(done) {
+            var errors = {
+                'syntactical': {},
+                'validity': {},
+                'quality': {},
+                'macro': {},
+                'special': {}
+            };
+
+            var path = '/isValidCensusCombination/' + engine.getRuleYear() + '/06/034/0100.01';
+            mockAPI('get', path, 200, JSON.stringify({result: true}), true);
+
+            rewiredEngine.runSpecial('2013')
+            .then(function(result) {
+                expect(_.isEqual(rewiredEngine.getErrors(), errors)).to.be.true();
+                done();
+            });
+        });
     });
 });
