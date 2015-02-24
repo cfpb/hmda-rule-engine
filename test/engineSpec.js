@@ -1459,11 +1459,11 @@ describe('Engine', function() {
             var state = '37';
             var county = '103';
             var tract = '5010.02';
-            var recordID = '012344567';
+            var loanNumber = '012344567';
             var path =  '/isValidCensusCombination/' + engine.getRuleYear() + '/' +
                         state + '/' + county + '/' + tract;
             mockAPI('get', path, 200, JSON.stringify({ result: true, msa_code: '35100' }));
-            engine.isValidStateCountyCensusTractCombo(recordID, metroArea, state, county, tract)
+            engine.isValidStateCountyCensusTractCombo(loanNumber, metroArea, state, county, tract)
             .then(function(result) {
                 expect(result).to.be.true();
                 done();
@@ -2880,7 +2880,7 @@ describe('Engine', function() {
             };
 
             var path = '/isValidCensusCombination/' + engine.getRuleYear() + '/06/034/0100.01';
-            mockAPI('get', path, 200, JSON.stringify({result: true}), true);
+            mockAPI('get', path, 200, JSON.stringify({result: true, msa_code: '06920'}), true);
 
             rewiredEngine.runSpecial('2013')
             .then(function(result) {
