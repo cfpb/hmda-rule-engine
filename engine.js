@@ -694,37 +694,79 @@ var accumulateResult = function(ifResult, thenResult) {
     };
 
     /* lar-quality */
-    HMDAEngine.isValidStateCountyCensusTractCombo = function(loanNumber, metroArea, fipsState, fipsCounty, censusTract) {
-       return this.apiGET('isValidCensusCombination', [fipsState, fipsCounty, censusTract])
-        .then(function(response) {
-            var result = resultFromResponse(response);
-            if (result.result) {
-                if ((metroArea === 'NA' && result.msa_code!=='') || metroArea!==result.msa_code) {
-                    var error = {'properties': {}};
-                    error.properties['Recommended MSA/MD'] = result.msa_code;
-                    error.properties['LAR number'] = loanNumber;
-                    error.properties['Reported State Code'] = fipsState;
-                    error.properties['Reported County Code'] = fipsCounty;
-                    error.properties['Reported Census Tract'] = censusTract;
-                    return [error];
+    HMDAEngine.isValidStateCountyCensusTractCombo = function(hmdaFile) {
+       var currentEngine = this,
+            invalidMSAs = [];
+        return Q.map(hmdaFile.loanApplicationRegisters, function(element) {
+            return currentEngine.apiGET('isValidCensusCombination', [element.fipsState, element.fipsCounty, element.censusTract])
+            .then(function(response) {
+                var result = resultFromResponse(response);
+                if (result.result) {
+                    if ((element.metroArea === 'NA' && result.msa_code!=='') || element.metroArea!==result.msa_code) {
+                        var error = {'properties': {}};
+                        error.properties['Recommended MSA/MD'] = result.msa_code;
+                        error.properties['LAR number'] = element.loanNumber;
+                        error.properties['Reported State Code'] = element.fipsState;
+                        error.properties['Reported County Code'] = element.fipsCounty;
+                        error.properties['Reported Census Tract'] = element.censusTract;
+                        invalidMSAs.push (error);
+                    }
                 }
+                return Q.resolve();
+            });
+        }, CONCURRENT_RULES)
+        .then(function() {
+            if (!invalidMSAs.length) {
                 return true;
+            } else {
+                return invalidMSAs;
             }
-            return false;
         });
     };
 
-    HMDAEngine.isNotIndependentMortgageCoOrMBS = function(respondentID, agencyCode) {
-        return this.apiGET('isNotIndependentMortgageCoOrMBS', [agencyCode, respondentID])
-        .then(function(response) {
-            return resultFromResponse(response).result;
-        });
-    };
-
-    HMDAEngine.isMetroAreaOnRespondentPanel = function(metroArea, respondentID, agencyCode) {
-        return this.apiGET('isMetroAreaOnRespondentPanel', [agencyCode, respondentID, metroArea])
-        .then(function(response) {
-            return resultFromResponse(response).result;
+    HMDAEngine.isMetroAreaOnRespondentPanel = function(hmdaFile) {
+        var currentEngine = this,
+            invalidMSAs = {};
+        return Q.map(hmdaFile.loanApplicationRegisters, function(element) {
+            return currentEngine.apiGET('isNotIndependentMortgageCoOrMBS', [element.agencyCode, element.respondentID])
+            .then(function(response) {
+                var result = resultFromResponse(response);
+                if (result.result) {
+                    var validActionTaken = ['1', '2', '3', '4', '5', '7', '8'];
+                    if (_.contains(validActionTaken, element.actionTaken)) {
+                        return currentEngine.apiGET('isMetroAreaOnRespondentPanel', [element.agencyCode, element.respondentID,
+                                            element.metroArea])
+                        .then(function(response) {
+                            var result = resultFromResponse(response);
+                            if (!result.result) {
+                                if (invalidMSAs[element.metroArea] !== undefined) {
+                                    invalidMSAs[element.metroArea]['LAR Count'] ++;
+                                } else {
+                                    var invalidMSA = {
+                                        'LAR Count': 1,
+                                        'MSA/MD': element.metroArea
+                                    };
+                                    invalidMSAs[element.metroArea] = invalidMSA;
+                                }
+                            }
+                            return resultFromResponse(response).result;
+                        });
+                    }
+                } 
+                return Q.resolve();
+            });
+        }, CONCURRENT_RULES)
+        .then(function() {
+            var errorMsas = _.keys(invalidMSAs);
+            if (!errorMsas.length) {
+                return true;
+            } else {
+                var errors = [];
+                for (var i=0; i<errorMsas.length; i++) {
+                    errors.push ({'properties': invalidMSAs[errorMsas[i]]});
+                }
+                return errors;
+            }
         });
     };
 
@@ -1236,7 +1278,7 @@ var accumulateResult = function(ifResult, thenResult) {
             console.time('time to run special rules');
         }
         return Q.all([
-            this.runEdits(year, 'lar', 'special')
+            this.runEdits(year, 'hmda', 'special')
         ])
         .then(function() {
             if (DEBUG) {

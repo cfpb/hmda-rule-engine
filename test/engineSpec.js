@@ -1455,47 +1455,11 @@ describe('Engine', function() {
 
     describe('isValidStateCountyCensusTractCombo', function() {
         it('should return true when API call to isValidCensusCombination result is true', function(done) {
-            var metroArea = '35100';
-            var state = '37';
-            var county = '103';
-            var tract = '5010.02';
-            var loanNumber = '012344567';
-            var path =  '/isValidCensusCombination/' + engine.getRuleYear() + '/' +
-                        state + '/' + county + '/' + tract;
-            mockAPI('get', path, 200, JSON.stringify({ result: true, msa_code: '35100' }));
-            engine.isValidStateCountyCensusTractCombo(loanNumber, metroArea, state, county, tract)
-            .then(function(result) {
-                expect(result).to.be.true();
-                done();
-            });
-        });
+            var hmdaFile = JSON.parse(JSON.stringify(require('./testdata/complete.json'))).hmdaFile;
+            var path = '/isValidCensusCombination/' + engine.getRuleYear() + '/06/034/0100.01';
+            mockAPI('get', path, 200, JSON.stringify({result: true, msa_code: '06920'}), true);
 
-        it('should return false when statecensustract combo is valid, but msa is NA', function(done) {
-            var metroArea = 'NA';
-            var state = '37';
-            var county = '103';
-            var tract = '5010.02';
-            var loanNumber = '012344567';
-            var path =  '/isValidCensusCombination/' + engine.getRuleYear() + '/' +
-                        state + '/' + county + '/' + tract;
-            mockAPI('get', path, 200, JSON.stringify({ result: true, msa_code: '35100' }));
-            engine.isValidStateCountyCensusTractCombo(loanNumber, metroArea, state, county, tract)
-            .then(function(result) {
-                console.log(result[0].properties);
-                expect(result[0].properties['Recommended MSA/MD']).to.be('35100');
-                done();
-            });
-        });
-    });
-
-    describe('isNotIndependentMortgageCoOrMBS', function() {
-        it('should return true when the API response result is true', function(done) {
-            var agencyCode = '1';
-            var respondentID = '1';
-            var path = '/isNotIndependentMortgageCoOrMBS/' + engine.getRuleYear() + '/' +
-                agencyCode + '/' + respondentID;
-            mockAPI('get', path, 200, JSON.stringify({ result: true }));
-            engine.isNotIndependentMortgageCoOrMBS(respondentID, agencyCode)
+            engine.isValidStateCountyCensusTractCombo(hmdaFile)
             .then(function(result) {
                 expect(result).to.be.true();
                 done();
@@ -1505,14 +1469,18 @@ describe('Engine', function() {
 
     describe('isMetroAreaOnRespondentPanel', function() {
         it('should return true when the API response result is true', function(done) {
-            var respondentID = '1';
-            var agencyCode = '1';
-            var metroArea = '1';
-            var path = '/isMetroAreaOnRespondentPanel/' + engine.getRuleYear() + '/' +
+            var hmdaFile = JSON.parse(JSON.stringify(require('./testdata/complete.json'))).hmdaFile;
+            var respondentID = '0123456789';
+            var agencyCode = '9';
+            var metroArea = '06920';
+            var path = '/isNotIndependentMortgageCoOrMBS/' + engine.getRuleYear() + '/9/0123456789';
+            mockAPI('get', path, 200, JSON.stringify({ result: true }), true);
+            path = '/isMetroAreaOnRespondentPanel/' + engine.getRuleYear() + '/' +
                 agencyCode + '/' + respondentID + '/' + metroArea;
-            mockAPI('get', path, 200, JSON.stringify({ result: true }));
-            engine.isMetroAreaOnRespondentPanel(metroArea, respondentID, agencyCode)
+            mockAPI('get', path, 200, JSON.stringify({ result: true }), true);
+            engine.isMetroAreaOnRespondentPanel(hmdaFile)
             .then(function(result) {
+                console.log(result);
                 expect(result).to.be.true();
                 done();
             });
