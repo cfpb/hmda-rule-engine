@@ -915,7 +915,7 @@ var accumulateResult = function(ifResult, thenResult) {
                         }
                     }
                     return Promise.resolve();
-                }, CONCURRENT_RULES)
+                }, { concurrency: CONCURRENT_RULES })
                 .then(function() {
                     if (!invalidMSAs.length) {
                         return true;
@@ -1183,7 +1183,7 @@ var accumulateResult = function(ifResult, thenResult) {
                 return Promise.map(topLevelObj, function(currentTopLevelObj) {
                     args.topLevelObj = currentTopLevelObj;
                     return currentEngine.getExecRulePromise(args);
-                }, CONCURRENT_RULES)
+                }, { concurrency: CONCURRENT_RULES })
                 .then(function() {
                     if (DEBUG > 0) {
                         console.timeEnd('    ' + currentRule.id + ' - ' + scope);
@@ -1198,7 +1198,7 @@ var accumulateResult = function(ifResult, thenResult) {
                 });
             }
 
-        }, CONCURRENT_RULES);
+        }, { concurrency: CONCURRENT_RULES });
 
     };
 
