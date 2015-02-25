@@ -1475,11 +1475,11 @@ describe('Engine', function() {
             var state = '37';
             var county = '103';
             var tract = '5010.02';
-            var recordID = '012344567';
+            var loanNumber = '012344567';
             var path =  '/isValidCensusCombination/' + engine.getRuleYear() + '/' +
                         state + '/' + county + '/' + tract;
             mockAPI('get', path, 200, JSON.stringify({ result: true, msa_code: '35100' }));
-            engine.isValidStateCountyCensusTractCombo(recordID, metroArea, state, county, tract)
+            engine.isValidStateCountyCensusTractCombo(loanNumber, metroArea, state, county, tract)
             .then(function(result) {
                 console.log(result[0].properties);
                 expect(result[0].properties['Recommended MSA/MD']).to.be('35100');
