@@ -1459,10 +1459,11 @@ describe('Engine', function() {
             var state = '37';
             var county = '103';
             var tract = '5010.02';
+            var loanNumber = '012344567';
             var path =  '/isValidCensusCombination/' + engine.getRuleYear() + '/' +
                         state + '/' + county + '/' + tract;
-            mockAPI('get', path, 200, JSON.stringify({ result: true }));
-            engine.isValidStateCountyCensusTractCombo(metroArea, state, county, tract)
+            mockAPI('get', path, 200, JSON.stringify({ result: true, msa_code: '35100' }));
+            engine.isValidStateCountyCensusTractCombo(loanNumber, metroArea, state, county, tract)
             .then(function(result) {
                 expect(result).to.be.true();
                 done();
@@ -1474,12 +1475,14 @@ describe('Engine', function() {
             var state = '37';
             var county = '103';
             var tract = '5010.02';
+            var loanNumber = '012344567';
             var path =  '/isValidCensusCombination/' + engine.getRuleYear() + '/' +
                         state + '/' + county + '/' + tract;
-            mockAPI('get', path, 200, JSON.stringify({ result: true }));
-            engine.isValidStateCountyCensusTractCombo(metroArea, state, county, tract)
+            mockAPI('get', path, 200, JSON.stringify({ result: true, msa_code: '35100' }));
+            engine.isValidStateCountyCensusTractCombo(loanNumber, metroArea, state, county, tract)
             .then(function(result) {
-                expect(result).to.be.false();
+                console.log(result[0].properties);
+                expect(result[0].properties['Recommended MSA/MD']).to.be('35100');
                 done();
             });
         });
@@ -2788,7 +2791,7 @@ describe('Engine', function() {
         it('should return a modified set of errors for failing quality edits', function(done) {
               // Q029
             var path = '/isValidCensusCombination/' + engine.getRuleYear() + '/06/034/0100.01';
-            mockAPI('get', path, 200, JSON.stringify({result: true}), true);
+            mockAPI('get', path, 200, JSON.stringify({result: true, msa_code: '06920'}), true);
 
             path = '/isChildFI/' + engine.getRuleYear() + '/9/0123456789';
             mockAPI('get', path, 200, JSON.stringify({result: true}));
@@ -2877,7 +2880,7 @@ describe('Engine', function() {
             };
 
             var path = '/isValidCensusCombination/' + engine.getRuleYear() + '/06/034/0100.01';
-            mockAPI('get', path, 200, JSON.stringify({result: true}), true);
+            mockAPI('get', path, 200, JSON.stringify({result: true, msa_code: '06920'}), true);
 
             rewiredEngine.runSpecial('2013')
             .then(function(result) {
