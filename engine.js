@@ -742,11 +742,15 @@ var accumulateResult = function(ifResult, thenResult) {
                                 if (invalidMSAs[element.metroArea] !== undefined) {
                                     invalidMSAs[element.metroArea]['LAR Count'] ++;
                                 } else {
-                                    var invalidMSA = {
-                                        'LAR Count': 1,
-                                        'MSA/MD': element.metroArea
-                                    };
-                                    invalidMSAs[element.metroArea] = invalidMSA;
+                                    return currentEngine.apiGET('getMSAName', [element.metroArea])
+                                    .then(function(response) {
+                                        var invalidMSA = {
+                                            'LAR Count': 1,
+                                            'MSA/MD': element.metroArea,
+                                            'MSA/MD name': resultFromResponse(response).msaName
+                                        };
+                                        invalidMSAs[element.metroArea] = invalidMSA;
+                                     }); 
                                 }
                             }
                             return resultFromResponse(response).result;
