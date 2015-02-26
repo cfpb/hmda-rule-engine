@@ -757,7 +757,7 @@ var accumulateResult = function(ifResult, thenResult) {
                 }
                 return Promise.resolve();
             });
-        }, CONCURRENT_RULES)
+        }, { concurrency: CONCURRENT_RULES })
         .then(function() {
             if (!invalidMSAs.length) {
                 return true;
@@ -802,7 +802,7 @@ var accumulateResult = function(ifResult, thenResult) {
                 } 
                 return Promise.resolve();
             });
-        }, CONCURRENT_RULES)
+        }, { concurrency: CONCURRENT_RULES })
         .then(function() {
             var errorMsas = _.keys(invalidMSAs);
             if (!errorMsas.length) {
