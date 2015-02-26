@@ -1454,7 +1454,19 @@ describe('Engine', function() {
     });
 
     describe('isValidStateCountyCensusTractCombo', function() {
-        it('should return true when API call to isValidCensusCombination result is true', function(done) {
+        it('should return true when API call to isValidCensusCombination result is false', function(done) {
+            var hmdaFile = JSON.parse(JSON.stringify(require('./testdata/complete.json'))).hmdaFile;
+            var path = '/isValidCensusCombination/' + engine.getRuleYear() + '/06/034/0100.01';
+            mockAPI('get', path, 200, JSON.stringify({result: false}), true);
+
+            engine.isValidStateCountyCensusTractCombo(hmdaFile)
+            .then(function(result) {
+                expect(result).to.be.true();
+                done();
+            });
+        });
+
+        it('should return true when msaCode = the code returned from the API', function(done) {
             var hmdaFile = JSON.parse(JSON.stringify(require('./testdata/complete.json'))).hmdaFile;
             var path = '/isValidCensusCombination/' + engine.getRuleYear() + '/06/034/0100.01';
             mockAPI('get', path, 200, JSON.stringify({result: true, msa_code: '06920'}), true);
@@ -1465,23 +1477,106 @@ describe('Engine', function() {
                 done();
             });
         });
+
+        it('should return false when msaCode != the code returned from the API', function(done) {
+            var hmdaFile = JSON.parse(JSON.stringify(require('./testdata/complete.json'))).hmdaFile;
+            var path = '/isValidCensusCombination/' + engine.getRuleYear() + '/06/034/0100.01';
+            mockAPI('get', path, 200, JSON.stringify({result: true, msa_code: '35100'}), true);
+
+            engine.isValidStateCountyCensusTractCombo(hmdaFile)
+            .then(function(result) {
+                expect(result.length).to.be(3);
+                done();
+            });
+        });
+
+        it('should return error information when isValidCensusComination returns true', function(done) {
+            var hmdaFile = JSON.parse(JSON.stringify(require('./testdata/complete.json'))).hmdaFile;
+            _.each(hmdaFile.loanApplicationRegisters, function (element) {
+                element.metroArea = 'NA';
+            });
+            var path = '/isValidCensusCombination/' + engine.getRuleYear() + '/06/034/0100.01';
+            mockAPI('get', path, 200, JSON.stringify({result: true, msa_code: '35100'}), true);
+
+            engine.isValidStateCountyCensusTractCombo(hmdaFile)
+            .then(function(result) {
+                expect(result.length).to.be(3);
+                expect(result[0].properties['LAR number']).to.be('ABCDEFGHIJKLMNOPQRSTUVWXY');
+                expect(result[0].properties['Recommended MSA/MD']).to.be('35100');
+                expect(result[0].properties['Reported State Code']).to.be('06');
+                expect(result[0].properties['Reported County Code']).to.be('034');
+                expect(result[0].properties['Reported Census Tract']).to.be('0100.01');
+                done();
+            });
+        });
     });
 
     describe('isMetroAreaOnRespondentPanel', function() {
-        it('should return true when the API response result is true', function(done) {
+        it('should return true when the respondent is Independent Mortgage comapny or MBS', function(done) {
             var hmdaFile = JSON.parse(JSON.stringify(require('./testdata/complete.json'))).hmdaFile;
             var respondentID = '0123456789';
             var agencyCode = '9';
             var metroArea = '06920';
             var path = '/isNotIndependentMortgageCoOrMBS/' + engine.getRuleYear() + '/9/0123456789';
-            mockAPI('get', path, 200, JSON.stringify({ result: true }), true);
-            path = '/isMetroAreaOnRespondentPanel/' + engine.getRuleYear() + '/' +
-                agencyCode + '/' + respondentID + '/' + metroArea;
-            mockAPI('get', path, 200, JSON.stringify({ result: true }), true);
+            mockAPI('get', path, 200, JSON.stringify({ result: false }), true);
+            
             engine.isMetroAreaOnRespondentPanel(hmdaFile)
             .then(function(result) {
-                console.log(result);
                 expect(result).to.be.true();
+                done();
+            });
+        });
+
+        it('should return true when the action taken is not valid', function(done) {
+            var hmdaFile = JSON.parse(JSON.stringify(require('./testdata/complete.json'))).hmdaFile;
+            _.each(hmdaFile.loanApplicationRegisters, function (element) {
+                element.actionTaken = '9';
+            });
+            var path = '/isNotIndependentMortgageCoOrMBS/' + engine.getRuleYear() + '/9/0123456789';
+            mockAPI('get', path, 200, JSON.stringify({ result: true }), true);
+            
+            engine.isMetroAreaOnRespondentPanel(hmdaFile)
+            .then(function(result) {
+                expect(result).to.be.true();
+                done();
+            });
+        });
+
+        it('should return true when the respondent has a branch in the msa', function(done) {
+            var hmdaFile = JSON.parse(JSON.stringify(require('./testdata/complete.json'))).hmdaFile;
+            _.each(hmdaFile.loanApplicationRegisters, function (element) {
+                element.actionTaken = '9';
+            });
+            var path = '/isNotIndependentMortgageCoOrMBS/' + engine.getRuleYear() + '/9/0123456789';
+            mockAPI('get', path, 200, JSON.stringify({ result: true }), true);
+            path = '/isMetroAreaOnRespondentPanel/' + engine.getRuleYear() + '/9/0123456789/06920';
+            mockAPI('get', path, 200, JSON.stringify({ result: true }), true);
+            
+            engine.isMetroAreaOnRespondentPanel(hmdaFile)
+            .then(function(result) {
+                expect(result).to.be.true();
+                done();
+            });
+        });
+
+        it('should return error data when the respondent doesnt have a branch in the msa', function(done) {
+            var hmdaFile = JSON.parse(JSON.stringify(require('./testdata/complete.json'))).hmdaFile;
+            _.each(hmdaFile.loanApplicationRegisters, function (element) {
+                element.metroArea = '35100';
+            });
+            var path = '/isNotIndependentMortgageCoOrMBS/' + engine.getRuleYear() + '/9/0123456789';
+            mockAPI('get', path, 200, JSON.stringify({ result: true }), true);
+            path = '/isMetroAreaOnRespondentPanel/' + engine.getRuleYear() + '/9/0123456789/35100';
+            mockAPI('get', path, 200, JSON.stringify({ result: false }), true);
+            path = '/getMsaName/' + engine.getRuleYear() + '/35100';
+            mockAPI('get', path, 200, JSON.stringify({ msaName: 'New Bern, NC' }), true);
+            
+            engine.isMetroAreaOnRespondentPanel(hmdaFile)
+            .then(function(result) {
+                expect(result.length).to.be(1);
+                expect(result[0].properties['LAR Count']).to.be(3);
+                expect(result[0].properties['MSA/MD']).to.be('35100');
+                expect(result[0].properties['MSA/MD name']).to.be('New Bern, NC');
                 done();
             });
         });

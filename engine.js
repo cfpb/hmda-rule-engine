@@ -769,7 +769,7 @@ var accumulateResult = function(ifResult, thenResult) {
 
     HMDAEngine.isMetroAreaOnRespondentPanel = function(hmdaFile) {
         var currentEngine = this,
-            invalidMSAs = {};
+            invalidMSAs = [];
         return Promise.map(hmdaFile.loanApplicationRegisters, function(element) {
             return currentEngine.apiGET('isNotIndependentMortgageCoOrMBS', [element.agencyCode, element.respondentID])
             .then(function(response) {
@@ -782,19 +782,7 @@ var accumulateResult = function(ifResult, thenResult) {
                         .then(function(response) {
                             var result = resultFromResponse(response);
                             if (!result.result) {
-                                if (invalidMSAs[element.metroArea] !== undefined) {
-                                    invalidMSAs[element.metroArea]['LAR Count'] ++;
-                                } else {
-                                    return currentEngine.apiGET('getMSAName', [element.metroArea])
-                                    .then(function(response) {
-                                        var invalidMSA = {
-                                            'LAR Count': 1,
-                                            'MSA/MD': element.metroArea,
-                                            'MSA/MD name': resultFromResponse(response).msaName
-                                        };
-                                        invalidMSAs[element.metroArea] = invalidMSA;
-                                     }); 
-                                }
+                                invalidMSAs.push(element.metroArea);
                             }
                             return resultFromResponse(response).result;
                         });
@@ -804,15 +792,35 @@ var accumulateResult = function(ifResult, thenResult) {
             });
         }, { concurrency: CONCURRENT_RULES })
         .then(function() {
-            var errorMsas = _.keys(invalidMSAs);
-            if (!errorMsas.length) {
+            if (!invalidMSAs.length) {
                 return true;
             } else {
-                var errors = [];
-                for (var i=0; i<errorMsas.length; i++) {
-                    errors.push ({'properties': invalidMSAs[errorMsas[i]]});
+                var errors = [],
+                    uniqueMSAMap = {};
+                for (var i=0; i<invalidMSAs.length; i++) {
+                    if (uniqueMSAMap[invalidMSAs[i]] === undefined) {
+                        uniqueMSAMap[invalidMSAs[i]] = 1;
+                    } else {
+                        uniqueMSAMap[invalidMSAs[i]]++;
+                    }
                 }
-                return errors;
+                
+                return Promise.map(_.keys(uniqueMSAMap), function(msaKey) {
+                    return currentEngine.apiGET('getMSAName', [msaKey])
+                    .then(function(response) {
+                        var msaInfo = {
+                            'LAR Count': uniqueMSAMap[msaKey],
+                            'MSA/MD': msaKey,
+                            'MSA/MD name': resultFromResponse(response).msaName
+                        };
+
+                        errors.push ({'properties': msaInfo});
+                        return Promise.resolve();
+                    });
+                }, { concurrency: CONCURRENT_RULES })
+                .then(function() {    
+                    return errors;
+                });
             }
         });
     };
@@ -824,7 +832,7 @@ var accumulateResult = function(ifResult, thenResult) {
             return resultFromResponse(body).result;
         });
     };
-
+ 
     HMDAEngine.isTaxIDTheSameAsLastYear = function(respondentID, agencyCode, taxID) {
         return this.apiGET('isTaxIDTheSameAsLastYear', [agencyCode, respondentID, taxID])
         .then(function(body) {
@@ -851,7 +859,7 @@ var accumulateResult = function(ifResult, thenResult) {
                 _.contains(['1', '2'], element.propertyType) && (element.loanType === '1')) {
                 numLoans++;
                 if (_.contains(['1', '3'], element.purchaserType)) {
-                    numFannieLoans ++;
+                    numFannieLoans++;
                 }
             }
         });
@@ -872,7 +880,7 @@ var accumulateResult = function(ifResult, thenResult) {
                 _.contains(['1', '2'], element.propertyType) && (element.loanType === '2')) {
                 numLoans++;
                 if (element.purchaserType === '2') {
-                    numGinnieLoans ++;
+                    numGinnieLoans++;
                 }
             }
         });
@@ -893,7 +901,7 @@ var accumulateResult = function(ifResult, thenResult) {
                 _.contains(['1', '2'], element.propertyType) && (element.loanType === '3')) {
                 numLoans++;
                 if (element.purchaserType === '2') {
-                    numGinnieLoans ++;
+                    numGinnieLoans++;
                 }
             }
         });
