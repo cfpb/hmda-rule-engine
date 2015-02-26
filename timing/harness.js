@@ -80,6 +80,7 @@ var runHarness = function(fn, year, apiurl, uselocaldb, debug, asthen) {
                 .then(function() {
                     console.timeEnd('time to run all rules');
                     console.timeEnd('total time');
+                    console.log(engine.getErrors());
                 })
                 .catch(function(err) {
                     console.log(err.message);

@@ -1,6 +1,7 @@
 /*jshint evil:true*/
 /*global window:false*/
 /* global -Promise */
+/* global indexedDB:false */
 'use strict';
 
 var hmdajson = require('./lib/hmdajson'),
@@ -11,7 +12,8 @@ var hmdajson = require('./lib/hmdajson'),
     GET = require('./lib/promise-http-get'),
     moment = require('moment'),
     Promise = require('bluebird'),
-    CONCURRENT_RULES = 10;
+    CONCURRENT_RULES = 10,
+    levelup = require('level-browserify');
 
 var resolveArg = function(arg, contextList) {
     var tokens = arg.split('.');
@@ -195,8 +197,112 @@ var accumulateResult = function(ifResult, thenResult) {
         DEBUG = level;
     };
 
+    HMDAEngine.getDebug = function() {
+        return DEBUG;
+    };
+
     HMDAEngine.setUseLocalDB = function(bool) {
         _USE_LOCAL_DB = bool;
+        if (bool) {
+            this.resetDB();
+        }
+    };
+
+    /*
+     * -----------------------------------------------------
+     * Local DB
+     * -----------------------------------------------------
+     */
+
+    HMDAEngine.resetDB = function() {
+        return destroyDB()
+        .then(function() {
+            _LOCAL_DB = levelup('hmda');
+        });
+    };
+
+    var destroyDB = function() {
+        var deferred = Promise.defer();
+        if (typeof levelup.destroy === 'function') {
+            levelup.destroy('hmda', function(err) {
+                if (err) {
+                    deferred.reject(err);
+                }
+                deferred.resolve();
+            });
+        } else {
+            var request = indexedDB.deleteDatabase('IDBWrapper-hmda');
+            request.onsuccess = function() {
+                deferred.resolve();
+            };
+            request.onerror = function(err) {
+                deferred.reject(err);
+            };
+        }
+        return deferred.promise;
+    };
+
+    var loadDB = function(data) {
+        var deferred = Promise.defer();
+        _LOCAL_DB.batch(data, function(err) {
+            if (err) {
+                deferred.reject(err);
+            }
+            deferred.resolve();
+        });
+        return deferred.promise;
+    };
+
+
+    var loadCensusData = function(currentEngine, year) {
+        var apiCalls = [
+            currentEngine.apiGET('localdb/census/msaCodesForYear'),
+            currentEngine.apiGET('localdb/census/stateCountyForYear'),
+            currentEngine.apiGET('localdb/census/stateCountyMSAForYear'),
+            currentEngine.apiGET('localdb/census/stateCountyMSATractForYear')
+        ];
+        return Promise.map(apiCalls, function(body) {
+            return loadDB(resultFromResponse(body));
+        });
+    };
+
+    var isValidCensusCombination = function(censusparams) {
+        var deferred = Promise.defer();
+
+        var key = '/census';
+
+        for (var param in censusparams) {
+            if (param === 'msa_code' && censusparams[param] === 'NA') {
+                key += '/msa_code/';
+            } else if (censusparams[param]!==undefined && censusparams[param]!=='NA') {
+                key += '/' + param + '/' + censusparams[param];
+            }
+        }
+        //console.log(key);
+        _LOCAL_DB.get(key, function(err, value) {
+            if (err && err.notFound) {
+                deferred.resolve(false);
+            }
+            if (censusparams.tract === 'NA' && value === '1') {
+                deferred.resolve(true);
+            }
+            deferred.resolve(true);
+        });
+
+        return deferred.promise;
+    };
+
+    var localMSALookup = function(msaCode) {
+        var deferred = Promise.defer();
+
+        var key = '/census/msa_code/' + msaCode;
+        _LOCAL_DB.get(key, function(err, value) {
+            if (err && err.notFound) {
+                deferred.resolve(false);
+            }
+            deferred.resolve(value);
+        });
+        return deferred.promise;
     };
 
     /*
@@ -666,7 +772,10 @@ var accumulateResult = function(ifResult, thenResult) {
     };
 
     HMDAEngine.apiGET = function(funcName, params) {
-        var url = this.getAPIURL()+'/'+funcName+'/'+this.getRuleYear()+'/'+params.join('/');
+        var url = this.getAPIURL()+'/'+funcName+'/'+this.getRuleYear();
+        if (params !== undefined && _.isArray(params) && params.length) {
+            url += '/'+params.join('/');
+        }
         return GET(url);
     };
 
@@ -709,7 +818,13 @@ var accumulateResult = function(ifResult, thenResult) {
             return true;
         }
         if (_USE_LOCAL_DB) {
-            // Do something
+            return this.getMSAName(metroArea)
+            .then(function(name) {
+                if (name) {
+                    return true;
+                }
+                return false;
+            });
         } else {
             return this.apiGET('isValidMSA', [metroArea])
             .then(function(response) {
@@ -720,7 +835,10 @@ var accumulateResult = function(ifResult, thenResult) {
 
     HMDAEngine.isValidMsaMdStateAndCountyCombo = function(metroArea, fipsState, fipsCounty) {
         if (_USE_LOCAL_DB) {
-            // Do something
+            return isValidCensusCombination({'state_code':fipsState, 'county_code':fipsCounty, 'msa_code': metroArea})
+            .then(function(result) {
+                return result;
+            });
         } else {
             return this.apiGET('isValidMSAStateCounty', [metroArea, fipsState, fipsCounty])
             .then(function(response) {
@@ -731,7 +849,10 @@ var accumulateResult = function(ifResult, thenResult) {
 
     HMDAEngine.isValidStateAndCounty = function(fipsState, fipsCounty) {
         if (_USE_LOCAL_DB) {
-            // Do something
+            return isValidCensusCombination({'state_code':fipsState, 'county_code':fipsCounty})
+            .then(function(result) {
+                return result;
+            });
         } else {
             return this.apiGET('isValidStateCounty', [fipsState, fipsCounty])
             .then(function(response) {
@@ -742,7 +863,11 @@ var accumulateResult = function(ifResult, thenResult) {
 
     HMDAEngine.isValidCensusTractCombo = function(censusTract, metroArea, fipsState, fipsCounty) {
         if (_USE_LOCAL_DB) {
-            // Do something
+            return isValidCensusCombination({'state_code':fipsState,
+                    'county_code':fipsCounty, 'tract': censusTract, 'msa_code': metroArea})
+            .then(function(result) {
+                return result;
+            });
         } else {
             return this.apiGET('isValidCensusTractCombo', [fipsState, fipsCounty, metroArea, censusTract])
             .then(function(response) {
@@ -1008,10 +1133,14 @@ var accumulateResult = function(ifResult, thenResult) {
     };
 
     HMDAEngine.getMSAName = function(msaCode) {
-        return this.apiGET('getMSAName', [msaCode])
-        .then(function(response) {
-            return resultFromResponse(response).msaName;
-        });
+        if (_USE_LOCAL_DB) {
+            return localMSALookup(msaCode);
+        } else {
+            return this.apiGET('getMSAName', [msaCode])
+            .then(function(response) {
+                return resultFromResponse(response).msaName;
+            });
+        }
     };
 
     /*
@@ -1298,30 +1427,25 @@ var accumulateResult = function(ifResult, thenResult) {
         });
     };
 
-    var loadValidityLocalDB = function(currentEngine, year) {
-        return currentEngine.apiGET('censusForYear', [])
-        .then(function(body) {
-            // Do something
-        });
-    };
-
     HMDAEngine.runValidity = function(year) {
         var currentEngine = this;
-        var validityPromise = Q.all([
-            currentEngine.runEdits(year, 'ts', 'validity'),
-            currentEngine.runEdits(year, 'lar', 'validity')
-        ]);
-        if (DEBUG) {
-            console.time('time to run validity rules');
-        }
+        var validityPromise;
         if (_USE_LOCAL_DB) {
-            validityPromise = loadValidityLocalDB(currentEngine, year)
+            validityPromise = loadCensusData(currentEngine, year)
             .then(function() {
                 return Promise.all([
                     currentEngine.runEdits(year, 'ts', 'validity'),
                     currentEngine.runEdits(year, 'lar', 'validity')
                 ]);
             });
+        } else {
+            validityPromise = Promise.all([
+                currentEngine.runEdits(year, 'ts', 'validity'),
+                currentEngine.runEdits(year, 'lar', 'validity')
+            ]);
+        }
+        if (DEBUG) {
+            console.time('time to run validity rules');
         }
         return validityPromise
         .then(function() {
