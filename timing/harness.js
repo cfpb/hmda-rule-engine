@@ -1,8 +1,9 @@
 #!/usr/bin/env node
 
+/* global -Promise */
 'use strict';
 
-var Q = require('q');
+var Promise = require('bluebird');
 var engine = require('../engine');
 var fs = require('fs');
 
@@ -14,7 +15,7 @@ var runSynValThen = function(year) {
 };
 
 var runSynValAll = function(year) {
-    return Q.all([engine.runSyntactical(year), engine.runValidity(year)]);
+    return Promise.all([engine.runSyntactical(year), engine.runValidity(year)]);
 };
 
 var runQualMacroThen = function(year) {
@@ -25,7 +26,7 @@ var runQualMacroThen = function(year) {
 };
 
 var runQualMacroAll = function(year) {
-    return Q.all([engine.runQuality(year), engine.runMacro(year)]);
+    return Promise.all([engine.runQuality(year), engine.runMacro(year)]);
 };
 
 var runAll = function(year) {

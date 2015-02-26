@@ -1,5 +1,6 @@
 /*jshint evil:true*/
 /*global window:false*/
+/* global -Promise */
 'use strict';
 
 var hmdajson = require('./lib/hmdajson'),
@@ -9,10 +10,8 @@ var hmdajson = require('./lib/hmdajson'),
     stream = require('stream'),
     GET = require('./lib/promise-http-get'),
     moment = require('moment'),
-    Q = require('q'),
+    Promise = require('bluebird'),
     CONCURRENT_RULES = 10;
-
-Q.map = require('q-map').map;
 
 var resolveArg = function(arg, contextList) {
     var tokens = arg.split('.');
@@ -85,11 +84,11 @@ var resultFromResponse = function(response) {
 
 var resolveError = function(err) {
     if (err.message && err.message === 'Failed to resolve argument!') {
-        return Q.reject(new Error('Rule-spec error: Invalid property\nProperty: ' + err.property + ' not found!'));
+        return Promise.reject(new Error('Rule-spec error: Invalid property\nProperty: ' + err.property + ' not found!'));
     } else if (err.message && err.message === 'connect ECONNREFUSED') {
-        return Q.reject(new Error('There was a problem connecting to the HMDA server. Please check your connection or try again later.'));
+        return Promise.reject(new Error('There was a problem connecting to the HMDA server. Please check your connection or try again later.'));
     } else {
-        return Q.reject(err);
+        return Promise.reject(err);
     }
 };
 
@@ -128,7 +127,7 @@ var accumulateResult = function(ifResult, thenResult) {
         exports.HMDAEngine = HMDAEngine;
     }
     root.HMDAEngine = HMDAEngine;
-    root.Q = Q;
+    root.Promise = Promise;
 
     /*
      * -----------------------------------------------------
@@ -485,7 +484,7 @@ var accumulateResult = function(ifResult, thenResult) {
             condid = '- compareNumEntriesSingleCond';
         }
 
-        return Q.map(loanApplicationRegisters, function(lar) {
+        return Promise.map(loanApplicationRegisters, function(lar) {
             return currentEngine.execRule(lar, rule, ruleid)
             .then(function(result) {
                 if (result.length === 0) {
@@ -526,7 +525,7 @@ var accumulateResult = function(ifResult, thenResult) {
             condid = '- compareNumEntriesCond';
         }
 
-        return Q.map(loanApplicationRegisters, function(lar) {
+        return Promise.map(loanApplicationRegisters, function(lar) {
             return currentEngine.execRule(lar, ruleA, ruleAid)
             .then(function(result) {
                 if (result.length === 0) {
@@ -568,6 +567,50 @@ var accumulateResult = function(ifResult, thenResult) {
             });
         });
 
+    };
+
+    HMDAEngine.getTotalsByMSA = function(loanApplicationRegisters) {
+        return _.chain(loanApplicationRegisters)
+        .groupBy('metroArea')
+        .map(function(value, key) {
+            var msaName = HMDAEngine.getMSAName(key);
+            var result = {msaCode: key, msaName: msaName, totalLAR: 0, totalLoanAmount: 0, totalConventional: 0, totalFHA: 0, totalVA: 0, totalFSA: 0,
+                total1To4Family: 0, totalMFD: 0, totalMultifamily: 0, totalHomePurchase: 0, totalHomeImprovement: 0, totalRefinance: 0};
+
+            _.each(value, function(element) {
+                result.totalLAR++;
+                result.totalLoanAmount += +element.loanAmount;
+
+                if (element.loanType === '1') {
+                    result.totalConventional++;
+                } else if (element.loanType === '2') {
+                    result.totalFHA++;
+                } else if (element.loanType === '3') {
+                    result.totalVA++;
+                } else if (element.loanType === '4') {
+                    result.totalFSA++;
+                }
+
+                if (element.propertyType === '1') {
+                    result.total1To4Family++;
+                } else if (element.propertyType === '2') {
+                    result.totalMFD++;
+                } else if (element.propertyType === '3') {
+                    result.totalMultifamily++;
+                }
+
+                if (element.loanPurpose === '1') {
+                    result.totalHomePurchase++;
+                } else if (element.loanPurpose === '2') {
+                    result.totalHomeImprovement++;
+                } else if (element.loanPurpose === '3') {
+                    result.totalRefinance++;
+                }
+            });
+            return result;
+        })
+        .sortBy('msaCode')
+        .value();
     };
 
     HMDAEngine.isValidNumMultifamilyLoans = function(hmdaFile) {
@@ -697,7 +740,7 @@ var accumulateResult = function(ifResult, thenResult) {
     HMDAEngine.isValidStateCountyCensusTractCombo = function(hmdaFile) {
        var currentEngine = this,
             invalidMSAs = [];
-        return Q.map(hmdaFile.loanApplicationRegisters, function(element) {
+        return Promise.map(hmdaFile.loanApplicationRegisters, function(element) {
             return currentEngine.apiGET('isValidCensusCombination', [element.fipsState, element.fipsCounty, element.censusTract])
             .then(function(response) {
                 var result = resultFromResponse(response);
@@ -712,7 +755,7 @@ var accumulateResult = function(ifResult, thenResult) {
                         invalidMSAs.push (error);
                     }
                 }
-                return Q.resolve();
+                return Promise.resolve();
             });
         }, CONCURRENT_RULES)
         .then(function() {
@@ -727,7 +770,7 @@ var accumulateResult = function(ifResult, thenResult) {
     HMDAEngine.isMetroAreaOnRespondentPanel = function(hmdaFile) {
         var currentEngine = this,
             invalidMSAs = {};
-        return Q.map(hmdaFile.loanApplicationRegisters, function(element) {
+        return Promise.map(hmdaFile.loanApplicationRegisters, function(element) {
             return currentEngine.apiGET('isNotIndependentMortgageCoOrMBS', [element.agencyCode, element.respondentID])
             .then(function(response) {
                 var result = resultFromResponse(response);
@@ -757,7 +800,7 @@ var accumulateResult = function(ifResult, thenResult) {
                         });
                     }
                 } 
-                return Q.resolve();
+                return Promise.resolve();
             });
         }, CONCURRENT_RULES)
         .then(function() {
@@ -902,11 +945,11 @@ var accumulateResult = function(ifResult, thenResult) {
         .then(function(response) {
             if (resultFromResponse(response).result) {
                 var validActionTaken = ['1', '2', '3', '4', '5', '6'];
-                return Q.map(hmdaFile.loanApplicationRegisters, function(element) {
+                return Promise.map(hmdaFile.loanApplicationRegisters, function(element) {
                     if (_.contains(validActionTaken, element.actionTaken)) {
                         if (element.censusTract==='NA') {
                             invalidMSAs.push(element.lineNumber);
-                            return Q.resolve();
+                            return Promise.resolve();
                         } else {
                             return currentEngine.apiGET('isValidCensusInMSA', [element.metroArea, element.fipsState,
                                    element.fipsCounty, element.censusTract])
@@ -917,8 +960,8 @@ var accumulateResult = function(ifResult, thenResult) {
                             });
                         }
                     }
-                    return Q.resolve();
-                }, CONCURRENT_RULES)
+                    return Promise.resolve();
+                }, { concurrency: CONCURRENT_RULES })
                 .then(function() {
                     if (!invalidMSAs.length) {
                         return true;
@@ -1075,9 +1118,9 @@ var accumulateResult = function(ifResult, thenResult) {
         };
 
         this.parseRule(rule, result);
-        var functionBody = 'return Q.spread([';
+        var functionBody = 'return Promise.join(';
         functionBody += result.funcs.join(',');
-        functionBody += '], function(';
+        functionBody += ', function(';
         functionBody += result.spreads.join(',');
         functionBody += ') { return ' + result.body + ' });';
 
@@ -1089,6 +1132,7 @@ var accumulateResult = function(ifResult, thenResult) {
                 return arg;
             }
         });
+
 
         if (ruleid) {
             console.time('    ' + ruleid);
@@ -1171,7 +1215,7 @@ var accumulateResult = function(ifResult, thenResult) {
                 break;
         }
 
-        return Q.map(rules, function(currentRule) {
+        return Promise.map(rules, function(currentRule) {
             if (DEBUG > 0) {
                 console.time('    ' + currentRule.id + ' - ' + scope);
             }
@@ -1182,10 +1226,10 @@ var accumulateResult = function(ifResult, thenResult) {
                 'editType': editType
             };
             if (_.isArray(topLevelObj)) {
-                return Q.map(topLevelObj, function(currentTopLevelObj) {
+                return Promise.map(topLevelObj, function(currentTopLevelObj) {
                     args.topLevelObj = currentTopLevelObj;
                     return currentEngine.getExecRulePromise(args);
-                }, CONCURRENT_RULES)
+                }, { concurrency: CONCURRENT_RULES })
                 .then(function() {
                     if (DEBUG > 0) {
                         console.timeEnd('    ' + currentRule.id + ' - ' + scope);
@@ -1200,7 +1244,7 @@ var accumulateResult = function(ifResult, thenResult) {
                 });
             }
 
-        }, CONCURRENT_RULES);
+        }, { concurrency: CONCURRENT_RULES });
 
     };
 
@@ -1208,7 +1252,7 @@ var accumulateResult = function(ifResult, thenResult) {
         if (DEBUG) {
             console.time('time to run syntactical rules');
         }
-        return Q.all([
+        return Promise.all([
             this.runEdits(year, 'ts', 'syntactical'),
             this.runEdits(year, 'lar', 'syntactical'),
             this.runEdits(year, 'hmda', 'syntactical')
@@ -1218,7 +1262,7 @@ var accumulateResult = function(ifResult, thenResult) {
                 console.timeEnd('time to run syntactical rules');
             }
         })
-        .fail(function(err) {
+        .catch(function(err) {
             return resolveError(err);
         });
     };
@@ -1227,7 +1271,7 @@ var accumulateResult = function(ifResult, thenResult) {
         if (DEBUG) {
             console.time('time to run validity rules');
         }
-        return Q.all([
+        return Promise.all([
             this.runEdits(year, 'ts', 'validity'),
             this.runEdits(year, 'lar', 'validity')
         ])
@@ -1236,7 +1280,7 @@ var accumulateResult = function(ifResult, thenResult) {
                 console.timeEnd('time to run validity rules');
             }
         })
-        .fail(function(err) {
+        .catch(function(err) {
             return resolveError(err);
         });
     };
@@ -1245,7 +1289,7 @@ var accumulateResult = function(ifResult, thenResult) {
         if (DEBUG) {
             console.time('time to run quality rules');
         }
-        return Q.all([
+        return Promise.all([
             this.runEdits(year, 'ts', 'quality'),
             this.runEdits(year, 'lar', 'quality'),
             this.runEdits(year, 'hmda', 'quality')
@@ -1255,7 +1299,7 @@ var accumulateResult = function(ifResult, thenResult) {
                 console.timeEnd('time to run quality rules');
             }
         })
-        .fail(function(err) {
+        .catch(function(err) {
             return resolveError(err);
         });
     };
@@ -1264,7 +1308,7 @@ var accumulateResult = function(ifResult, thenResult) {
         if (DEBUG) {
             console.time('time to run macro rules');
         }
-        return Q.all([
+        return Promise.all([
             this.runEdits(year, 'hmda', 'macro')
         ])
         .then(function() {
@@ -1272,7 +1316,7 @@ var accumulateResult = function(ifResult, thenResult) {
                 console.timeEnd('time to run macro rules');
             }
         })
-        .fail(function(err) {
+        .catch(function(err) {
             return resolveError(err);
         });
     };
@@ -1281,7 +1325,7 @@ var accumulateResult = function(ifResult, thenResult) {
         if (DEBUG) {
             console.time('time to run special rules');
         }
-        return Q.all([
+        return Promise.all([
             this.runEdits(year, 'hmda', 'special')
         ])
         .then(function() {
@@ -1289,7 +1333,7 @@ var accumulateResult = function(ifResult, thenResult) {
                 console.timeEnd('time to run special rules');
             }
         })
-        .fail(function(err) {
+        .catch(function(err) {
             return resolveError(err);
         });
     };
