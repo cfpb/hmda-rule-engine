@@ -1544,9 +1544,6 @@ describe('Engine', function() {
 
         it('should return true when the respondent has a branch in the msa', function(done) {
             var hmdaFile = JSON.parse(JSON.stringify(require('./testdata/complete.json'))).hmdaFile;
-            _.each(hmdaFile.loanApplicationRegisters, function (element) {
-                element.actionTaken = '9';
-            });
             var path = '/isNotIndependentMortgageCoOrMBS/' + engine.getRuleYear() + '/9/0123456789';
             mockAPI('get', path, 200, JSON.stringify({ result: true }), true);
             path = '/isMetroAreaOnRespondentPanel/' + engine.getRuleYear() + '/9/0123456789/06920';
