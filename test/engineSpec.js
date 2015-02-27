@@ -1519,7 +1519,7 @@ describe('Engine', function() {
             var metroArea = '06920';
             var path = '/isNotIndependentMortgageCoOrMBS/' + engine.getRuleYear() + '/9/0123456789';
             mockAPI('get', path, 200, JSON.stringify({ result: false }), true);
-            
+
             engine.isMetroAreaOnRespondentPanel(hmdaFile)
             .then(function(result) {
                 expect(result).to.be.true();
@@ -1534,7 +1534,7 @@ describe('Engine', function() {
             });
             var path = '/isNotIndependentMortgageCoOrMBS/' + engine.getRuleYear() + '/9/0123456789';
             mockAPI('get', path, 200, JSON.stringify({ result: true }), true);
-            
+
             engine.isMetroAreaOnRespondentPanel(hmdaFile)
             .then(function(result) {
                 expect(result).to.be.true();
@@ -1548,7 +1548,7 @@ describe('Engine', function() {
             mockAPI('get', path, 200, JSON.stringify({ result: true }), true);
             path = '/isMetroAreaOnRespondentPanel/' + engine.getRuleYear() + '/9/0123456789/06920';
             mockAPI('get', path, 200, JSON.stringify({ result: true }), true);
-            
+
             engine.isMetroAreaOnRespondentPanel(hmdaFile)
             .then(function(result) {
                 expect(result).to.be.true();
@@ -1567,7 +1567,7 @@ describe('Engine', function() {
             mockAPI('get', path, 200, JSON.stringify({ result: false }), true);
             path = '/getMsaName/' + engine.getRuleYear() + '/35100';
             mockAPI('get', path, 200, JSON.stringify({ msaName: 'New Bern, NC' }), true);
-            
+
             engine.isMetroAreaOnRespondentPanel(hmdaFile)
             .then(function(result) {
                 expect(result.length).to.be(1);
