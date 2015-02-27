@@ -2963,7 +2963,6 @@ describe('Engine', function() {
 
             engine.getTotalsByMSA(hmdaJson.hmdaFile.loanApplicationRegisters)
             .then(function(result) {
-                console.log(JSON.stringify(result, null, 2));
                 expect(result[0].msaCode).to.be('35100');
                 expect(result[0].totalLAR).to.be(3);
                 expect(result[0].totalLoanAmount).to.be(30000);
