@@ -256,10 +256,11 @@ var accumulateResult = function(ifResult, thenResult) {
 
     var loadCensusData = function(currentEngine, year) {
         var apiCalls = [
-            currentEngine.apiGET('localdb/census/msaCodesForYear'),
-            currentEngine.apiGET('localdb/census/stateCountyForYear'),
-            currentEngine.apiGET('localdb/census/stateCountyMSAForYear'),
-            currentEngine.apiGET('localdb/census/stateCountyMSATractForYear')
+            currentEngine.apiGET('localdb/census/msaCodes'),
+            currentEngine.apiGET('localdb/census/stateCounty'),
+            currentEngine.apiGET('localdb/census/stateCountyMSA'),
+            currentEngine.apiGET('localdb/census/stateCountyTract'),
+            currentEngine.apiGET('localdb/census/stateCountyTractMSA')
         ];
         return Promise.map(apiCalls, function(body) {
             return loadDB(resultFromResponse(body));
@@ -272,19 +273,16 @@ var accumulateResult = function(ifResult, thenResult) {
         var key = '/census';
 
         for (var param in censusparams) {
-            if (param === 'msa_code' && censusparams[param] === 'NA') {
-                key += '/msa_code/';
-            } else if (censusparams[param]!==undefined && censusparams[param]!=='NA') {
+            if (censusparams[param]!==undefined && censusparams[param]!=='NA') {
                 key += '/' + param + '/' + censusparams[param];
             }
         }
-        //console.log(key);
         _LOCAL_DB.get(key, function(err, value) {
             if (err && err.notFound) {
                 deferred.resolve(false);
             }
-            if (censusparams.tract === 'NA' && value === '1') {
-                deferred.resolve(true);
+            if (censusparams.tract === 'NA' && value !== '1') {
+                deferred.resolve(false);
             }
             deferred.resolve(true);
         });
