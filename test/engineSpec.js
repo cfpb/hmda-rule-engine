@@ -2956,10 +2956,10 @@ describe('Engine', function() {
 
             var msaCode = '06920';
             var path = '/getMSAName/' + engine.getRuleYear() + '/' + msaCode;
-            mockAPI('get', path, 200, JSON.stringify({ msaName: '' }), true);
+            mockAPI('get', path, 200, JSON.stringify({ msaName: '' }));
             msaCode = '35100';
             path = '/getMSAName/' + engine.getRuleYear() + '/' + msaCode;
-            mockAPI('get', path, 200, JSON.stringify({ msaName: 'New Bern, NC' }), true);
+            mockAPI('get', path, 200, JSON.stringify({ msaName: 'New Bern, NC' }));
 
             engine.getTotalsByMSA(hmdaJson.hmdaFile.loanApplicationRegisters)
             .then(function(result) {
