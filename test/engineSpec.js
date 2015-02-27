@@ -2148,7 +2148,7 @@ describe('Engine', function() {
         it('should return true for a passing is_integer rule', function(done) {
             rule = {
                 'property': 'timestamp',
-                'condition': 'is_integer',
+                'condition': 'is_integer'
             };
 
             engine.execRule(topLevelObj, rule)
