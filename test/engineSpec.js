@@ -5,13 +5,29 @@
 /*global rewire:false*/
 /*global _:false*/
 /*global mockAPI:false*/
+/*global before:false*/
+/*global port:false*/
 'use strict';
 
 var engine = require('../engine'),
     rewiredEngine = require('./rewiredEngine'),
+    levelup = require('level-browserify'),
     http = require('http'),
     mockAPIURL,
     mockYEAR;
+
+var setupCensusAPI = function() {
+    mockAPI('get', '/localdb/census/msaCodes/2013', 200,
+        JSON.parse(JSON.stringify(require('./testdata/api_localdb_census_msaCodes.json'))));
+    mockAPI('get', '/localdb/census/stateCounty/2013', 200,
+        JSON.parse(JSON.stringify(require('./testdata/api_localdb_census_stateCounty.json'))));
+    mockAPI('get', '/localdb/census/stateCountyMSA/2013', 200,
+        JSON.parse(JSON.stringify(require('./testdata/api_localdb_census_stateCountyMSA.json'))));
+    mockAPI('get', '/localdb/census/stateCountyTract/2013', 200,
+        JSON.parse(JSON.stringify(require('./testdata/api_localdb_census_stateCountyTract.json'))));
+    mockAPI('get', '/localdb/census/stateCountyTractMSA/2013', 200,
+        JSON.parse(JSON.stringify(require('./testdata/api_localdb_census_stateCountyTractMSA.json'))));
+};
 
 describe('Engine', function() {
 
@@ -71,6 +87,53 @@ describe('Engine', function() {
             engine.setRuleYear('2014');
             expect(engine.getRuleYear()).to.be('2014');
             done();
+        });
+    });
+
+    describe('get/set debug level', function() {
+        it('should get/set debug level correctly', function(done) {
+            expect(engine.getDebug()).to.be(0);
+            engine.setDebug(3);
+            expect(engine.getDebug()).to.be(3);
+            done();
+        });
+    });
+
+    describe('setUseLocalDB', function() {
+        it('should create the db', function(done) {
+            expect(engine.shouldUseLocalDB()).to.be(false);
+            engine.setUseLocalDB(true)
+            .then(function(db) {
+                expect(engine.shouldUseLocalDB()).to.be(true);
+                expect(db).to.not.be.null();
+                engine.setUseLocalDB(false)
+                .then(function() {
+                    expect(engine.shouldUseLocalDB()).to.be(false);
+                    done();
+                });
+            });
+        });
+    });
+
+    describe('loadCensusData', function() {
+        it('should populate the localdb with data', function(done) {
+            engine.setUseLocalDB(true)
+            .then(function(db) {
+                setupCensusAPI();
+                expect(db).to.not.be.undefined();
+                expect(engine.shouldUseLocalDB()).to.be(true);
+                engine.loadCensusData(engine.getRuleYear())
+                .then(function() {
+                    db.get('/census/msa_code/49740', function(err, value) {
+                        expect(value).to.be.equal('Yuma, AZ');
+                        engine.setUseLocalDB(false)
+                        .then(function() {
+                            expect(engine.shouldUseLocalDB()).to.be(false);
+                            done();
+                        });
+                    });
+                });
+            });
         });
     });
 

@@ -147,7 +147,7 @@ var accumulateResult = function(ifResult, thenResult) {
             macro: {},
             special: {}
         },
-        _LOCAL_DB,
+        _LOCAL_DB = null,
         _USE_LOCAL_DB = false,
         DEBUG = 0;
 
@@ -201,43 +201,78 @@ var accumulateResult = function(ifResult, thenResult) {
         return DEBUG;
     };
 
-    HMDAEngine.setUseLocalDB = function(bool) {
-        _USE_LOCAL_DB = bool;
-        if (bool) {
-            this.resetDB();
-        }
-    };
-
     /*
      * -----------------------------------------------------
      * Local DB
      * -----------------------------------------------------
      */
 
-    HMDAEngine.resetDB = function() {
+    HMDAEngine.setUseLocalDB = function(bool) {
+        _USE_LOCAL_DB = bool;
+        if (bool) {
+            return resetDB();
+        } else {
+            return destroyDB();
+        }
+    };
+
+    HMDAEngine.shouldUseLocalDB = function() {
+        return _USE_LOCAL_DB;
+    };
+
+    HMDAEngine.loadCensusData = function(year) {
+        var apiCalls = [
+            this.apiGET('localdb/census/msaCodes'),
+            this.apiGET('localdb/census/stateCounty'),
+            this.apiGET('localdb/census/stateCountyMSA'),
+            this.apiGET('localdb/census/stateCountyTract'),
+            this.apiGET('localdb/census/stateCountyTractMSA')
+        ];
+        return Promise.map(apiCalls, function(body) {
+            return loadDB(resultFromResponse(body));
+        });
+    };
+
+    var resetDB = function() {
         return destroyDB()
         .then(function() {
             _LOCAL_DB = levelup('hmda');
+            return _LOCAL_DB;
         });
     };
 
     var destroyDB = function() {
         var deferred = Promise.defer();
-        if (typeof levelup.destroy === 'function') {
-            levelup.destroy('hmda', function(err) {
+
+        var realDestroy = function() {
+            if (typeof levelup.destroy === 'function') {
+                levelup.destroy('hmda', function(err) {
+                    if (err) {
+                        deferred.reject(err);
+                    }
+                    _LOCAL_DB = null;
+                    deferred.resolve();
+                });
+            } else {
+                var request = indexedDB.deleteDatabase('IDBWrapper-hmda');
+                request.onsuccess = function() {
+                    _LOCAL_DB = null;
+                    deferred.resolve();
+                };
+                request.onerror = function(err) {
+                    deferred.reject(err);
+                };
+            }
+        };
+        if (_LOCAL_DB) {
+            _LOCAL_DB.close(function(err) {
                 if (err) {
                     deferred.reject(err);
                 }
-                deferred.resolve();
+                realDestroy();
             });
         } else {
-            var request = indexedDB.deleteDatabase('IDBWrapper-hmda');
-            request.onsuccess = function() {
-                deferred.resolve();
-            };
-            request.onerror = function(err) {
-                deferred.reject(err);
-            };
+            realDestroy();
         }
         return deferred.promise;
     };
@@ -251,20 +286,6 @@ var accumulateResult = function(ifResult, thenResult) {
             deferred.resolve();
         });
         return deferred.promise;
-    };
-
-
-    var loadCensusData = function(currentEngine, year) {
-        var apiCalls = [
-            currentEngine.apiGET('localdb/census/msaCodes'),
-            currentEngine.apiGET('localdb/census/stateCounty'),
-            currentEngine.apiGET('localdb/census/stateCountyMSA'),
-            currentEngine.apiGET('localdb/census/stateCountyTract'),
-            currentEngine.apiGET('localdb/census/stateCountyTractMSA')
-        ];
-        return Promise.map(apiCalls, function(body) {
-            return loadDB(resultFromResponse(body));
-        });
     };
 
     var isValidCensusCombination = function(censusparams) {
@@ -815,7 +836,7 @@ var accumulateResult = function(ifResult, thenResult) {
         if (metroArea === 'NA') {
             return true;
         }
-        if (_USE_LOCAL_DB) {
+        if (this.shouldUseLocalDB()) {
             return this.getMSAName(metroArea)
             .then(function(name) {
                 if (name) {
@@ -832,7 +853,7 @@ var accumulateResult = function(ifResult, thenResult) {
     };
 
     HMDAEngine.isValidMsaMdStateAndCountyCombo = function(metroArea, fipsState, fipsCounty) {
-        if (_USE_LOCAL_DB) {
+        if (this.shouldUseLocalDB()) {
             return isValidCensusCombination({'state_code':fipsState, 'county_code':fipsCounty, 'msa_code': metroArea})
             .then(function(result) {
                 return result;
@@ -846,7 +867,7 @@ var accumulateResult = function(ifResult, thenResult) {
     };
 
     HMDAEngine.isValidStateAndCounty = function(fipsState, fipsCounty) {
-        if (_USE_LOCAL_DB) {
+        if (this.shouldUseLocalDB()) {
             return isValidCensusCombination({'state_code':fipsState, 'county_code':fipsCounty})
             .then(function(result) {
                 return result;
@@ -860,7 +881,7 @@ var accumulateResult = function(ifResult, thenResult) {
     };
 
     HMDAEngine.isValidCensusTractCombo = function(censusTract, metroArea, fipsState, fipsCounty) {
-        if (_USE_LOCAL_DB) {
+        if (this.shouldUseLocalDB()) {
             return isValidCensusCombination({'state_code':fipsState,
                     'county_code':fipsCounty, 'tract': censusTract, 'msa_code': metroArea})
             .then(function(result) {
@@ -1131,7 +1152,7 @@ var accumulateResult = function(ifResult, thenResult) {
     };
 
     HMDAEngine.getMSAName = function(msaCode) {
-        if (_USE_LOCAL_DB) {
+        if (this.shouldUseLocalDB()) {
             return localMSALookup(msaCode);
         } else {
             return this.apiGET('getMSAName', [msaCode])
@@ -1428,8 +1449,8 @@ var accumulateResult = function(ifResult, thenResult) {
     HMDAEngine.runValidity = function(year) {
         var currentEngine = this;
         var validityPromise;
-        if (_USE_LOCAL_DB) {
-            validityPromise = loadCensusData(currentEngine, year)
+        if (this.shouldUseLocalDB()) {
+            validityPromise = currentEngine.loadCensusData(year)
             .then(function() {
                 return Promise.all([
                     currentEngine.runEdits(year, 'ts', 'validity'),
