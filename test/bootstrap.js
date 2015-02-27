@@ -16,7 +16,7 @@ global.mockAPI = function(method, path, status, reply, persisted) {
         status: status || 200,
         reply: reply || '{}',
         persisted: persisted || false
-    }
+    };
     child.send(ob);
 };
 
@@ -26,7 +26,7 @@ before(function(done) {
         if (m.hasOwnProperty('port')) {
             port = m.port;
             done();
-        };
+        }
     });
 });
 
