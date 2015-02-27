@@ -1519,7 +1519,7 @@ describe('Engine', function() {
             var metroArea = '06920';
             var path = '/isNotIndependentMortgageCoOrMBS/' + engine.getRuleYear() + '/9/0123456789';
             mockAPI('get', path, 200, JSON.stringify({ result: false }), true);
-            
+
             engine.isMetroAreaOnRespondentPanel(hmdaFile)
             .then(function(result) {
                 expect(result).to.be.true();
@@ -1534,7 +1534,7 @@ describe('Engine', function() {
             });
             var path = '/isNotIndependentMortgageCoOrMBS/' + engine.getRuleYear() + '/9/0123456789';
             mockAPI('get', path, 200, JSON.stringify({ result: true }), true);
-            
+
             engine.isMetroAreaOnRespondentPanel(hmdaFile)
             .then(function(result) {
                 expect(result).to.be.true();
@@ -1548,7 +1548,7 @@ describe('Engine', function() {
             mockAPI('get', path, 200, JSON.stringify({ result: true }), true);
             path = '/isMetroAreaOnRespondentPanel/' + engine.getRuleYear() + '/9/0123456789/06920';
             mockAPI('get', path, 200, JSON.stringify({ result: true }), true);
-            
+
             engine.isMetroAreaOnRespondentPanel(hmdaFile)
             .then(function(result) {
                 expect(result).to.be.true();
@@ -1567,7 +1567,7 @@ describe('Engine', function() {
             mockAPI('get', path, 200, JSON.stringify({ result: false }), true);
             path = '/getMsaName/' + engine.getRuleYear() + '/35100';
             mockAPI('get', path, 200, JSON.stringify({ msaName: 'New Bern, NC' }), true);
-            
+
             engine.isMetroAreaOnRespondentPanel(hmdaFile)
             .then(function(result) {
                 expect(result.length).to.be(1);
@@ -2148,7 +2148,7 @@ describe('Engine', function() {
         it('should return true for a passing is_integer rule', function(done) {
             rule = {
                 'property': 'timestamp',
-                'condition': 'is_integer',
+                'condition': 'is_integer'
             };
 
             engine.execRule(topLevelObj, rule)
@@ -2951,27 +2951,32 @@ describe('Engine', function() {
     });
 
     describe('getTotalsByMSA', function() {
-        var hmdaJson = {};
-
-        beforeEach(function() {
-            hmdaJson = JSON.parse(JSON.stringify(require('./testdata/loans-to-total.json')));
-        });
-
         it('should group the LARs by metro area and calculate totals', function(done) {
-            var result = engine.getTotalsByMSA(hmdaJson.hmdaFile.loanApplicationRegisters);
-            expect(result[0].msaCode).to.be('06920');
-            expect(result[0].totalLAR).to.be(9);
-            expect(result[0].totalLoanAmount).to.be(90000);
-            expect(result[0].totalHomePurchase).to.be(7);
-            expect(result[0].totalHomeImprovement).to.be(0);
-            expect(result[0].totalRefinance).to.be(2);
-            expect(result[1].msaCode).to.be('35100');
-            expect(result[1].totalLAR).to.be(3);
-            expect(result[1].totalLoanAmount).to.be(30000);
-            expect(result[1].totalFHA).to.be(2);
-            expect(result[1].totalVA).to.be(0);
-            expect(result[1].totalFSA).to.be(1);
-            done();
+            var hmdaJson = JSON.parse(JSON.stringify(require('./testdata/loans-to-total.json')));
+
+            var msaCode = '06920';
+            var path = '/getMSAName/' + engine.getRuleYear() + '/' + msaCode;
+            mockAPI('get', path, 200, JSON.stringify({ msaName: '' }));
+            msaCode = '35100';
+            path = '/getMSAName/' + engine.getRuleYear() + '/' + msaCode;
+            mockAPI('get', path, 200, JSON.stringify({ msaName: 'New Bern, NC' }));
+
+            engine.getTotalsByMSA(hmdaJson.hmdaFile.loanApplicationRegisters)
+            .then(function(result) {
+                expect(result[0].msaCode).to.be('35100');
+                expect(result[0].totalLAR).to.be(3);
+                expect(result[0].totalLoanAmount).to.be(30000);
+                expect(result[0].totalFHA).to.be(2);
+                expect(result[0].totalVA).to.be(0);
+                expect(result[0].totalFSA).to.be(1);
+                expect(result[1].msaCode).to.be('06920');
+                expect(result[1].totalLAR).to.be(9);
+                expect(result[1].totalLoanAmount).to.be(90000);
+                expect(result[1].totalHomePurchase).to.be(7);
+                expect(result[1].totalHomeImprovement).to.be(0);
+                expect(result[1].totalRefinance).to.be(2);
+                done();
+            });
         });
     });
 });
