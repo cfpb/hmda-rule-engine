@@ -49,9 +49,12 @@ var runThen = function(year) {
     });
 };
 
-var runHarness = function(fn, year, apiurl, debug, asthen) {
+var runHarness = function(fn, year, apiurl, uselocaldb, debug, asthen) {
     var promise = runAll;
     engine.setAPIURL(apiurl);
+    if (uselocaldb !== undefined && uselocaldb === 'y') {
+        engine.setUseLocalDB(true);
+    }
     if (debug !== undefined) {
         engine.setDebug(debug);
     }
@@ -77,6 +80,8 @@ var runHarness = function(fn, year, apiurl, debug, asthen) {
                 .then(function() {
                     console.timeEnd('time to run all rules');
                     console.timeEnd('total time');
+                    //console.log(JSON.stringify(engine.getErrors(), null, 2));
+                    console.log(engine.getErrors());
                 })
                 .catch(function(err) {
                     console.log(err.message);
@@ -89,7 +94,7 @@ var runHarness = function(fn, year, apiurl, debug, asthen) {
 var run = function() {
     if (process.argv.length < 5) {
         console.error('');
-        console.error('Usage: ./run FILENAME YEAR APIURL [ENGINE DEBUG LEVEL] [RUN AS THEN, NOT ALL]');
+        console.error('Usage: ./run FILENAME YEAR APIURL [USE LOCALDB] [ENGINE DEBUG LEVEL] [RUN AS THEN, NOT ALL]');
         console.error('');
         console.error('EX: ./run ./testdata/bank.dat 2013 http://localhost:9000 1 y');
         console.error('');
@@ -99,9 +104,10 @@ var run = function() {
     var fn = process.argv[2];
     var year = process.argv[3];
     var apiurl = process.argv[4];
-    var debug = process.argv[5];
-    var asthen = process.argv[6];
-    runHarness(fn, year, apiurl, debug, asthen);
+    var uselocaldb = process.argv[5];
+    var debug = process.argv[6];
+    var asthen = process.argv[7];
+    runHarness(fn, year, apiurl, uselocaldb, debug, asthen);
 };
 
 module.exports = runHarness;
