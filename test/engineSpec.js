@@ -5,13 +5,29 @@
 /*global rewire:false*/
 /*global _:false*/
 /*global mockAPI:false*/
+/*global before:false*/
+/*global port:false*/
 'use strict';
 
 var engine = require('../engine'),
     rewiredEngine = require('./rewiredEngine'),
+    levelup = require('level-browserify'),
     http = require('http'),
     mockAPIURL,
     mockYEAR;
+
+var setupCensusAPI = function() {
+    mockAPI('get', '/localdb/census/msaCodes/2013', 200,
+        JSON.parse(JSON.stringify(require('./testdata/api_localdb_census_msaCodes.json'))));
+    mockAPI('get', '/localdb/census/stateCounty/2013', 200,
+        JSON.parse(JSON.stringify(require('./testdata/api_localdb_census_stateCounty.json'))));
+    mockAPI('get', '/localdb/census/stateCountyMSA/2013', 200,
+        JSON.parse(JSON.stringify(require('./testdata/api_localdb_census_stateCountyMSA.json'))));
+    mockAPI('get', '/localdb/census/stateCountyTract/2013', 200,
+        JSON.parse(JSON.stringify(require('./testdata/api_localdb_census_stateCountyTract.json'))));
+    mockAPI('get', '/localdb/census/stateCountyTractMSA/2013', 200,
+        JSON.parse(JSON.stringify(require('./testdata/api_localdb_census_stateCountyTractMSA.json'))));
+};
 
 describe('Engine', function() {
 
@@ -71,6 +87,53 @@ describe('Engine', function() {
             engine.setRuleYear('2014');
             expect(engine.getRuleYear()).to.be('2014');
             done();
+        });
+    });
+
+    describe('get/set debug level', function() {
+        it('should get/set debug level correctly', function(done) {
+            expect(engine.getDebug()).to.be(0);
+            engine.setDebug(3);
+            expect(engine.getDebug()).to.be(3);
+            done();
+        });
+    });
+
+    describe('setUseLocalDB', function() {
+        it('should create the db', function(done) {
+            expect(engine.shouldUseLocalDB()).to.be(false);
+            engine.setUseLocalDB(true)
+            .then(function(db) {
+                expect(engine.shouldUseLocalDB()).to.be(true);
+                expect(db).to.not.be.null();
+                engine.setUseLocalDB(false)
+                .then(function() {
+                    expect(engine.shouldUseLocalDB()).to.be(false);
+                    done();
+                });
+            });
+        });
+    });
+
+    describe('loadCensusData', function() {
+        it('should populate the localdb with data', function(done) {
+            engine.setUseLocalDB(true)
+            .then(function(db) {
+                setupCensusAPI();
+                expect(db).to.not.be.undefined();
+                expect(engine.shouldUseLocalDB()).to.be(true);
+                engine.loadCensusData(engine.getRuleYear())
+                .then(function() {
+                    db.get('/census/msa_code/49740', function(err, value) {
+                        expect(value).to.be.equal('Yuma, AZ');
+                        engine.setUseLocalDB(false)
+                        .then(function() {
+                            expect(engine.shouldUseLocalDB()).to.be(false);
+                            done();
+                        });
+                    });
+                });
+            });
         });
     });
 
@@ -1288,6 +1351,7 @@ describe('Engine', function() {
                 done();
             });
         });
+
         it('should return error array when API response result is false', function(done) {
             var path = '/isValidControlNumber/' + engine.getRuleYear() + '/1/0000000001';
             mockAPI('get', path, 200, JSON.stringify({ result: false }));
@@ -1308,6 +1372,25 @@ describe('Engine', function() {
                 done();
             });
         });
+
+        it('should return an error array when the API response is true but the control number is not consistent across the file', function(done) {
+            var path = '/isValidControlNumber/' + engine.getRuleYear() + '/9/0123456789';
+            mockAPI('get', path, 200, JSON.stringify({result: true}), true);
+
+            var hmdaJson = JSON.parse(JSON.stringify(require('./testdata/complete.json')));
+            hmdaJson.hmdaFile.loanApplicationRegisters[0].respondentID = 'cat';
+            engine.isValidControlNumber(hmdaJson.hmdaFile)
+            .then(function(result) {
+                expect(result.length).to.be(1);
+                expect(result[0].lineNumber).to.be('2');
+                expect(result[0].loanNumber).to.be('ABCDEFGHIJKLMNOPQRSTUVWXY');
+                expect(result[0].properties).to.have.property('agencyCode');
+                expect(result[0].properties).to.have.property('respondentID');
+                expect(result[0].properties.agencyCode).to.be('9');
+                expect(result[0].properties.respondentID).to.be('cat');
+                done();
+            });
+        });
     });
 
     describe('isValidMetroArea', function() {
@@ -1324,6 +1407,35 @@ describe('Engine', function() {
         it('should return true when metroArea is NA', function(done) {
             expect(engine.isValidMetroArea('NA')).to.be(true);
             done();
+        });
+
+        it('should return true when we use local data and result is true', function(done) {
+            engine.setUseLocalDB(true)
+            .then(function(db) {
+                setupCensusAPI();
+                expect(db).to.not.be.undefined();
+                expect(engine.shouldUseLocalDB()).to.be(true);
+                engine.loadCensusData(engine.getRuleYear())
+                .then(function() {
+                    engine.isValidMetroArea('49740')
+                    .then(function(result) {
+                        expect(result).to.be.true();
+                        done();
+                    });
+                });
+            });
+        });
+
+        it('should return false when we use local data and result is false', function(done) {
+            engine.isValidMetroArea('22220')
+            .then(function(result) {
+                expect(result).to.be.false();
+                engine.setUseLocalDB(false)
+                .then(function() {
+                    expect(engine.shouldUseLocalDB()).to.be(false);
+                    done();
+                });
+            });
         });
     });
 
@@ -1385,6 +1497,36 @@ describe('Engine', function() {
                 done();
             });
         });
+
+        it('should return true when we use local data and result is true', function(done) {
+            engine.setUseLocalDB(true)
+            .then(function(db) {
+                setupCensusAPI();
+                expect(db).to.not.be.undefined();
+                expect(engine.shouldUseLocalDB()).to.be(true);
+                engine.loadCensusData(engine.getRuleYear())
+                .then(function() {
+                    engine.isValidMsaMdStateAndCountyCombo('49780', '39', '119')
+                    .then(function(result) {
+                        expect(result).to.be.true();
+                        done();
+                    });
+                });
+            });
+        });
+
+        it('should return false when we use local data and result is false', function(done) {
+            engine.isValidMsaMdStateAndCountyCombo('22220', '05', '143')
+            .then(function(result) {
+                expect(result).to.be.false();
+                engine.setUseLocalDB(false)
+                .then(function() {
+                    expect(engine.shouldUseLocalDB()).to.be(false);
+                    done();
+                });
+            });
+        });
+
     });
 
     describe('isValidCensusTractCombo', function() {
@@ -1407,6 +1549,59 @@ describe('Engine', function() {
                 done();
             });
         });
+
+        it('should return true when we use local data and result is true with MSA and Tract !== NA', function(done) {
+            engine.setUseLocalDB(true)
+            .then(function(db) {
+                setupCensusAPI();
+                expect(db).to.not.be.undefined();
+                expect(engine.shouldUseLocalDB()).to.be(true);
+                engine.loadCensusData(engine.getRuleYear())
+                .then(function() {
+                    engine.isValidCensusTractCombo('9128.00', '49780', '39', '119')
+                    .then(function(result) {
+                        expect(result).to.be.true();
+                        done();
+                    });
+                });
+            });
+        });
+
+        it('should return true when we use local data and MSA = NA, but state/count/tract is valid', function(done) {
+            engine.isValidCensusTractCombo('9128.00', 'NA', '39', '119')
+            .then(function(result) {
+                expect(result).to.be.true();
+                done();
+            });
+        });
+
+        it('should return true when we use local data and Tract = NA, but is small county', function(done) {
+            engine.isValidCensusTractCombo('NA', '49540', '28', '163')
+            .then(function(result) {
+                expect(result).to.be.true();
+                done();
+            });
+        });
+
+        it('should return false when we use local data and Tract = NA, but is not small county', function(done) {
+            engine.isValidCensusTractCombo('NA', '49780', '39', '119')
+            .then(function(result) {
+                expect(result).to.be.false();
+                done();
+            });
+        });
+
+        it('should return false when we use local data and result is false', function(done) {
+            engine.isValidCensusTractCombo('9702.00', '22220', '05', '143')
+            .then(function(result) {
+                expect(result).to.be.false();
+                engine.setUseLocalDB(false)
+                .then(function() {
+                    expect(engine.shouldUseLocalDB()).to.be(false);
+                    done();
+                });
+            });
+        });
     });
 
     describe('isValidStateAndCounty', function() {
@@ -1419,13 +1614,42 @@ describe('Engine', function() {
                 done();
             });
         });
+
+        it('should return true when we use local data and result is true', function(done) {
+            engine.setUseLocalDB(true)
+            .then(function(db) {
+                setupCensusAPI();
+                expect(db).to.not.be.undefined();
+                expect(engine.shouldUseLocalDB()).to.be(true);
+                engine.loadCensusData(engine.getRuleYear())
+                .then(function() {
+                    engine.isValidStateAndCounty('04', '027')
+                    .then(function(result) {
+                        expect(result).to.be.true();
+                        done();
+                    });
+                });
+            });
+        });
+
+        it('should return false when we use local data and result is false', function(done) {
+            engine.isValidStateAndCounty('05', '143')
+            .then(function(result) {
+                expect(result).to.be.false();
+                engine.setUseLocalDB(false)
+                .then(function() {
+                    expect(engine.shouldUseLocalDB()).to.be(false);
+                    done();
+                });
+            });
+        });
     });
 
     describe('isRespondentMBS', function() {
         it('should return true when the API response result is true', function(done) {
-            var path = '/isRespondentMBS/' + engine.getRuleYear() + '/0000000001';
+            var path = '/isRespondentMBS/' + engine.getRuleYear() + '/9/0000000001';
             mockAPI('get', path, 200, JSON.stringify({ result: true }));
-            engine.isRespondentMBS('0000000001')
+            engine.isRespondentMBS('0000000001', '9')
             .then(function(result) {
                 expect(result).to.be(true);
                 done();
@@ -1433,33 +1657,127 @@ describe('Engine', function() {
         });
     });
 
-    describe('isValidStateCountyCensusTract', function() {
-        it('should return true when API call to isValidStateCounty API call result is true', function(done) {
-            var metroArea = '35100';
-            var state = '37';
-            var county = '103';
-            var tract = '5010.02';
-            var path =  '/isValidCensusCombination/' + engine.getRuleYear() + '/' +
-                        state + '/' + county + '/' + tract;
-            mockAPI('get', path, 200, JSON.stringify({ result: true }));
-            engine.isValidStateCountyCensusTractCombo(metroArea, state, county, tract)
+    describe('isValidStateCountyCensusTractCombo', function() {
+        it('should return true when API call to isValidCensusCombination result is false', function(done) {
+            var hmdaFile = JSON.parse(JSON.stringify(require('./testdata/complete.json'))).hmdaFile;
+            var path = '/isValidCensusCombination/' + engine.getRuleYear() + '/06/034/0100.01';
+            mockAPI('get', path, 200, JSON.stringify({result: false}), true);
+
+            engine.isValidStateCountyCensusTractCombo(hmdaFile)
             .then(function(result) {
                 expect(result).to.be.true();
                 done();
             });
         });
 
-        it('should return false when statecensustract combo is valid, but msa is NA', function(done) {
-            var metroArea = 'NA';
-            var state = '37';
-            var county = '103';
-            var tract = '5010.02';
-            var path =  '/isValidCensusCombination/' + engine.getRuleYear() + '/' +
-                        state + '/' + county + '/' + tract;
-            mockAPI('get', path, 200, JSON.stringify({ result: true }));
-            engine.isValidStateCountyCensusTractCombo(metroArea, state, county, tract)
+        it('should return true when msaCode = the code returned from the API', function(done) {
+            var hmdaFile = JSON.parse(JSON.stringify(require('./testdata/complete.json'))).hmdaFile;
+            var path = '/isValidCensusCombination/' + engine.getRuleYear() + '/06/034/0100.01';
+            mockAPI('get', path, 200, JSON.stringify({result: true, msa_code: '06920'}), true);
+
+            engine.isValidStateCountyCensusTractCombo(hmdaFile)
             .then(function(result) {
-                expect(result).to.be.false();
+                expect(result).to.be.true();
+                done();
+            });
+        });
+
+        it('should return false when msaCode != the code returned from the API', function(done) {
+            var hmdaFile = JSON.parse(JSON.stringify(require('./testdata/complete.json'))).hmdaFile;
+            var path = '/isValidCensusCombination/' + engine.getRuleYear() + '/06/034/0100.01';
+            mockAPI('get', path, 200, JSON.stringify({result: true, msa_code: '35100'}), true);
+
+            engine.isValidStateCountyCensusTractCombo(hmdaFile)
+            .then(function(result) {
+                expect(result.length).to.be(3);
+                done();
+            });
+        });
+
+        it('should return error information when isValidCensusComination returns true', function(done) {
+            var hmdaFile = JSON.parse(JSON.stringify(require('./testdata/complete.json'))).hmdaFile;
+            _.each(hmdaFile.loanApplicationRegisters, function (element) {
+                element.metroArea = 'NA';
+            });
+            var path = '/isValidCensusCombination/' + engine.getRuleYear() + '/06/034/0100.01';
+            mockAPI('get', path, 200, JSON.stringify({result: true, msa_code: '35100'}), true);
+
+            engine.isValidStateCountyCensusTractCombo(hmdaFile)
+            .then(function(result) {
+                expect(result.length).to.be(3);
+                expect(result[0].properties['LAR number']).to.be('ABCDEFGHIJKLMNOPQRSTUVWXY');
+                expect(result[0].properties['Recommended MSA/MD']).to.be('35100');
+                expect(result[0].properties['Reported State Code']).to.be('06');
+                expect(result[0].properties['Reported County Code']).to.be('034');
+                expect(result[0].properties['Reported Census Tract']).to.be('0100.01');
+                done();
+            });
+        });
+    });
+
+    describe('isMetroAreaOnRespondentPanel', function() {
+        it('should return true when the respondent is Independent Mortgage comapny or MBS', function(done) {
+            var hmdaFile = JSON.parse(JSON.stringify(require('./testdata/complete.json'))).hmdaFile;
+            var respondentID = '0123456789';
+            var agencyCode = '9';
+            var metroArea = '06920';
+            var path = '/isNotIndependentMortgageCoOrMBS/' + engine.getRuleYear() + '/9/0123456789';
+            mockAPI('get', path, 200, JSON.stringify({ result: false }), true);
+
+            engine.isMetroAreaOnRespondentPanel(hmdaFile)
+            .then(function(result) {
+                expect(result).to.be.true();
+                done();
+            });
+        });
+
+        it('should return true when the action taken is not valid', function(done) {
+            var hmdaFile = JSON.parse(JSON.stringify(require('./testdata/complete.json'))).hmdaFile;
+            _.each(hmdaFile.loanApplicationRegisters, function (element) {
+                element.actionTaken = '9';
+            });
+            var path = '/isNotIndependentMortgageCoOrMBS/' + engine.getRuleYear() + '/9/0123456789';
+            mockAPI('get', path, 200, JSON.stringify({ result: true }), true);
+
+            engine.isMetroAreaOnRespondentPanel(hmdaFile)
+            .then(function(result) {
+                expect(result).to.be.true();
+                done();
+            });
+        });
+
+        it('should return true when the respondent has a branch in the msa', function(done) {
+            var hmdaFile = JSON.parse(JSON.stringify(require('./testdata/complete.json'))).hmdaFile;
+            var path = '/isNotIndependentMortgageCoOrMBS/' + engine.getRuleYear() + '/9/0123456789';
+            mockAPI('get', path, 200, JSON.stringify({ result: true }), true);
+            path = '/isMetroAreaOnRespondentPanel/' + engine.getRuleYear() + '/9/0123456789/06920';
+            mockAPI('get', path, 200, JSON.stringify({ result: true }), true);
+
+            engine.isMetroAreaOnRespondentPanel(hmdaFile)
+            .then(function(result) {
+                expect(result).to.be.true();
+                done();
+            });
+        });
+
+        it('should return error data when the respondent doesnt have a branch in the msa', function(done) {
+            var hmdaFile = JSON.parse(JSON.stringify(require('./testdata/complete.json'))).hmdaFile;
+            _.each(hmdaFile.loanApplicationRegisters, function (element) {
+                element.metroArea = '35100';
+            });
+            var path = '/isNotIndependentMortgageCoOrMBS/' + engine.getRuleYear() + '/9/0123456789';
+            mockAPI('get', path, 200, JSON.stringify({ result: true }), true);
+            path = '/isMetroAreaOnRespondentPanel/' + engine.getRuleYear() + '/9/0123456789/35100';
+            mockAPI('get', path, 200, JSON.stringify({ result: false }), true);
+            path = '/getMsaName/' + engine.getRuleYear() + '/35100';
+            mockAPI('get', path, 200, JSON.stringify({ msaName: 'New Bern, NC' }), true);
+
+            engine.isMetroAreaOnRespondentPanel(hmdaFile)
+            .then(function(result) {
+                expect(result.length).to.be(1);
+                expect(result[0].properties['LAR Count']).to.be(3);
+                expect(result[0].properties['MSA/MD']).to.be('35100');
+                expect(result[0].properties['MSA/MD name']).to.be('New Bern, NC');
                 done();
             });
         });
@@ -1469,9 +1787,9 @@ describe('Engine', function() {
         it('should return true when API call to isValidTimestamp API call result is true', function(done) {
             var respondentId = '0000001195';
             var timestamp = '201501010000';
-            var path =  '/isValidTimestamp/' + engine.getRuleYear() + '/' + respondentId + '/' + timestamp;
+            var path =  '/isValidTimestamp/' + engine.getRuleYear() + '/9/' + respondentId + '/' + timestamp;
             mockAPI('get', path, 200, JSON.stringify({ result: true }));
-            engine.isTimestampLaterThanDatabase(respondentId, timestamp)
+            engine.isTimestampLaterThanDatabase(respondentId, '9', timestamp)
             .then(function(result) {
                 expect(result).to.be.true();
                 done();
@@ -1482,9 +1800,9 @@ describe('Engine', function() {
     describe('isChildFI', function() {
         it('should return true when the API response result is true', function(done) {
             var respondentID = '1';
-            var path = '/isChildFI/'+engine.getRuleYear()+'/'+respondentID;
+            var path = '/isChildFI/' + engine.getRuleYear() + '/9/' + respondentID;
             mockAPI('get', path, 200, JSON.stringify({ result: true }));
-            engine.isChildFI(respondentID)
+            engine.isChildFI(respondentID, '9')
             .then(function(result) {
                 expect(result).to.be.true();
                 done();
@@ -1497,9 +1815,9 @@ describe('Engine', function() {
             var respondentID = '0000000001';
             var taxID = '23-0916895';
             var year = engine.getRuleYear();
-            var path = '/isTaxIDTheSameAsLastYear/' + year + '/' + respondentID + '/' + taxID;
+            var path = '/isTaxIDTheSameAsLastYear/' + year + '/9/' + respondentID + '/' + taxID;
             mockAPI('get', path, 200, JSON.stringify({result: true}));
-            engine.isTaxIDTheSameAsLastYear(respondentID, taxID)
+            engine.isTaxIDTheSameAsLastYear(respondentID, '9', taxID)
             .then(function(result) {
                 expect(result).to.be.true();
                 done();
@@ -1513,7 +1831,7 @@ describe('Engine', function() {
             var respondentID = hmdaFile.transmittalSheet.respondentID;
             var numLoans = 3;
             var year = engine.getRuleYear();
-            var path = '/isValidNumLoans/total/' + year + '/' + respondentID + '/' + numLoans;
+            var path = '/isValidNumLoans/total/' + year + '/9/' + respondentID + '/' + numLoans;
             mockAPI('get', path, 200, JSON.stringify({result: true}));
             engine.isValidNumLoans(hmdaFile)
             .then(function(result) {
@@ -1528,7 +1846,7 @@ describe('Engine', function() {
             var hmdaJson = JSON.parse(JSON.stringify(require('./testdata/home-purchase-loans.json')));
 
             var respondentID = '0123456789';
-            var path = '/isValidNumLoans/homePurchase/' + engine.getRuleYear() + '/' + respondentID + '/10';
+            var path = '/isValidNumLoans/homePurchase/' + engine.getRuleYear() + '/9/' + respondentID + '/10';
             mockAPI('get', path, 200, JSON.stringify({ result: true }));
             engine.isValidNumHomePurchaseLoans(hmdaJson.hmdaFile)
             .then(function(result) {
@@ -1543,7 +1861,7 @@ describe('Engine', function() {
             var hmdaJson = JSON.parse(JSON.stringify(require('./testdata/fanniefreddie-loans.json')));
 
             var respondentID = '0000413208';
-            var path = '/isValidNumLoans/fannieMae/' + engine.getRuleYear() + '/' + respondentID + '/6/3';
+            var path = '/isValidNumLoans/fannieMae/' + engine.getRuleYear() + '/9/' + respondentID + '/6/3';
             mockAPI('get', path, 200, JSON.stringify({ result: true }));
             engine.isValidNumFannieMaeLoans(hmdaJson.hmdaFile)
             .then(function(result) {
@@ -1558,7 +1876,7 @@ describe('Engine', function() {
             var hmdaJson = JSON.parse(JSON.stringify(require('./testdata/ginnie-fha-loans.json')));
 
             var respondentID = '0000413208';
-            var path = '/isValidNumLoans/ginnieMaeFHA/' + engine.getRuleYear() + '/' + respondentID + '/6/3';
+            var path = '/isValidNumLoans/ginnieMaeFHA/' + engine.getRuleYear() + '/9/' + respondentID + '/6/3';
             mockAPI('get', path, 200, JSON.stringify({ result: true }));
             engine.isValidNumGinnieMaeFHALoans(hmdaJson.hmdaFile)
             .then(function(result) {
@@ -1573,7 +1891,7 @@ describe('Engine', function() {
             var hmdaJson = JSON.parse(JSON.stringify(require('./testdata/ginnie-va-loans.json')));
 
             var respondentID = '0000413208';
-            var path = '/isValidNumLoans/ginnieMaeVA/' + engine.getRuleYear() + '/' + respondentID + '/6/3';
+            var path = '/isValidNumLoans/ginnieMaeVA/' + engine.getRuleYear() + '/9/' + respondentID + '/6/3';
             mockAPI('get', path, 200, JSON.stringify({ result: true }));
             engine.isValidNumGinnieMaeVALoans(hmdaJson.hmdaFile)
             .then(function(result) {
@@ -1588,11 +1906,24 @@ describe('Engine', function() {
            var hmdaJson = JSON.parse(JSON.stringify(require('./testdata/refinance-loans.json')));
 
             var respondentID = '0123456789';
-            var path = '/isValidNumLoans/refinance/' + engine.getRuleYear() + '/' + respondentID + '/10';
+            var path = '/isValidNumLoans/refinance/' + engine.getRuleYear() + '/9/' + respondentID + '/10';
             mockAPI('get', path, 200, JSON.stringify({ result: true }));
             engine.isValidNumRefinanceLoans(hmdaJson.hmdaFile)
             .then(function(result) {
                 expect(result).to.be(true);
+                done();
+            });
+        });
+    });
+
+    describe('getMSAName', function() {
+        it('should return an msa name when given an msa code', function(done) {
+            var msaCode = '35100';
+            var path = '/getMSAName/' + engine.getRuleYear() + '/' + msaCode;
+            mockAPI('get', path, 200, JSON.stringify({ msaName: 'New Bern, NC' }));
+            engine.getMSAName(msaCode)
+            .then(function(msaName) {
+                expect(msaName).to.be('New Bern, NC');
                 done();
             });
         });
@@ -2021,7 +2352,7 @@ describe('Engine', function() {
         it('should return true for a passing is_integer rule', function(done) {
             rule = {
                 'property': 'timestamp',
-                'condition': 'is_integer',
+                'condition': 'is_integer'
             };
 
             engine.execRule(topLevelObj, rule)
@@ -2637,7 +2968,7 @@ describe('Engine', function() {
 
         it('should return an unmodified set of errors for passing syntactical edits', function(done) {
             // S013
-            var path = '/isValidTimestamp/'+engine.getRuleYear()+'/0123456789/201301171330';
+            var path = '/isValidTimestamp/'+engine.getRuleYear()+'/9/0123456789/201301171330';
             mockAPI('get', path, 200, JSON.stringify({ result: true }), true);
 
             hmdaJson.hmdaFile.loanApplicationRegisters[1].loanNumber = '1000000000000000000000000';
@@ -2655,7 +2986,7 @@ describe('Engine', function() {
             rewiredEngine.setHmdaJson(hmdaJson);
 
             // S013
-            var path = '/isValidTimestamp/'+engine.getRuleYear()+'/0123456789/cat';
+            var path = '/isValidTimestamp/'+engine.getRuleYear()+'/9/0123456789/cat';
             mockAPI('get', path, 200, JSON.stringify({ result: true }), true);
 
             var errors_syntactical = require('./testdata/errors-syntactical.json');
@@ -2723,17 +3054,17 @@ describe('Engine', function() {
 
         it('should return a modified set of errors for failing quality edits', function(done) {
               // Q029
-            var path = '/isValidCensusCombination/'+engine.getRuleYear()+'/06/034/0100.01';
-            mockAPI('get', path, 200, JSON.stringify({ result: true }), true);
+            var path = '/isValidCensusCombination/' + engine.getRuleYear() + '/06/034/0100.01';
+            mockAPI('get', path, 200, JSON.stringify({result: true, msa_code: '06920'}), true);
 
-            path = '/isChildFI/'+engine.getRuleYear()+'/0123456789';
-            mockAPI('get', path, 200, JSON.stringify({ result: true }));
+            path = '/isChildFI/' + engine.getRuleYear() + '/9/0123456789';
+            mockAPI('get', path, 200, JSON.stringify({result: true}));
 
             // Q030
-            path = '/isCraReporter/'+engine.getRuleYear()+'/0123456789';
-            mockAPI('get', path, 200, JSON.stringify({ result: true }), true);
-            path = '/isValidCensusInMSA/'+engine.getRuleYear()+'/06920/06/034/0100.01';
-            mockAPI('get', path, 200, JSON.stringify({ result: true }), true);
+            path = '/isCraReporter/' + engine.getRuleYear() + '/0123456789';
+            mockAPI('get', path, 200, JSON.stringify({result: true}), true);
+            path = '/isValidCensusInMSA/' + engine.getRuleYear() + '/06920/06/034/0100.01';
+            mockAPI('get', path, 200, JSON.stringify({result: true}), true);
 
             hmdaJson.hmdaFile.transmittalSheet.parentName = '                              ';
             var errors_quality = require('./testdata/errors-quality.json');
@@ -2771,6 +3102,7 @@ describe('Engine', function() {
                 'validity': {},
                 'quality': {},
                 'macro': {},
+                'special': {}
             };
 
             rewiredEngine.runMacro('2013')
@@ -2789,5 +3121,66 @@ describe('Engine', function() {
         //         done();
         //     });
         // });
+    });
+
+    describe('runSpecial', function() {
+        var hmdaJson = {};
+        var topLevelObj = {};
+
+        beforeEach(function() {
+            hmdaJson = JSON.parse(JSON.stringify(require('./testdata/complete.json')));
+            topLevelObj = hmdaJson.hmdaFile.transmittalSheet;
+            rewiredEngine.setHmdaJson(hmdaJson);
+            rewiredEngine.clearErrors();
+        });
+
+        it('should return an unmodified set of errors for passing special edits', function(done) {
+            var errors = {
+                'syntactical': {},
+                'validity': {},
+                'quality': {},
+                'macro': {},
+                'special': {}
+            };
+
+            var path = '/isValidCensusCombination/' + engine.getRuleYear() + '/06/034/0100.01';
+            mockAPI('get', path, 200, JSON.stringify({result: true, msa_code: '06920'}), true);
+
+            rewiredEngine.runSpecial('2013')
+            .then(function(result) {
+                expect(_.isEqual(rewiredEngine.getErrors(), errors)).to.be.true();
+                done();
+            });
+        });
+    });
+
+    describe('getTotalsByMSA', function() {
+        it('should group the LARs by metro area and calculate totals', function(done) {
+            var hmdaJson = JSON.parse(JSON.stringify(require('./testdata/loans-to-total.json')));
+
+            var msaCode = '06920';
+            var path = '/getMSAName/' + engine.getRuleYear() + '/' + msaCode;
+            mockAPI('get', path, 200, JSON.stringify({ msaName: '' }));
+            msaCode = '35100';
+            path = '/getMSAName/' + engine.getRuleYear() + '/' + msaCode;
+            mockAPI('get', path, 200, JSON.stringify({ msaName: 'New Bern, NC' }));
+
+            engine.getTotalsByMSA(hmdaJson.hmdaFile.loanApplicationRegisters)
+            .then(function(result) {
+                expect(result[0].msaCode).to.be('35100');
+                expect(result[0].totalLAR).to.be(3);
+                expect(result[0].totalLoanAmount).to.be(30000);
+                expect(result[0].totalFHA).to.be(2);
+                expect(result[0].totalVA).to.be(0);
+                expect(result[0].totalFSA).to.be(1);
+                expect(result[1].msaCode).to.be('06920');
+                expect(result[1].totalLAR).to.be(9);
+                expect(result[1].totalLoanAmount).to.be(90000);
+                expect(result[1].totalHomePurchase).to.be(7);
+                expect(result[1].totalHomeImprovement).to.be(0);
+                expect(result[1].totalRefinance).to.be(2);
+                done();
+            });
+        });
     });
 });

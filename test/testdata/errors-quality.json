@@ -11,6 +11,7 @@
                     "lineNumber": "1",
                     "properties": {
                         "respondentID": "0123456789",
+                        "agencyCode": "9",
                         "parentName": "                              ",
                         "parentAddress": "1234 Kearney St    XXXXXXXXXXXXXXXXXXXXX",
                         "parentCity": "San Francisco      XXXXXX",
@@ -120,5 +121,6 @@
             ]
         }
     },
-    "macro": {}
+    "macro": {},
+    "special": {}
 }

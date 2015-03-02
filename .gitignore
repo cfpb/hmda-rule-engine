@@ -18,6 +18,7 @@ coverage
 node_modules/
 .build/
 
-
+timing/edit-timing.*
+hmda
 
 
