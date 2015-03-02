@@ -961,7 +961,6 @@ var accumulateResult = function(ifResult, thenResult) {
             return Promise.resolve();
         })
         .then(function() {
-            console.log('blah');
             if (!invalidMSAs.length) {
                 return true;
             } else {
