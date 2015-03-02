@@ -938,11 +938,11 @@ var accumulateResult = function(ifResult, thenResult) {
     HMDAEngine.isMetroAreaOnRespondentPanel = function(hmdaFile) {
         var currentEngine = this,
             invalidMSAs = [];
-        return Promise.map(hmdaFile.loanApplicationRegisters, function(element) {
-            return currentEngine.apiGET('isNotIndependentMortgageCoOrMBS', [element.agencyCode, element.respondentID])
-            .then(function(response) {
-                var result = resultFromResponse(response);
-                if (result.result) {
+        return currentEngine.apiGET('isNotIndependentMortgageCoOrMBS', [hmdaFile.transmittalSheet.agencyCode, hmdaFile.transmittalSheet.respondentID])
+        .then(function(response) {
+            var result = resultFromResponse(response);
+            if (result.result === true) {
+                return Promise.map(hmdaFile.loanApplicationRegisters, function(element) {
                     var validActionTaken = ['1', '2', '3', '4', '5', '7', '8'];
                     if (_.contains(validActionTaken, element.actionTaken)) {
                         return currentEngine.apiGET('isMetroAreaOnRespondentPanel', [element.agencyCode, element.respondentID,
@@ -953,13 +953,15 @@ var accumulateResult = function(ifResult, thenResult) {
                                 invalidMSAs.push(element.metroArea);
                             }
                             return resultFromResponse(response).result;
-                        });
+                        }, {concurrency: CONCURRENT_RULES});
                     }
-                }
-                return Promise.resolve();
-            });
-        }, { concurrency: CONCURRENT_RULES })
+                    return Promise.resolve();
+                });
+            }
+            return Promise.resolve();
+        })
         .then(function() {
+            console.log('blah');
             if (!invalidMSAs.length) {
                 return true;
             } else {
