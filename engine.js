@@ -701,10 +701,11 @@ var accumulateResult = function(ifResult, thenResult) {
     };
 
     HMDAEngine.getTotalsByMSA = function(loanApplicationRegisters) {
+        var currentEngine = this;
         return Promise.all(_.chain(loanApplicationRegisters)
         .groupBy('metroArea')
         .collect(function(value, key) {
-            return HMDAEngine.getMSAName(key).then(function(msaName) {
+            return currentEngine.getMSAName(key).then(function(msaName) {
                 var result = {msaCode: key, msaName: msaName, totalLAR: 0, totalLoanAmount: 0, totalConventional: 0, totalFHA: 0, totalVA: 0, totalFSA: 0,
                     total1To4Family: 0, totalMFD: 0, totalMultifamily: 0, totalHomePurchase: 0, totalHomeImprovement: 0, totalRefinance: 0};
 
@@ -973,12 +974,12 @@ var accumulateResult = function(ifResult, thenResult) {
                 }
 
                 return Promise.map(_.keys(uniqueMSAMap), function(msaKey) {
-                    return currentEngine.apiGET('getMSAName', [msaKey])
-                    .then(function(response) {
+                    return currentEngine.getMSAName(msaKey)
+                    .then(function(msaName) {
                         var msaInfo = {
                             'LAR Count': uniqueMSAMap[msaKey],
                             'MSA/MD': msaKey,
-                            'MSA/MD name': resultFromResponse(response).msaName
+                            'MSA/MD name': msaName
                         };
 
                         errors.push ({'properties': msaInfo});
