@@ -36,6 +36,13 @@ var runAll = function(year) {
     })
     .then(function() {
         return engine.runSpecial(year);
+    })
+    .then(function() {
+        console.time('time to run IRS report');
+        return engine.getTotalsByMSA(engine.getHmdaJson().hmdaFile.loanApplicationRegisters)
+        .then(function() {
+            console.timeEnd('time to run IRS report');
+        });
     });
 };
 
@@ -46,6 +53,13 @@ var runThen = function(year) {
     })
     .then(function() {
         return engine.runSpecial(year);
+    })
+    .then(function() {
+        console.time('time to run IRS report');
+        return engine.getTotalsByMSA(engine.getHmdaJson().hmdaFile.loanApplicationRegisters)
+        .then(function() {
+            console.timeEnd('time to run IRS report');
+        });
     });
 };
 
@@ -81,7 +95,7 @@ var runHarness = function(fn, year, apiurl, uselocaldb, debug, asthen) {
                     console.timeEnd('time to run all rules');
                     console.timeEnd('total time');
                     //console.log(JSON.stringify(engine.getErrors(), null, 2));
-                    console.log(engine.getErrors());
+                    //console.log(engine.getErrors());
                 })
                 .catch(function(err) {
                     console.log(err.message);
