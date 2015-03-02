@@ -1408,6 +1408,35 @@ describe('Engine', function() {
             expect(engine.isValidMetroArea('NA')).to.be(true);
             done();
         });
+
+        it('should return true when we use local data and result is true', function(done) {
+            engine.setUseLocalDB(true)
+            .then(function(db) {
+                setupCensusAPI();
+                expect(db).to.not.be.undefined();
+                expect(engine.shouldUseLocalDB()).to.be(true);
+                engine.loadCensusData(engine.getRuleYear())
+                .then(function() {
+                    engine.isValidMetroArea('49740')
+                    .then(function(result) {
+                        expect(result).to.be.true();
+                        done();
+                    });
+                });
+            });
+        });
+
+        it('should return false when we use local data and result is false', function(done) {
+            engine.isValidMetroArea('22220')
+            .then(function(result) {
+                expect(result).to.be.false();
+                engine.setUseLocalDB(false)
+                .then(function() {
+                    expect(engine.shouldUseLocalDB()).to.be(false);
+                    done();
+                });
+            });
+        });
     });
 
 
@@ -1468,6 +1497,36 @@ describe('Engine', function() {
                 done();
             });
         });
+
+        it('should return true when we use local data and result is true', function(done) {
+            engine.setUseLocalDB(true)
+            .then(function(db) {
+                setupCensusAPI();
+                expect(db).to.not.be.undefined();
+                expect(engine.shouldUseLocalDB()).to.be(true);
+                engine.loadCensusData(engine.getRuleYear())
+                .then(function() {
+                    engine.isValidMsaMdStateAndCountyCombo('49780', '39', '119')
+                    .then(function(result) {
+                        expect(result).to.be.true();
+                        done();
+                    });
+                });
+            });
+        });
+
+        it('should return false when we use local data and result is false', function(done) {
+            engine.isValidMsaMdStateAndCountyCombo('22220', '05', '143')
+            .then(function(result) {
+                expect(result).to.be.false();
+                engine.setUseLocalDB(false)
+                .then(function() {
+                    expect(engine.shouldUseLocalDB()).to.be(false);
+                    done();
+                });
+            });
+        });
+
     });
 
     describe('isValidCensusTractCombo', function() {
@@ -1490,6 +1549,59 @@ describe('Engine', function() {
                 done();
             });
         });
+
+        it('should return true when we use local data and result is true with MSA and Tract !== NA', function(done) {
+            engine.setUseLocalDB(true)
+            .then(function(db) {
+                setupCensusAPI();
+                expect(db).to.not.be.undefined();
+                expect(engine.shouldUseLocalDB()).to.be(true);
+                engine.loadCensusData(engine.getRuleYear())
+                .then(function() {
+                    engine.isValidCensusTractCombo('9128.00', '49780', '39', '119')
+                    .then(function(result) {
+                        expect(result).to.be.true();
+                        done();
+                    });
+                });
+            });
+        });
+
+        it('should return true when we use local data and MSA = NA, but state/count/tract is valid', function(done) {
+            engine.isValidCensusTractCombo('9128.00', 'NA', '39', '119')
+            .then(function(result) {
+                expect(result).to.be.true();
+                done();
+            });
+        });
+
+        it('should return true when we use local data and Tract = NA, but is small county', function(done) {
+            engine.isValidCensusTractCombo('NA', '49540', '28', '163')
+            .then(function(result) {
+                expect(result).to.be.true();
+                done();
+            });
+        });
+
+        it('should return false when we use local data and Tract = NA, but is not small county', function(done) {
+            engine.isValidCensusTractCombo('NA', '49780', '39', '119')
+            .then(function(result) {
+                expect(result).to.be.false();
+                done();
+            });
+        });
+
+        it('should return false when we use local data and result is false', function(done) {
+            engine.isValidCensusTractCombo('9702.00', '22220', '05', '143')
+            .then(function(result) {
+                expect(result).to.be.false();
+                engine.setUseLocalDB(false)
+                .then(function() {
+                    expect(engine.shouldUseLocalDB()).to.be(false);
+                    done();
+                });
+            });
+        });
     });
 
     describe('isValidStateAndCounty', function() {
@@ -1500,6 +1612,35 @@ describe('Engine', function() {
             .then(function(result) {
                 expect(result).to.be(true);
                 done();
+            });
+        });
+
+        it('should return true when we use local data and result is true', function(done) {
+            engine.setUseLocalDB(true)
+            .then(function(db) {
+                setupCensusAPI();
+                expect(db).to.not.be.undefined();
+                expect(engine.shouldUseLocalDB()).to.be(true);
+                engine.loadCensusData(engine.getRuleYear())
+                .then(function() {
+                    engine.isValidStateAndCounty('04', '027')
+                    .then(function(result) {
+                        expect(result).to.be.true();
+                        done();
+                    });
+                });
+            });
+        });
+
+        it('should return false when we use local data and result is false', function(done) {
+            engine.isValidStateAndCounty('05', '143')
+            .then(function(result) {
+                expect(result).to.be.false();
+                engine.setUseLocalDB(false)
+                .then(function() {
+                    expect(engine.shouldUseLocalDB()).to.be(false);
+                    done();
+                });
             });
         });
     });
