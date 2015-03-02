@@ -288,7 +288,7 @@ var accumulateResult = function(ifResult, thenResult) {
         return deferred.promise;
     };
 
-    var isValidCensusCombination = function(censusparams) {
+    var localCensusComboValidation = function(censusparams) {
         var deferred = Promise.defer();
 
         var key = '/census';
@@ -854,7 +854,7 @@ var accumulateResult = function(ifResult, thenResult) {
 
     HMDAEngine.isValidMsaMdStateAndCountyCombo = function(metroArea, fipsState, fipsCounty) {
         if (this.shouldUseLocalDB()) {
-            return isValidCensusCombination({'state_code':fipsState, 'county_code':fipsCounty, 'msa_code': metroArea})
+            return localCensusComboValidation({'state_code':fipsState, 'county_code':fipsCounty, 'msa_code': metroArea})
             .then(function(result) {
                 return result;
             });
@@ -868,7 +868,7 @@ var accumulateResult = function(ifResult, thenResult) {
 
     HMDAEngine.isValidStateAndCounty = function(fipsState, fipsCounty) {
         if (this.shouldUseLocalDB()) {
-            return isValidCensusCombination({'state_code':fipsState, 'county_code':fipsCounty})
+            return localCensusComboValidation({'state_code':fipsState, 'county_code':fipsCounty})
             .then(function(result) {
                 return result;
             });
@@ -882,7 +882,7 @@ var accumulateResult = function(ifResult, thenResult) {
 
     HMDAEngine.isValidCensusTractCombo = function(censusTract, metroArea, fipsState, fipsCounty) {
         if (this.shouldUseLocalDB()) {
-            return isValidCensusCombination({'state_code':fipsState,
+            return localCensusComboValidation({'state_code':fipsState,
                     'county_code':fipsCounty, 'tract': censusTract, 'msa_code': metroArea})
             .then(function(result) {
                 return result;
@@ -954,7 +954,7 @@ var accumulateResult = function(ifResult, thenResult) {
                             return resultFromResponse(response).result;
                         });
                     }
-                } 
+                }
                 return Promise.resolve();
             });
         }, { concurrency: CONCURRENT_RULES })
@@ -971,7 +971,7 @@ var accumulateResult = function(ifResult, thenResult) {
                         uniqueMSAMap[invalidMSAs[i]]++;
                     }
                 }
-                
+
                 return Promise.map(_.keys(uniqueMSAMap), function(msaKey) {
                     return currentEngine.apiGET('getMSAName', [msaKey])
                     .then(function(response) {
@@ -985,7 +985,7 @@ var accumulateResult = function(ifResult, thenResult) {
                         return Promise.resolve();
                     });
                 }, { concurrency: CONCURRENT_RULES })
-                .then(function() {    
+                .then(function() {
                     return errors;
                 });
             }
@@ -999,7 +999,7 @@ var accumulateResult = function(ifResult, thenResult) {
             return resultFromResponse(body).result;
         });
     };
- 
+
     HMDAEngine.isTaxIDTheSameAsLastYear = function(respondentID, agencyCode, taxID) {
         return this.apiGET('isTaxIDTheSameAsLastYear', [agencyCode, respondentID, taxID])
         .then(function(body) {
