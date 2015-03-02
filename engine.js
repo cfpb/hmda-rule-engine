@@ -974,12 +974,12 @@ var accumulateResult = function(ifResult, thenResult) {
                 }
 
                 return Promise.map(_.keys(uniqueMSAMap), function(msaKey) {
-                    return currentEngine.apiGET('getMSAName', [msaKey])
-                    .then(function(response) {
+                    return currentEngine.getMSAName(msaKey)
+                    .then(function(msaName) {
                         var msaInfo = {
                             'LAR Count': uniqueMSAMap[msaKey],
                             'MSA/MD': msaKey,
-                            'MSA/MD name': resultFromResponse(response).msaName
+                            'MSA/MD name': msaName
                         };
 
                         errors.push ({'properties': msaInfo});
