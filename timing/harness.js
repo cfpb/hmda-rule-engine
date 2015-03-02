@@ -63,34 +63,34 @@ var runThen = function(year) {
     });
 };
 
-var runHarness = function(fn, year, apiurl, uselocaldb, debug, asthen) {
+var runHarness = function(options) {
     var promise = runAll;
-    engine.setAPIURL(apiurl);
-    if (uselocaldb !== undefined && uselocaldb === 'y') {
+    engine.setAPIURL(options.apiurl);
+    if (options.uselocaldb !== undefined && options.uselocaldb === 'y') {
         engine.setUseLocalDB(true);
     }
-    if (debug !== undefined) {
-        engine.setDebug(debug);
+    if (options.debug !== undefined) {
+        engine.setDebug(options.debug);
     }
-    if (asthen !== undefined && asthen === 'y') {
+    if (options.asthen !== undefined && options.asthen === 'y') {
         promise = runThen;
     }
 
     console.time('total time');
     console.time('time to process hmda json');
-    fs.readFile(fn, function(err, data) {
+    fs.readFile(options.fn, function(err, data) {
         if (err) {
             console.error('File does not exist');
             process.exit(1);
         }
-        engine.fileToJson(data, year, function(fileErr) {
+        engine.fileToJson(data, options.year, function(fileErr) {
             if (fileErr) {
                 console.log(fileErr);
             } else {
-                console.log('lars in \'' + fn + '\' = ' + engine.getHmdaJson().hmdaFile.loanApplicationRegisters.length);
+                console.log('lars in \'' + options.fn + '\' = ' + engine.getHmdaJson().hmdaFile.loanApplicationRegisters.length);
                 console.timeEnd('time to process hmda json');
                 console.time('time to run all rules');
-                promise(year)
+                promise(options.year)
                 .then(function() {
                     console.timeEnd('time to run all rules');
                     console.timeEnd('total time');
@@ -115,13 +115,15 @@ var run = function() {
         process.exit(1);
     }
 
-    var fn = process.argv[2];
-    var year = process.argv[3];
-    var apiurl = process.argv[4];
-    var uselocaldb = process.argv[5];
-    var debug = process.argv[6];
-    var asthen = process.argv[7];
-    runHarness(fn, year, apiurl, uselocaldb, debug, asthen);
+    var options = {
+        'fn': process.argv[2],
+        'year': process.argv[3],
+        'apiurl': process.argv[4],
+        'uselocaldb': process.argv[5],
+        'debug': process.argv[6],
+        'asthen': process.argv[7]
+    };
+    runHarness(options);
 };
 
 module.exports = runHarness;
