@@ -220,15 +220,26 @@ var accumulateResult = function(ifResult, thenResult) {
         return _USE_LOCAL_DB;
     };
 
-    HMDAEngine.loadCensusData = function(year) {
-        var apiCalls = [
-            this.apiGET('localdb/census/msaCodes'),
-            this.apiGET('localdb/census/stateCounty'),
-            this.apiGET('localdb/census/stateCountyMSA'),
-            this.apiGET('localdb/census/stateCountyTract'),
-            this.apiGET('localdb/census/stateCountyTractMSA')
-        ];
-        return Promise.map(apiCalls, function(body) {
+    HMDAEngine.loadCensusData = function() {
+        var currentEngine = this;
+        return getLocalDataFromAPI(currentEngine, 'localdb/census/stateCountyTractMSA')
+        .then(function() {
+            return getLocalDataFromAPI(currentEngine, 'localdb/census/stateCountyTract');
+        })
+        .then(function() {
+            return getLocalDataFromAPI(currentEngine, 'localdb/census/stateCountyMSA');
+        })
+        .then(function() {
+            return getLocalDataFromAPI(currentEngine, 'localdb/census/stateCounty');
+        })
+        .then(function() {
+            return getLocalDataFromAPI(currentEngine, 'localdb/census/msaCodes');
+        });
+    };
+
+    var getLocalDataFromAPI = function(currentEngine, endpoint) {
+        return currentEngine.apiGET(endpoint)
+        .then(function(body) {
             return loadDB(resultFromResponse(body));
         });
     };
@@ -1452,7 +1463,7 @@ var accumulateResult = function(ifResult, thenResult) {
         var currentEngine = this;
         var validityPromise;
         if (this.shouldUseLocalDB()) {
-            validityPromise = currentEngine.loadCensusData(year)
+            validityPromise = currentEngine.loadCensusData()
             .then(function() {
                 return Promise.all([
                     currentEngine.runEdits(year, 'ts', 'validity'),

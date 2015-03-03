@@ -122,7 +122,7 @@ describe('Engine', function() {
                 setupCensusAPI();
                 expect(db).to.not.be.undefined();
                 expect(engine.shouldUseLocalDB()).to.be(true);
-                engine.loadCensusData(engine.getRuleYear())
+                engine.loadCensusData()
                 .then(function() {
                     db.get('/census/msa_code/49740', function(err, value) {
                         var expected = {msa_name: 'Yuma, AZ'};
@@ -1416,7 +1416,7 @@ describe('Engine', function() {
                 setupCensusAPI();
                 expect(db).to.not.be.undefined();
                 expect(engine.shouldUseLocalDB()).to.be(true);
-                engine.loadCensusData(engine.getRuleYear())
+                engine.loadCensusData()
                 .then(function() {
                     engine.isValidMetroArea('49740')
                     .then(function(result) {
@@ -1505,7 +1505,7 @@ describe('Engine', function() {
                 setupCensusAPI();
                 expect(db).to.not.be.undefined();
                 expect(engine.shouldUseLocalDB()).to.be(true);
-                engine.loadCensusData(engine.getRuleYear())
+                engine.loadCensusData()
                 .then(function() {
                     engine.isValidMsaMdStateAndCountyCombo('49780', '39', '119')
                     .then(function(result) {
@@ -1557,7 +1557,7 @@ describe('Engine', function() {
                 setupCensusAPI();
                 expect(db).to.not.be.undefined();
                 expect(engine.shouldUseLocalDB()).to.be(true);
-                engine.loadCensusData(engine.getRuleYear())
+                engine.loadCensusData()
                 .then(function() {
                     engine.isValidCensusTractCombo('9128.00', '49780', '39', '119')
                     .then(function(result) {
@@ -1622,7 +1622,7 @@ describe('Engine', function() {
                 setupCensusAPI();
                 expect(db).to.not.be.undefined();
                 expect(engine.shouldUseLocalDB()).to.be(true);
-                engine.loadCensusData(engine.getRuleYear())
+                engine.loadCensusData()
                 .then(function() {
                     engine.isValidStateAndCounty('04', '027')
                     .then(function(result) {
