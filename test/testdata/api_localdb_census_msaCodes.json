@@ -1,10 +1,10 @@
 [
-    {"type":"put","key":"/census/msa_code/49740","value":"Yuma, AZ"},
-    {"type":"put","key":"/census/msa_code/49700","value":"Yuba City, CA"},
-    {"type":"put","key":"/census/msa_code/49500","value":"Yauco, PR"},
-    {"type":"put","key":"/census/msa_code/49460","value":"Yankton, SD"},
-    {"type":"put","key":"/census/msa_code/49420","value":"Yakima, WA"},
-    {"type":"put","key":"/census/msa_code/49340","value":"Worcester, MA"},
-    {"type":"put","key":"/census/msa_code/49300","value":"Wooster, OH"},
-    {"type":"put","key":"/census/msa_code/49180","value":"Winston-Salem, NC"}
+    {"type":"put","key":"/census/msa_code/49740","value":{"msa_name": "Yuma, AZ"}},
+    {"type":"put","key":"/census/msa_code/49700","value":{"msa_name": "Yuba City, CA"}},
+    {"type":"put","key":"/census/msa_code/49500","value":{"msa_name": "Yauco, PR"}},
+    {"type":"put","key":"/census/msa_code/49460","value":{"msa_name": "Yankton, SD"}},
+    {"type":"put","key":"/census/msa_code/49420","value":{"msa_name": "Yakima, WA"}},
+    {"type":"put","key":"/census/msa_code/49340","value":{"msa_name": "Worcester, MA"}},
+    {"type":"put","key":"/census/msa_code/49300","value":{"msa_name": "Wooster, OH"}},
+    {"type":"put","key":"/census/msa_code/49180","value":{"msa_name": "Winston-Salem, NC"}}
 ]

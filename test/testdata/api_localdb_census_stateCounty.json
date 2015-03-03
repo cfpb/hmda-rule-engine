@@ -1,8 +1,8 @@
 [
-    {"type":"put","key":"/census/state_code/04/county_code/027","value":"0"},
-    {"type":"put","key":"/census/state_code/06/county_code/115","value":"0"},
-    {"type":"put","key":"/census/state_code/39/county_code/155","value":"0"},
-    {"type":"put","key":"/census/state_code/39/county_code/099","value":"0"},
-    {"type":"put","key":"/census/state_code/28/county_code/163","value":"1"},
-    {"type":"put","key":"/census/state_code/72/county_code/111","value":"1"}
+    {"type":"put","key":"/census/state_code/04/county_code/027","value":{"small_county": "0"}},
+    {"type":"put","key":"/census/state_code/06/county_code/115","value":{"small_county": "0"}},
+    {"type":"put","key":"/census/state_code/39/county_code/155","value":{"small_county": "0"}},
+    {"type":"put","key":"/census/state_code/39/county_code/099","value":{"small_county": "0"}},
+    {"type":"put","key":"/census/state_code/28/county_code/163","value":{"small_county": "1"}},
+    {"type":"put","key":"/census/state_code/72/county_code/111","value":{"small_county": "1"}}
 ]
