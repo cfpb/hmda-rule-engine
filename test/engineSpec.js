@@ -125,7 +125,8 @@ describe('Engine', function() {
                 engine.loadCensusData(engine.getRuleYear())
                 .then(function() {
                     db.get('/census/msa_code/49740', function(err, value) {
-                        expect(value).to.be.equal('Yuma, AZ');
+                        var expected = {msa_name: 'Yuma, AZ'};
+                        expect(_.isEqual(value, expected)).to.be.true();
                         engine.setUseLocalDB(false)
                         .then(function() {
                             expect(engine.shouldUseLocalDB()).to.be(false);

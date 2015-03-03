@@ -236,7 +236,7 @@ var accumulateResult = function(ifResult, thenResult) {
     var resetDB = function() {
         return destroyDB()
         .then(function() {
-            _LOCAL_DB = levelup('hmda');
+            _LOCAL_DB = levelup('hmda', {valueEncoding: 'json'});
             return _LOCAL_DB;
         });
     };
@@ -248,7 +248,7 @@ var accumulateResult = function(ifResult, thenResult) {
             if (typeof levelup.destroy === 'function') {
                 levelup.destroy('hmda', function(err) {
                     if (err) {
-                        deferred.reject(err);
+                        return deferred.reject(err);
                     }
                     _LOCAL_DB = null;
                     deferred.resolve();
@@ -267,7 +267,7 @@ var accumulateResult = function(ifResult, thenResult) {
         if (_LOCAL_DB) {
             _LOCAL_DB.close(function(err) {
                 if (err) {
-                    deferred.reject(err);
+                    return deferred.reject(err);
                 }
                 realDestroy();
             });
@@ -281,7 +281,7 @@ var accumulateResult = function(ifResult, thenResult) {
         var deferred = Promise.defer();
         _LOCAL_DB.batch(data, function(err) {
             if (err) {
-                deferred.reject(err);
+                return deferred.reject(err);
             }
             deferred.resolve();
         });
@@ -300,10 +300,10 @@ var accumulateResult = function(ifResult, thenResult) {
         }
         _LOCAL_DB.get(key, function(err, value) {
             if (err && err.notFound) {
-                deferred.resolve(false);
+                return deferred.resolve(false);
             }
-            if (censusparams.tract === 'NA' && value !== '1') {
-                deferred.resolve(false);
+            if (censusparams.tract === 'NA' && value.small_county !== '1') {
+                return deferred.resolve(false);
             }
             deferred.resolve(true);
         });
@@ -316,10 +316,10 @@ var accumulateResult = function(ifResult, thenResult) {
 
         var key = '/census/msa_code/' + msaCode;
         _LOCAL_DB.get(key, function(err, value) {
-            if (err && err.notFound) {
-                deferred.resolve(false);
+            if ( (err && err.notFound) || msaCode === 'NA' ) {
+                return deferred.resolve(false);
             }
-            deferred.resolve(value);
+            deferred.resolve(value.msa_name);
         });
         return deferred.promise;
     };

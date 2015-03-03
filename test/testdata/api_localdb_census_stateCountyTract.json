@@ -1,10 +1,10 @@
 [
-    {"type":"put","key":"/census/state_code/39/county_code/119/tract/9128.00","value":"0"},
-    {"type":"put","key":"/census/state_code/39/county_code/119/tract/9118.00","value":"0"},
-    {"type":"put","key":"/census/state_code/39/county_code/119/tract/9116.00","value":"0"},
-    {"type":"put","key":"/census/state_code/39/county_code/119/tract/9115.00","value":"0"},
-    {"type":"put","key":"/census/state_code/39/county_code/119/tract/9114.00","value":"0"},
-    {"type":"put","key":"/census/state_code/39/county_code/119/tract/9111.00","value":"0"},
-    {"type":"put","key":"/census/state_code/39/county_code/119/tract/9110.00","value":"0"},
-    {"type":"put","key":"/census/state_code/04/county_code/027/tract/9800.05","value":"0"}
+    {"type":"put","key":"/census/state_code/39/county_code/119/tract/9128.00","value":{"small_county": "0"}},
+    {"type":"put","key":"/census/state_code/39/county_code/119/tract/9118.00","value":{"small_county": "0"}},
+    {"type":"put","key":"/census/state_code/39/county_code/119/tract/9116.00","value":{"small_county": "0"}},
+    {"type":"put","key":"/census/state_code/39/county_code/119/tract/9115.00","value":{"small_county": "0"}},
+    {"type":"put","key":"/census/state_code/39/county_code/119/tract/9114.00","value":{"small_county": "0"}},
+    {"type":"put","key":"/census/state_code/39/county_code/119/tract/9111.00","value":{"small_county": "0"}},
+    {"type":"put","key":"/census/state_code/39/county_code/119/tract/9110.00","value":{"small_county": "0"}},
+    {"type":"put","key":"/census/state_code/04/county_code/027/tract/9800.05","value":{"small_county": "0"}}
 ]

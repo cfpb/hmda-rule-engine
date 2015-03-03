@@ -1,13 +1,13 @@
 [
-    {"type":"put","key":"/census/state_code/39/county_code/119/tract/9128.00/msa_code/49780","value":"0"},
-    {"type":"put","key":"/census/state_code/39/county_code/119/tract/9124.00/msa_code/49780","value":"0"},
-    {"type":"put","key":"/census/state_code/39/county_code/119/tract/9123.00/msa_code/49780","value":"0"},
-    {"type":"put","key":"/census/state_code/39/county_code/119/tract/9119.00/msa_code/49780","value":"0"},
-    {"type":"put","key":"/census/state_code/39/county_code/119/tract/9114.00/msa_code/49780","value":"0"},
-    {"type":"put","key":"/census/state_code/39/county_code/119/tract/9113.00/msa_code/49780","value":"0"},
-    {"type":"put","key":"/census/state_code/04/county_code/027/tract/9800.06/msa_code/49740","value":"0"},
-    {"type":"put","key":"/census/state_code/04/county_code/027/tract/9800.05/msa_code/49740","value":"0"},
-    {"type":"put","key":"/census/state_code/04/county_code/027/tract/0118.00/msa_code/49740","value":"0"},
-    {"type":"put","key":"/census/state_code/04/county_code/027/tract/0117.00/msa_code/49740","value":"0"},
-    {"type":"put","key":"/census/state_code/04/county_code/027/tract/0114.05/msa_code/49740","value":"0"}
+    {"type":"put","key":"/census/state_code/39/county_code/119/tract/9128.00/msa_code/49780","value":{"small_county": "0"}},
+    {"type":"put","key":"/census/state_code/39/county_code/119/tract/9124.00/msa_code/49780","value":{"small_county": "0"}},
+    {"type":"put","key":"/census/state_code/39/county_code/119/tract/9123.00/msa_code/49780","value":{"small_county": "0"}},
+    {"type":"put","key":"/census/state_code/39/county_code/119/tract/9119.00/msa_code/49780","value":{"small_county": "0"}},
+    {"type":"put","key":"/census/state_code/39/county_code/119/tract/9114.00/msa_code/49780","value":{"small_county": "0"}},
+    {"type":"put","key":"/census/state_code/39/county_code/119/tract/9113.00/msa_code/49780","value":{"small_county": "0"}},
+    {"type":"put","key":"/census/state_code/04/county_code/027/tract/9800.06/msa_code/49740","value":{"small_county": "0"}},
+    {"type":"put","key":"/census/state_code/04/county_code/027/tract/9800.05/msa_code/49740","value":{"small_county": "0"}},
+    {"type":"put","key":"/census/state_code/04/county_code/027/tract/0118.00/msa_code/49740","value":{"small_county": "0"}},
+    {"type":"put","key":"/census/state_code/04/county_code/027/tract/0117.00/msa_code/49740","value":{"small_county": "0"}},
+    {"type":"put","key":"/census/state_code/04/county_code/027/tract/0114.05/msa_code/49740","value":{"small_county": "0"}}
 ]
