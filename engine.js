@@ -1116,7 +1116,7 @@ var accumulateResult = function(ifResult, thenResult) {
 
         var respondentID = hmdaFile.transmittalSheet.respondentID,
             agencyCode = hmdaFile.transmittalSheet.agencyCode;
-        return this.apiGET('isValidNumLoans/refinance', [agencyCode, respondentID, count])
+        return this.apiGET('isValidNumLoans/refinance', [agencyCode, respondentID, count, countSold])
         .then(function(body) {
             return resultBodyAsError(body);
         });

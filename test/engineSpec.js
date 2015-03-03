@@ -1846,7 +1846,7 @@ describe('Engine', function() {
             var hmdaJson = JSON.parse(JSON.stringify(require('./testdata/home-purchase-loans.json')));
 
             var respondentID = '0123456789';
-            var path = '/isValidNumLoans/homePurchase/' + engine.getRuleYear() + '/9/' + respondentID + '/10';
+            var path = '/isValidNumLoans/homePurchase/' + engine.getRuleYear() + '/9/' + respondentID + '/10/9';
             mockAPI('get', path, 200, JSON.stringify({ result: true }));
             engine.isValidNumHomePurchaseLoans(hmdaJson.hmdaFile)
             .then(function(result) {
@@ -1906,7 +1906,7 @@ describe('Engine', function() {
            var hmdaJson = JSON.parse(JSON.stringify(require('./testdata/refinance-loans.json')));
 
             var respondentID = '0123456789';
-            var path = '/isValidNumLoans/refinance/' + engine.getRuleYear() + '/9/' + respondentID + '/10';
+            var path = '/isValidNumLoans/refinance/' + engine.getRuleYear() + '/9/' + respondentID + '/10/9';
             mockAPI('get', path, 200, JSON.stringify({ result: true }));
             engine.isValidNumRefinanceLoans(hmdaJson.hmdaFile)
             .then(function(result) {

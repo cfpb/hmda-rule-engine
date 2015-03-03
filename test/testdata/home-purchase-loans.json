@@ -59,7 +59,7 @@
                 "applicantSex": "1",
                 "coapplicantSex": "2",
                 "applicantIncome": "9000",
-                "purchaserType": "3",
+                "purchaserType": "0",
                 "denialReason1": "9",
                 "denialReason2": "8",
                 "denialReason3": "7",
