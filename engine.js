@@ -1168,13 +1168,23 @@ var accumulateResult = function(ifResult, thenResult) {
                             invalidMSAs.push(element.lineNumber);
                             return Promise.resolve();
                         } else {
-                            return currentEngine.apiGET('isValidCensusInMSA', [element.metroArea, element.fipsState,
+                            if (currentEngine.shouldUseLocalDB()) {
+                                return localCensusComboValidation({'state_code': element.fipsState, 
+                                    'county_code': element.fipsCounty, 'tract': element.censusTract, 'msa_code': element.metroArea})
+                                .then(function(result) {
+                                    if (!result) {
+                                        invalidMSAs.push(element.lineNumber);
+                                    }
+                                });
+                            } else {
+                                return currentEngine.apiGET('isValidCensusInMSA', [element.metroArea, element.fipsState,
                                    element.fipsCounty, element.censusTract])
-                            .then(function (response) {
-                                if (!resultFromResponse(response).result) {
-                                    invalidMSAs.push(element.lineNumber);
-                                }
-                            });
+                                .then(function (response) {
+                                    if (!resultFromResponse(response).result) {
+                                        invalidMSAs.push(element.lineNumber);
+                                    }
+                                });
+                            }
                         }
                     }
                     return Promise.resolve();

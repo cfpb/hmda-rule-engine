@@ -1471,6 +1471,29 @@ describe('Engine', function() {
             });
         });
 
+        it('should return true when we use local data and the result is true', function(done) {
+            var path = '/isCraReporter/' + engine.getRuleYear() + '/0123456789';
+            mockAPI('get', path, 200, JSON.stringify({result: true}), true);
+            engine.setUseLocalDB(true)
+            .then(function(db) {
+                setupCensusAPI();
+                expect(db).to.not.be.undefined();
+                expect(engine.shouldUseLocalDB()).to.be.true();
+                engine.loadCensusData(engine.getRuleYear())
+                .then(function() {
+                    var hmdaFile = JSON.parse(JSON.stringify(require('./testdata/complete.json'))).hmdaFile;
+                    engine.isValidMsaMdCountyCensusForNonDepository(hmdaFile)
+                    .then(function(result) {
+                        expect(result).to.be.true();
+                        engine.setUseLocalDB(false)
+                        .then(function() {
+                            done();    
+                        })
+                    });
+                });
+            })
+        });
+
         it('should return false when one of the LARs census tract is NA', function(done) {
             var path = '/isCraReporter/' + engine.getRuleYear() + '/0123456789';
             mockAPI('get', path, 200, JSON.stringify({ result: true }));
