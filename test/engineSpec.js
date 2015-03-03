@@ -1723,7 +1723,7 @@ describe('Engine', function() {
                 setupCensusAPI();
                 expect(db).to.not.be.undefined();
                 expect(engine.shouldUseLocalDB()).to.be(true);
-                engine.loadCensusData(engine.getRuleYear())
+                engine.loadCensusData()
                 .then(function() {
                     engine.isValidStateCountyCensusTractCombo(hmdaFile)
                     .then(function(result) {
