@@ -953,10 +953,10 @@ var accumulateResult = function(ifResult, thenResult) {
                                 invalidMSAs.push(element.metroArea);
                             }
                             return resultFromResponse(response).result;
-                        }, {concurrency: CONCURRENT_RULES});
+                        });
                     }
                     return Promise.resolve();
-                });
+                },  {concurrency: CONCURRENT_RULES});
             }
             return Promise.resolve();
         })
