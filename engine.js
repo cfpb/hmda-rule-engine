@@ -1124,32 +1124,40 @@ var accumulateResult = function(ifResult, thenResult) {
     };
 
     HMDAEngine.isValidNumHomePurchaseLoans = function(hmdaFile) {
-        var count = 0;
+        var count = 0,
+            countSold = 0;
         _.each(hmdaFile.loanApplicationRegisters, function(element, index, next) {
-            if (element.loanPurpose === '1' && _.contains(['1', '6'], element.actionTaken) && _.contains(['1', '2'], element.propertyType) && element.purchaserType !== '0') {
+            if (element.loanPurpose === '1' && _.contains(['1', '6'], element.actionTaken) && _.contains(['1', '2'], element.propertyType)) {
                 count += 1;
+                if (element.purchaserType !== '0') {
+                    countSold += 1;
+                }
             }
         });
 
         var respondentID = hmdaFile.transmittalSheet.respondentID,
             agencyCode = hmdaFile.transmittalSheet.agencyCode;
-        return this.apiGET('isValidNumLoans/homePurchase', [agencyCode, respondentID, count])
+        return this.apiGET('isValidNumLoans/homePurchase', [agencyCode, respondentID, count, countSold])
         .then(function(body) {
             return resultBodyAsError(body);
         });
     };
 
     HMDAEngine.isValidNumRefinanceLoans = function(hmdaFile) {
-        var count = 0;
+        var count = 0,
+            countSold = 0;
         _.each(hmdaFile.loanApplicationRegisters, function(element, index, next) {
-            if (element.loanPurpose === '3' && _.contains(['1', '6'], element.actionTaken) && _.contains(['1', '2'], element.propertyType) && element.purchaserType !== '0') {
+            if (element.loanPurpose === '3' && _.contains(['1', '6'], element.actionTaken) && _.contains(['1', '2'], element.propertyType)) {
                 count += 1;
+                if (element.purchaserType !== '0') {
+                    countSold += 1;
+                }
             }
         });
 
         var respondentID = hmdaFile.transmittalSheet.respondentID,
             agencyCode = hmdaFile.transmittalSheet.agencyCode;
-        return this.apiGET('isValidNumLoans/refinance', [agencyCode, respondentID, count])
+        return this.apiGET('isValidNumLoans/refinance', [agencyCode, respondentID, count, countSold])
         .then(function(body) {
             return resultBodyAsError(body);
         });
