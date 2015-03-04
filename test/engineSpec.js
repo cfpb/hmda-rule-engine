@@ -1695,7 +1695,7 @@ describe('Engine', function() {
             });
         });
 
-        it('should return error information when isValidCensusComination returns true', function(done) {
+        it('should return error information when metroArea = NA and there is a valid code', function(done) {
             var hmdaFile = JSON.parse(JSON.stringify(require('./testdata/complete.json'))).hmdaFile;
             _.each(hmdaFile.loanApplicationRegisters, function (element) {
                 element.metroArea = 'NA';
@@ -1714,6 +1714,74 @@ describe('Engine', function() {
                 done();
             });
         });
+
+        it('should return true when we use local data and can not find combination', function(done) {
+            var hmdaFile = JSON.parse(JSON.stringify(require('./testdata/complete.json'))).hmdaFile;
+
+            engine.setUseLocalDB(true)
+            .then(function(db) {
+                setupCensusAPI();
+                expect(db).to.not.be.undefined();
+                expect(engine.shouldUseLocalDB()).to.be(true);
+                engine.loadCensusData()
+                .then(function() {
+                    engine.isValidStateCountyCensusTractCombo(hmdaFile)
+                    .then(function(result) {
+                        expect(result).to.be.true();
+                        done();
+                    });
+                });
+            });
+        });
+
+        it('should return true when msaCode = the code returned from the API', function(done) {
+            var hmdaFile = JSON.parse(JSON.stringify(require('./testdata/complete.json'))).hmdaFile;
+
+            engine.isValidStateCountyCensusTractCombo(hmdaFile)
+            .then(function(result) {
+                expect(result).to.be.true();
+                done();
+            });
+        });
+
+        it('should return false when using local data and msaCode != the code returned', function(done) {
+            var hmdaFile = JSON.parse(JSON.stringify(require('./testdata/complete.json'))).hmdaFile;
+            _.each(hmdaFile.loanApplicationRegisters, function (element) {
+                element.metroArea = '035100';
+            });
+            engine.isValidStateCountyCensusTractCombo(hmdaFile)
+            .then(function(result) {
+                expect(result.length).to.be(3);
+                expect(result[0].properties['LAR number']).to.be('ABCDEFGHIJKLMNOPQRSTUVWXY');
+                expect(result[0].properties['Recommended MSA/MD']).to.be('06920');
+                expect(result[0].properties['Reported State Code']).to.be('06');
+                expect(result[0].properties['Reported County Code']).to.be('034');
+                expect(result[0].properties['Reported Census Tract']).to.be('0100.01');
+                done();
+            });
+        });
+
+        it('should return error information when we use local data and metroArea = NA and there is a valid code', function(done) {
+            var hmdaFile = JSON.parse(JSON.stringify(require('./testdata/complete.json'))).hmdaFile;
+            _.each(hmdaFile.loanApplicationRegisters, function (element) {
+                element.metroArea = 'NA';
+            });
+            engine.isValidStateCountyCensusTractCombo(hmdaFile)
+            .then(function(result) {
+                expect(result.length).to.be(3);
+                expect(result[0].properties['LAR number']).to.be('ABCDEFGHIJKLMNOPQRSTUVWXY');
+                expect(result[0].properties['Recommended MSA/MD']).to.be('06920');
+                expect(result[0].properties['Reported State Code']).to.be('06');
+                expect(result[0].properties['Reported County Code']).to.be('034');
+                expect(result[0].properties['Reported Census Tract']).to.be('0100.01');
+                engine.setUseLocalDB(false)
+                .then(function() {
+                    expect(engine.shouldUseLocalDB()).to.be(false);
+                    done();
+                });
+            });
+        });
+
     });
 
     describe('isMetroAreaOnRespondentPanel', function() {
