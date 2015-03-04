@@ -1697,6 +1697,14 @@ describe('Engine', function() {
                 });
             });
         });
+
+        it('should return false when either state or county are NA', function(done) {
+            engine.isValidStateAndCounty('NA', '143')
+            .then(function(result) {
+                expect(result).to.be.false();
+                done();
+            });
+        });
     });
 
     describe('isRespondentMBS', function() {
