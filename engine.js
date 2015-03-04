@@ -306,14 +306,15 @@ var accumulateResult = function(ifResult, thenResult) {
         var deferred = Promise.defer();
 
         var key = '/census';
-        var tract;
+        var tract, paramsKey;
 
         for (var i = 0; i < censusparams.length; i++) {
-            if (censusparams[i] !== undefined && censusparams[i][_.keys(censusparams[i])[0]] !== 'NA') {
-                key += '/' + _.keys(censusparams[i])[0] + '/' + censusparams[i][_.keys(censusparams[i])[0]];
+            paramsKey = _.keys(censusparams[i])[0];
+            if (censusparams[i] !== undefined && censusparams[i][paramsKey] !== 'NA') {
+                key += '/' + paramsKey + '/' + censusparams[i][paramsKey];
             }
-            if (_.keys(censusparams[i])[0] === 'tract') {
-                tract = censusparams[i][_.keys(censusparams[i])[0]];
+            if (paramsKey === 'tract') {
+                tract = censusparams[i][paramsKey];
             }
         }
         _LOCAL_DB.get(key, function(err, value) {
@@ -328,9 +329,8 @@ var accumulateResult = function(ifResult, thenResult) {
             if (tract === 'NA' && value.small_county !== '1') {
                 if (resultAsOb) {
                     return deferred.resolve(value);
-                } else {
-                    return deferred.resolve(false);
                 }
+                return deferred.resolve(false);
             }
             if (resultAsOb) {
                 value.result = true;
