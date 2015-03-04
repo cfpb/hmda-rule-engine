@@ -903,6 +903,12 @@ var accumulateResult = function(ifResult, thenResult) {
     };
 
     HMDAEngine.isValidStateAndCounty = function(fipsState, fipsCounty) {
+        if (fipsState === 'NA' || fipsCounty === 'NA') {
+            return Promise.resolve()
+            .then(function() {
+                return false;
+            });
+        }
         if (this.shouldUseLocalDB()) {
             return localCensusComboValidation([
                 {'state_code': fipsState}, 
