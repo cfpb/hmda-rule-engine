@@ -1471,6 +1471,59 @@ describe('Engine', function() {
             });
         });
 
+        it('should return true when we use local data and the result is true', function(done) {
+            var path = '/isCraReporter/' + engine.getRuleYear() + '/0123456789';
+            mockAPI('get', path, 200, JSON.stringify({result: true}), true);
+            engine.setUseLocalDB(true)
+            .then(function(db) {
+                setupCensusAPI();
+                expect(db).to.not.be.undefined();
+                expect(engine.shouldUseLocalDB()).to.be.true();
+                engine.loadCensusData(engine.getRuleYear())
+                .then(function() {
+                    var hmdaFile = JSON.parse(JSON.stringify(require('./testdata/complete.json'))).hmdaFile;
+                    engine.isValidMsaMdCountyCensusForNonDepository(hmdaFile)
+                    .then(function(result) {
+                        expect(result).to.be.true();
+                        engine.setUseLocalDB(false)
+                        .then(function() {
+                            done();    
+                        })
+                    });
+                });
+            })
+        });
+
+        it('should return false when we use local data and the result is false', function(done) {
+            var path = '/isCraReporter/' + engine.getRuleYear() + '/0123456789';
+            mockAPI('get', path, 200, JSON.stringify({result: true}), true);
+            engine.setUseLocalDB(true)
+            .then(function(db) {
+                setupCensusAPI();
+                expect(db).to.not.be.undefined();
+                expect(engine.shouldUseLocalDB()).to.be.true();
+                engine.loadCensusData(engine.getRuleYear())
+                .then(function() {
+                    var hmdaFile = JSON.parse(JSON.stringify(require('./testdata/complete.json'))).hmdaFile;
+                    hmdaFile.loanApplicationRegisters[1].censusTract = '8000.01';
+                    engine.isValidMsaMdCountyCensusForNonDepository(hmdaFile)
+                    .then(function(result) {
+                        expect(result.length).to.be(1);
+                        expect(result[0].properties.metroArea).to.be('06920');
+                        expect(result[0].properties.fipsState).to.be('06');
+                        expect(result[0].properties.fipsCounty).to.be('034');
+                        expect(result[0].properties.censusTract).to.be('8000.01');
+                        expect(result[0].lineNumber).to.be('3');
+                        expect(result[0].loanNumber).to.be('ABCDEFGHIJKLMNOPQRSTUVWXY');
+                        engine.setUseLocalDB(false)
+                        .then(function() {
+                            done();    
+                        })
+                    });
+                });
+            });
+        });
+
         it('should return false when one of the LARs census tract is NA', function(done) {
             var path = '/isCraReporter/' + engine.getRuleYear() + '/0123456789';
             mockAPI('get', path, 200, JSON.stringify({ result: true }));
