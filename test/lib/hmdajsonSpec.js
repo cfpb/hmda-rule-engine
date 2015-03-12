@@ -58,7 +58,7 @@ describe('lib/hmdajson', function() {
         it('should return empty record if no fields in line spec', function(done) {
             var line = '';
             var line_spec = {};
-            var result = HMDAJson.parseLine(line_spec, line).record;
+            var result = HMDAJson.parseLine(null, line_spec, line).record;
             expect(typeof result).to.be('object');
             expect(Object.keys(result).length).to.be(0);
             done();
@@ -72,7 +72,7 @@ describe('lib/hmdajson', function() {
                     'end': 11
                 }
             };
-            var result = HMDAJson.parseLine(line_spec, line);
+            var result = HMDAJson.parseLine(null, line_spec, line);
             expect(result.error).to.be('Line is not long enough to contain \'foo\'');
             done();
         });
@@ -93,7 +93,7 @@ describe('lib/hmdajson', function() {
                     'end': 10
                 }
             };
-            var result = HMDAJson.parseLine(line_spec, line).record;
+            var result = HMDAJson.parseLine(null, line_spec, line).record;
             expect(result).to.have.property('one');
             expect(result.one).to.be.equal('1');
             expect(result).to.have.property('middle');
@@ -112,7 +112,7 @@ describe('lib/hmdajson', function() {
                     'dataType': 'N'
                 }
             };
-            var result = HMDAJson.parseLine(line_spec, line);
+            var result = HMDAJson.parseLine(null, line_spec, line);
             expect(result.error).to.be('\'foo\' must be a number');
             done();
         });
