@@ -957,12 +957,12 @@ describe('Engine', function() {
             done();
         });
 
-        it('should return false when there is not at least one loan application register', function(done) {
+        it('should return a single record error array when there is not at least one loan application register', function(done) {
             var hmdaFile = {
                 loanApplicationRegisters: []
             };
             var result = engine.hasAtLeastOneLAR(hmdaFile);
-            expect(result).to.be(false);
+            expect(result[0]).to.be(false);
             done();
         });
     });

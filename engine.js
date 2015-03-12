@@ -570,7 +570,10 @@ var accumulateResult = function(ifResult, thenResult) {
     };
 
     HMDAEngine.hasAtLeastOneLAR = function(hmdaFile) {
-        return hmdaFile.loanApplicationRegisters.length > 0;
+        if (hmdaFile.loanApplicationRegisters.length > 0) {
+            return true;
+        }
+        return [false];
     };
 
     HMDAEngine.isValidAgencyCode = function(hmdaFile) {
