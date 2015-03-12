@@ -9,7 +9,8 @@ var hmdajson = require('./lib/hmdajson'),
     _ = require('underscore'),
     brijSpec = require('brij-spec'),
     stream = require('stream'),
-    GET = require('./lib/promise-http-get'),
+    // GET = require('./lib/promise-http-get'),
+    GET = require('./lib/promise-superagent'),
     moment = require('moment'),
     Promise = require('bluebird'),
     CONCURRENT_RULES = 10,
@@ -239,8 +240,8 @@ var accumulateResult = function(ifResult, thenResult) {
 
     var getLocalDataFromAPI = function(currentEngine, endpoint) {
         return currentEngine.apiGET(endpoint)
-        .then(function(body) {
-            return loadDB(resultFromResponse(body));
+        .then(function(result) {
+            return loadDB(resultFromResponse(result));
         });
     };
 
@@ -1022,7 +1023,7 @@ var accumulateResult = function(ifResult, thenResult) {
                             if (!result.result) {
                                 invalidMSAs.push(element.metroArea);
                             }
-                            return resultFromResponse(response).result;
+                            return response.result;
                         });
                     }
                 },  {concurrency: CONCURRENT_RULES});

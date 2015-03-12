@@ -40,6 +40,7 @@
     "level-browserify": "^0.18.1",
     "line-chomper": "^0.4.5",
     "moment": "^2.9.0",
+    "superagent": "^1.0.0",
     "underscore": "^1.7.0"
   }
 }
