@@ -78,30 +78,29 @@ var runHarness = function(options) {
 
     console.time('total time');
     console.time('time to process hmda json');
-    fs.readFile(options.fn, function(err, data) {
-        if (err) {
-            console.error('File does not exist');
-            process.exit(1);
+    var fileStream = fs.createReadStream(options.fn);
+    fileStream.on('error', function(err) {
+        console.error('File does not exist');
+        process.exit(1);
+    });
+    engine.fileToJson(fileStream, options.year, function(fileErr) {
+        if (fileErr) {
+            console.log(fileErr);
+        } else {
+            console.log('lars in \'' + options.fn + '\' = ' + engine.getHmdaJson().hmdaFile.loanApplicationRegisters.length);
+            console.timeEnd('time to process hmda json');
+            console.time('time to run all rules');
+            promise(options.year)
+            .then(function() {
+                console.timeEnd('time to run all rules');
+                console.timeEnd('total time');
+                //console.log(JSON.stringify(engine.getErrors(), null, 2));
+                //console.log(engine.getErrors());
+            })
+            .catch(function(err) {
+                console.log(err.message);
+            });
         }
-        engine.fileToJson(data, options.year, function(fileErr) {
-            if (fileErr) {
-                console.log(fileErr);
-            } else {
-                console.log('lars in \'' + options.fn + '\' = ' + engine.getHmdaJson().hmdaFile.loanApplicationRegisters.length);
-                console.timeEnd('time to process hmda json');
-                console.time('time to run all rules');
-                promise(options.year)
-                .then(function() {
-                    console.timeEnd('time to run all rules');
-                    console.timeEnd('total time');
-                    //console.log(JSON.stringify(engine.getErrors(), null, 2));
-                    //console.log(engine.getErrors());
-                })
-                .catch(function(err) {
-                    console.log(err.message);
-                });
-            }
-        });
     });
 };
 
