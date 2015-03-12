@@ -573,7 +573,9 @@ var accumulateResult = function(ifResult, thenResult) {
         if (hmdaFile.loanApplicationRegisters.length > 0) {
             return true;
         }
-        return [false];
+        var error = {'properties': {}};
+        error.properties['Total Loan/Application records in file'] = hmdaFile.loanApplicationRegisters.length;
+        return [error];
     };
 
     HMDAEngine.isValidAgencyCode = function(hmdaFile) {

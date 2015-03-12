@@ -962,7 +962,7 @@ describe('Engine', function() {
                 loanApplicationRegisters: []
             };
             var result = engine.hasAtLeastOneLAR(hmdaFile);
-            expect(result[0]).to.be(false);
+            expect(result[0].properties['Total Loan/Application records in file']).to.be(0);
             done();
         });
     });
