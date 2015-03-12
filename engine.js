@@ -9,7 +9,6 @@ var hmdajson = require('./lib/hmdajson'),
     _ = require('underscore'),
     brijSpec = require('brij-spec'),
     stream = require('stream'),
-    // GET = require('./lib/promise-http-get'),
     GET = require('./lib/promise-superagent'),
     moment = require('moment'),
     Promise = require('bluebird'),
@@ -1019,11 +1018,11 @@ var accumulateResult = function(ifResult, thenResult) {
                         return currentEngine.apiGET('isMetroAreaOnRespondentPanel', [element.agencyCode, element.respondentID,
                                             element.metroArea])
                         .then(function(response) {
-                            var result = resultFromResponse(response);
-                            if (!result.result) {
+                            var result = resultFromResponse(response).result;
+                            if (!result) {
                                 invalidMSAs.push(element.metroArea);
                             }
-                            return response.result;
+                            return result;
                         });
                     }
                 },  {concurrency: CONCURRENT_RULES});
