@@ -932,12 +932,9 @@ var accumulateResult = function(ifResult, thenResult) {
 
     HMDAEngine.isValidCensusTractCombo = function(censusTract, metroArea, fipsState, fipsCounty) {
         if (censusTract === 'NA' && metroArea === 'NA' && fipsState === 'NA' && fipsCounty === 'NA') {
-            return Promise.resolve()
-            .then(function() {
-                return true;
-            });
+            return true;
         }
-        
+
         if (this.shouldUseLocalDB()) {
             return localCensusComboValidation([
                 {'state_code': fipsState},

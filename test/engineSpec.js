@@ -1638,11 +1638,9 @@ describe('Engine', function() {
         });
 
         it('should return true when we use local data and all fields are NA', function(done) {
-            engine.isValidCensusTractCombo('NA', 'NA', 'NA', 'NA')
-            .then(function(result) {
-                expect(result).to.be.true();
-                done();
-            });
+            // engine.isValidCensusTractCombo('NA', 'NA', 'NA', 'NA')
+            expect(engine.isValidCensusTractCombo('NA', 'NA', 'NA', 'NA')).to.be.true();
+            done();
         });
 
         it('should return false when we use local data and Tract = NA, but is not small county', function(done) {
