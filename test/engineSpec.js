@@ -1061,9 +1061,8 @@ describe('Engine', function() {
             };
             var result = engine.hasUniqueLoanNumbers(hmdaFile);
             expect(result.length).to.be(1);
-            expect(result[0].loanNumber).to.be('1');
-            expect(result[0].properties.lineNumbers.length).to.be(2);
-            expect(result[0].properties.lineNumbers[0]).to.be('2');
+            expect(result[0].properties.loanNumber).to.be('1');
+            expect(result[0].lineNumber).to.be('2, 3');
             done();
         });
 
@@ -1487,7 +1486,7 @@ describe('Engine', function() {
                         expect(result).to.be.true();
                         engine.setUseLocalDB(false)
                         .then(function() {
-                            done();    
+                            done();
                         })
                     });
                 });
@@ -1517,7 +1516,7 @@ describe('Engine', function() {
                         expect(result[0].loanNumber).to.be('ABCDEFGHIJKLMNOPQRSTUVWXY');
                         engine.setUseLocalDB(false)
                         .then(function() {
-                            done();    
+                            done();
                         })
                     });
                 });
