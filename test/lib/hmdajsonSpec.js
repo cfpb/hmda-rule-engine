@@ -20,40 +20,6 @@ describe('lib/hmdajson', function() {
         });
     });
 
-    describe('addToJsonOb', function() {
-        var tmpTSRecord = {'foo': 'bar'};
-        var tmpLARRecord = {'bar': 'foo'};
-
-        beforeEach(function() {
-            HMDAJson.resetJsonOb();
-        });
-
-        it('should add record to transmittalSheet when type is transmittalSheet', function(done) {
-            HMDAJson.addToJsonOb('transmittalSheet', tmpTSRecord);
-            var result = HMDAJson.getJsonObject();
-            expect(result.hmdaFile.transmittalSheet).to.be(tmpTSRecord);
-            expect(result.hmdaFile.loanApplicationRegisters.length).to.be(0);
-            done();
-        });
-
-        it('should add record to loanApplicationRegisters when type is loanApplicationRegister', function(done) {
-            var tmpRecord = {'bar':'foo'};
-            HMDAJson.addToJsonOb('loanApplicationRegister', tmpLARRecord);
-            var result = HMDAJson.getJsonObject();
-            expect(result.hmdaFile.loanApplicationRegisters.length).to.be(1);
-            expect(result.hmdaFile.loanApplicationRegisters[0]).to.be(tmpLARRecord);
-            done();
-        });
-
-        it('should do nothing when type is unknown', function(done) {
-            var originalObj = HMDAJson.getJsonObject();
-            HMDAJson.addToJsonOb('lar', tmpTSRecord);
-            var result = HMDAJson.getJsonObject();
-            expect(result).to.be(originalObj);
-            done();
-        });
-    });
-
     describe('parseLine', function() {
         it('should return empty record if no fields in line spec', function(done) {
             var line = '';
