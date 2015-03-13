@@ -1638,7 +1638,6 @@ describe('Engine', function() {
         });
 
         it('should return true when we use local data and all fields are NA', function(done) {
-            // engine.isValidCensusTractCombo('NA', 'NA', 'NA', 'NA')
             expect(engine.isValidCensusTractCombo('NA', 'NA', 'NA', 'NA')).to.be.true();
             done();
         });
