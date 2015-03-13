@@ -1,14 +1,14 @@
 [
 	{
-		"loanNumber": "12A",
+		"lineNumber": "4, 8",
 		"properties": {
-			"lineNumbers": ["4", "8"]
+			"loanNumber": "12A"
 		}
 	},
 	{
-		"loanNumber": "12C",
+		"lineNumber": "5, 13",
 		"properties": {
-			"lineNumbers": ["5", "13"]
+			"loanNumber": "12C"
 		}
 	}
 ]
