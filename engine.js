@@ -67,12 +67,12 @@ var handleUniqueLoanNumberErrors = function(counts) {
     for (var i = 0; i < loanNumbers.length; i++) {
         var loanNumber = loanNumbers[i];
         if (counts[loanNumber].length > 1) {
-            var error = {'properties': {}};
-            error.loanNumber = loanNumber;
-            error.properties.lineNumbers = [];
+            var error = {'properties': { 'loanNumber': loanNumber }};
+            var lineNumbers = [];
             for (var j = 0; j < counts[loanNumber].length; j++) {
-                error.properties.lineNumbers.push(counts[loanNumber][j].lineNumber);
+                lineNumbers.push(counts[loanNumber][j].lineNumber);
             }
+            error.lineNumber = lineNumbers.join(', ');
             errors.push(error);
         }
     }
@@ -916,7 +916,7 @@ var accumulateResult = function(ifResult, thenResult) {
         }
         if (this.shouldUseLocalDB()) {
             return localCensusComboValidation([
-                {'state_code': fipsState}, 
+                {'state_code': fipsState},
                 {'county_code': fipsCounty}
             ], false)
             .then(function(result) {
@@ -1210,9 +1210,9 @@ var accumulateResult = function(ifResult, thenResult) {
                         } else {
                             if (currentEngine.shouldUseLocalDB()) {
                                 return localCensusComboValidation([
-                                    {'state_code': element.fipsState}, 
-                                    {'county_code': element.fipsCounty}, 
-                                    {'tract': element.censusTract}, 
+                                    {'state_code': element.fipsState},
+                                    {'county_code': element.fipsCounty},
+                                    {'tract': element.censusTract},
                                     {'msa_code': element.metroArea}
                                 ], false)
                                 .then(function(result) {
