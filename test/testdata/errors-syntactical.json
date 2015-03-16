@@ -63,9 +63,9 @@
             "scope": "hmda",
             "errors": [
                 {
-                    "loanNumber": "ABCDEFGHIJKLMNOPQRSTUVWXY",
+                    "lineNumber": "2, 3, 4",
                     "properties": {
-                        "lineNumbers": ["2", "3", "4"]
+                        "loanNumber": "ABCDEFGHIJKLMNOPQRSTUVWXY"
                     }
                 }
             ]

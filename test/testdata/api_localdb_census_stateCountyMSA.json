@@ -1,9 +1,9 @@
 [
-    {"type":"put","key":"/census/state_code/39/county_code/119/msa_code/49780","value":"0"},
-    {"type":"put","key":"/census/state_code/06/county_code/115/msa_code/49700","value":"0"},
-    {"type":"put","key":"/census/state_code/42/county_code/085/msa_code/49660","value":"0"},
-    {"type":"put","key":"/census/state_code/39/county_code/155/msa_code/49660","value":"0"},
-    {"type":"put","key":"/census/state_code/39/county_code/099/msa_code/49660","value":"0"},
-    {"type":"put","key":"/census/state_code/28/county_code/163/msa_code/49540","value":"1"},
-    {"type":"put","key":"/census/state_code/72/county_code/153/msa_code/49500","value":"0"}
+    {"type":"put","key":"/census/state_code/39/county_code/119/msa_code/49780","value":{"small_county": "0"}},
+    {"type":"put","key":"/census/state_code/06/county_code/115/msa_code/49700","value":{"small_county": "0"}},
+    {"type":"put","key":"/census/state_code/42/county_code/085/msa_code/49660","value":{"small_county": "0"}},
+    {"type":"put","key":"/census/state_code/39/county_code/155/msa_code/49660","value":{"small_county": "0"}},
+    {"type":"put","key":"/census/state_code/39/county_code/099/msa_code/49660","value":{"small_county": "0"}},
+    {"type":"put","key":"/census/state_code/28/county_code/163/msa_code/49540","value":{"small_county": "1"}},
+    {"type":"put","key":"/census/state_code/72/county_code/153/msa_code/49500","value":{"small_county": "0"}}
 ]

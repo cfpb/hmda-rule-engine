@@ -36,6 +36,13 @@ var runAll = function(year) {
     })
     .then(function() {
         return engine.runSpecial(year);
+    })
+    .then(function() {
+        console.time('time to run IRS report');
+        return engine.getTotalsByMSA(engine.getHmdaJson().hmdaFile.loanApplicationRegisters)
+        .then(function() {
+            console.timeEnd('time to run IRS report');
+        });
     });
 };
 
@@ -46,48 +53,54 @@ var runThen = function(year) {
     })
     .then(function() {
         return engine.runSpecial(year);
+    })
+    .then(function() {
+        console.time('time to run IRS report');
+        return engine.getTotalsByMSA(engine.getHmdaJson().hmdaFile.loanApplicationRegisters)
+        .then(function() {
+            console.timeEnd('time to run IRS report');
+        });
     });
 };
 
-var runHarness = function(fn, year, apiurl, uselocaldb, debug, asthen) {
+var runHarness = function(options) {
     var promise = runAll;
-    engine.setAPIURL(apiurl);
-    if (uselocaldb !== undefined && uselocaldb === 'y') {
+    engine.setAPIURL(options.apiurl);
+    if (options.uselocaldb !== undefined && options.uselocaldb === 'y') {
         engine.setUseLocalDB(true);
     }
-    if (debug !== undefined) {
-        engine.setDebug(debug);
+    if (options.debug !== undefined) {
+        engine.setDebug(options.debug);
     }
-    if (asthen !== undefined && asthen === 'y') {
+    if (options.asthen !== undefined && options.asthen === 'y') {
         promise = runThen;
     }
 
     console.time('total time');
     console.time('time to process hmda json');
-    fs.readFile(fn, function(err, data) {
-        if (err) {
-            console.error('File does not exist');
-            process.exit(1);
+    var fileStream = fs.createReadStream(options.fn);
+    fileStream.on('error', function(err) {
+        console.error('File does not exist');
+        process.exit(1);
+    });
+    engine.fileToJson(fileStream, options.year, function(fileErr) {
+        if (fileErr) {
+            console.log(fileErr);
+        } else {
+            console.log('lars in \'' + options.fn + '\' = ' + engine.getHmdaJson().hmdaFile.loanApplicationRegisters.length);
+            console.timeEnd('time to process hmda json');
+            console.time('time to run all rules');
+            promise(options.year)
+            .then(function() {
+                console.timeEnd('time to run all rules');
+                console.timeEnd('total time');
+                //console.log(JSON.stringify(engine.getErrors(), null, 2));
+                //console.log(engine.getErrors());
+            })
+            .catch(function(err) {
+                console.log(err.message);
+            });
         }
-        engine.fileToJson(data, year, function(fileErr) {
-            if (fileErr) {
-                console.log(fileErr);
-            } else {
-                console.log('lars in \'' + fn + '\' = ' + engine.getHmdaJson().hmdaFile.loanApplicationRegisters.length);
-                console.timeEnd('time to process hmda json');
-                console.time('time to run all rules');
-                promise(year)
-                .then(function() {
-                    console.timeEnd('time to run all rules');
-                    console.timeEnd('total time');
-                    //console.log(JSON.stringify(engine.getErrors(), null, 2));
-                    console.log(engine.getErrors());
-                })
-                .catch(function(err) {
-                    console.log(err.message);
-                });
-            }
-        });
     });
 };
 
@@ -101,13 +114,15 @@ var run = function() {
         process.exit(1);
     }
 
-    var fn = process.argv[2];
-    var year = process.argv[3];
-    var apiurl = process.argv[4];
-    var uselocaldb = process.argv[5];
-    var debug = process.argv[6];
-    var asthen = process.argv[7];
-    runHarness(fn, year, apiurl, uselocaldb, debug, asthen);
+    var options = {
+        'fn': process.argv[2],
+        'year': process.argv[3],
+        'apiurl': process.argv[4],
+        'uselocaldb': process.argv[5],
+        'debug': process.argv[6],
+        'asthen': process.argv[7]
+    };
+    runHarness(options);
 };
 
 module.exports = runHarness;
