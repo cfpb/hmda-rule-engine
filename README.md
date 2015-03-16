@@ -5,6 +5,9 @@ Nothing presented in the issues or in this repo is a final product unless it is 
 
 **Description**:  The HMDA Rule Engine processes the [HMDA Edits](http://www.ffiec.gov/hmda/edits.htm) as defined by the FFIEC. It requires as input a valid [HMDA data file](http://www.ffiec.gov/hmda/fileformats.htm). The engine understands edit rules written in the [brij-spec](http://github.com/linuxbozo/brij-spec) standard.
 
+[![Build Status](https://travis-ci.org/cfpb/hmda-rule-engine.svg)](https://travis-ci.org/cfpb/hmda-rule-engine)
+[![Coverage Status](https://coveralls.io/repos/cfpb/hmda-rule-engine/badge.svg)](https://coveralls.io/r/cfpb/hmda-rule-engine)
+
 ## Requirements
 
 The project requires [NodeJS](http://nodejs.org) (npm) to build and manage dependencies.

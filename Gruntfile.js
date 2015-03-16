@@ -77,6 +77,12 @@ module.exports = function (grunt) {
             }
         },
 
+        coveralls: {
+            options: {
+                src: 'coverage/lcov.info'
+            }
+        }
+
     });
 
 
@@ -87,10 +93,12 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-env');
     grunt.loadNpmTasks('grunt-contrib-jshint');
     grunt.loadNpmTasks('grunt-release');
+    grunt.loadNpmTasks('grunt-coveralls');
 
     // Register group tasks
     grunt.registerTask('clean_all', [ 'clean:node_modules', 'clean:coverage', 'npm_install' ]);
     grunt.registerTask('test', ['env:test', 'clean:coverage', 'jshint', 'mocha_istanbul']);
-    grunt.registerTask('coverage', ['env:test', 'clean:coverage', 'jshint', 'mocha_istanbul', 'open_coverage' ]);
+    grunt.registerTask('travis-coverage', ['test', 'coveralls']);
+    grunt.registerTask('coverage', ['test', 'open_coverage' ]);
 
 };
