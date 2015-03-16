@@ -43,6 +43,27 @@ var retrieveProps = function(error, line, properties) {
     }
 };
 
+var getRuleFunc = function(rule, currentEngine) {
+    var result = {
+        argIndex: 0,
+        args: [],
+        funcs: [],
+        spreads: [],
+        body: '',
+        properties: {}
+    };
+
+    currentEngine.parseRule(rule, result);
+
+    var functionBody = 'return Promise.join(';
+    functionBody += result.funcs.join(',');
+    functionBody += ', function(';
+    functionBody += result.spreads.join(',');
+    functionBody += ') { return ' + result.body + ' });';
+
+    return [functionBody, result];
+};
+
 var handleArrayErrors = function(hmdaFile, lines, properties) {
     var errors = [];
     for (var i = 0; i < lines.length; i++) {
@@ -1382,23 +1403,7 @@ var accumulateResult = function(ifResult, thenResult) {
      * -----------------------------------------------------
      */
 
-    HMDAEngine.execRule = function(topLevelObj, rule, ruleid) {
-        var result = {
-            argIndex: 0,
-            args: [],
-            funcs: [],
-            spreads: [],
-            body: '',
-            properties: {}
-        };
-
-        this.parseRule(rule, result);
-        var functionBody = 'return Promise.join(';
-        functionBody += result.funcs.join(',');
-        functionBody += ', function(';
-        functionBody += result.spreads.join(',');
-        functionBody += ') { return ' + result.body + ' });';
-
+    HMDAEngine.execParsedRule = function(topLevelObj, functionBody, result, ruleid) {
         var args = _.map(result.args, function(arg) {
             if (typeof(arg) === 'string') {
                 var contextList = [topLevelObj, !topLevelObj.hmdaFile ? _HMDA_JSON : {}];        // Context list to search
@@ -1436,6 +1441,29 @@ var accumulateResult = function(ifResult, thenResult) {
         });
     };
 
+    HMDAEngine.execRule = function(topLevelObj, rule, ruleid) {
+        var parserResult = getRuleFunc(rule, this);
+        var functionBody = parserResult[0];
+        var result = parserResult[1];
+        // var result = {
+        //     argIndex: 0,
+        //     args: [],
+        //     funcs: [],
+        //     spreads: [],
+        //     body: '',
+        //     properties: {}
+        // };
+
+        // this.parseRule(rule, result);
+        // var functionBody = 'return Promise.join(';
+        // functionBody += result.funcs.join(',');
+        // functionBody += ', function(';
+        // functionBody += result.spreads.join(',');
+        // functionBody += ') { return ' + result.body + ' });';
+
+        return this.execParsedRule(topLevelObj, functionBody, result, ruleid);        
+    };
+
     /*
      * -----------------------------------------------------
      * API Endpoints
@@ -1461,7 +1489,7 @@ var accumulateResult = function(ifResult, thenResult) {
         if (DEBUG > 2) {
             console.time('    ' + args.rule.id + ' - ' + args.scope + (args.topLevelObj.hasOwnProperty('loanNumber') ? ' - ' + args.topLevelObj.loanNumber : ''));
         }
-        return this.execRule(args.topLevelObj, args.rule.rule)
+        return this.execParsedRule(args.topLevelObj, args.functionBody, args.result)
         .then(function(result) {
             if (_.isArray(result) && result.length !== 0) {
                 addToErrors(result, args.rule, args.editType, args.scope);
@@ -1500,6 +1528,10 @@ var accumulateResult = function(ifResult, thenResult) {
                 'scope': scope,
                 'editType': editType
             };
+            var parsedResult = getRuleFunc(currentRule.rule, currentEngine);
+            args.functionBody = parsedResult[0];
+            args.result = parsedResult[1];
+
             if (_.isArray(topLevelObj)) {
                 return Promise.map(topLevelObj, function(currentTopLevelObj) {
                     args.topLevelObj = currentTopLevelObj;

@@ -1487,10 +1487,10 @@ describe('Engine', function() {
                         engine.setUseLocalDB(false)
                         .then(function() {
                             done();
-                        })
+                        });
                     });
                 });
-            })
+            });
         });
 
         it('should return false when we use local data and the result is false', function(done) {
@@ -3315,6 +3315,32 @@ describe('Engine', function() {
                 expect(result[1].totalRefinance).to.be(2);
                 done();
             });
+        });
+    });
+
+    describe('getRuleFunc', function() {
+        it('should return the function text and parsed rule for a given rule', function(done) {
+            var rule = {
+                'property': 'foo',
+                'condition': 'is_true'
+            };
+            var rewiredEngine = rewire('../engine');
+            var getRuleFunc = rewiredEngine.__get__('getRuleFunc');
+            var result = getRuleFunc(rule, engine);
+            var parseResult = {
+                argIndex: 1,
+                args: ['foo'],
+                funcs: ['this.is_true(arguments[0])'],
+                spreads: ['promise0result'],
+                body: 'promise0result',
+                properties: {foo: true}
+            };
+
+            expect(result[0]).to.be('return Promise.join(this.is_true(arguments[0]), function(promise0result) { return promise0result });');
+            expect(_.isEqual(result[1], parseResult)).to.be.true();
+
+            result = getRuleFunc(rule, engine);
+            done();
         });
     });
 });
