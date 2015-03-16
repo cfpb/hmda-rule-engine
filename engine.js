@@ -672,8 +672,12 @@ var accumulateResult = function(ifResult, thenResult) {
             condid = '- compareNumEntriesSingleCond';
         }
 
+        var parsedResult = getRuleFunc(rule, currentEngine);
+        var functionBody = parsedResult[0];
+        var result = parsedResult[1];
+
         return Promise.map(loanApplicationRegisters, function(lar) {
-            return currentEngine.execRule(lar, rule, ruleid)
+            return currentEngine.execParsedRule(lar, functionBody, result, ruleid)
             .then(function(result) {
                 if (result.length === 0) {
                     count += 1;
@@ -713,13 +717,20 @@ var accumulateResult = function(ifResult, thenResult) {
             condid = '- compareNumEntriesCond';
         }
 
+        var parsedResult = getRuleFunc(ruleA, currentEngine);
+        var functionBodyA = parsedResult[0];
+        var resultA = parsedResult[1];
+        parsedResult = getRuleFunc(ruleB, currentEngine);
+        var functionBodyB = parsedResult[0];
+        var resultB = parsedResult[1];
+
         return Promise.map(loanApplicationRegisters, function(lar) {
-            return currentEngine.execRule(lar, ruleA, ruleAid)
+            return currentEngine.execParsedRule(lar, functionBodyA, resultA, ruleAid)
             .then(function(result) {
                 if (result.length === 0) {
                     countA += 1;
                 }
-                return currentEngine.execRule(lar, ruleB, ruleBid)
+                return currentEngine.execParsedRule(lar, functionBodyB, resultB, ruleBid)
                 .then(function(result) {
                     if (result.length === 0) {
                         countB += 1;
