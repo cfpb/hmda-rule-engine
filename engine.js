@@ -43,7 +43,7 @@ var retrieveProps = function(error, line, properties) {
     }
 };
 
-var getRuleFunc = function(rule, currentEngine) {
+var getParsedRule = function(rule, currentEngine) {
     var result = {
         argIndex: 0,
         args: [],
@@ -672,9 +672,9 @@ var accumulateResult = function(ifResult, thenResult) {
             condid = '- compareNumEntriesSingleCond';
         }
 
-        var parsedResult = getRuleFunc(rule, currentEngine);
-        var functionBody = parsedResult[0];
-        var result = parsedResult[1];
+        var parsedRule = getParsedRule(rule, currentEngine);
+        var functionBody = parsedRule[0];
+        var result = parsedRule[1];
 
         return Promise.map(loanApplicationRegisters, function(lar) {
             return currentEngine.execParsedRule(lar, functionBody, result, ruleid)
@@ -717,12 +717,12 @@ var accumulateResult = function(ifResult, thenResult) {
             condid = '- compareNumEntriesCond';
         }
 
-        var parsedResult = getRuleFunc(ruleA, currentEngine);
-        var functionBodyA = parsedResult[0];
-        var resultA = parsedResult[1];
-        parsedResult = getRuleFunc(ruleB, currentEngine);
-        var functionBodyB = parsedResult[0];
-        var resultB = parsedResult[1];
+        var parsedRule = getParsedRule(ruleA, currentEngine);
+        var functionBodyA = parsedRule[0];
+        var resultA = parsedRule[1];
+        parsedRule = getParsedRule(ruleB, currentEngine);
+        var functionBodyB = parsedRule[0];
+        var resultB = parsedRule[1];
 
         return Promise.map(loanApplicationRegisters, function(lar) {
             return currentEngine.execParsedRule(lar, functionBodyA, resultA, ruleAid)
@@ -1453,7 +1453,7 @@ var accumulateResult = function(ifResult, thenResult) {
     };
 
     HMDAEngine.execRule = function(topLevelObj, rule, ruleid) {
-        var parserResult = getRuleFunc(rule, this);
+        var parserResult = getParsedRule(rule, this);
         var functionBody = parserResult[0];
         var result = parserResult[1];
         // var result = {
@@ -1539,9 +1539,9 @@ var accumulateResult = function(ifResult, thenResult) {
                 'scope': scope,
                 'editType': editType
             };
-            var parsedResult = getRuleFunc(currentRule.rule, currentEngine);
-            args.functionBody = parsedResult[0];
-            args.result = parsedResult[1];
+            var parsedRule = getParsedRule(currentRule.rule, currentEngine);
+            args.functionBody = parsedRule[0];
+            args.result = parsedRule[1];
 
             if (_.isArray(topLevelObj)) {
                 return Promise.map(topLevelObj, function(currentTopLevelObj) {

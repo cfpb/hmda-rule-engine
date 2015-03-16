@@ -3325,9 +3325,9 @@ describe('Engine', function() {
                 'condition': 'is_true'
             };
             var rewiredEngine = rewire('../engine');
-            var getRuleFunc = rewiredEngine.__get__('getRuleFunc');
-            var result = getRuleFunc(rule, engine);
-            var parseResult = {
+            var getParsedRule = rewiredEngine.__get__('getParsedRule');
+            var result = getParsedRule(rule, engine);
+            var parsedRule = {
                 argIndex: 1,
                 args: ['foo'],
                 funcs: ['this.is_true(arguments[0])'],
@@ -3337,9 +3337,7 @@ describe('Engine', function() {
             };
 
             expect(result[0]).to.be('return Promise.join(this.is_true(arguments[0]), function(promise0result) { return promise0result });');
-            expect(_.isEqual(result[1], parseResult)).to.be.true();
-
-            result = getRuleFunc(rule, engine);
+            expect(_.isEqual(result[1], parsedRule)).to.be.true();
             done();
         });
     });
