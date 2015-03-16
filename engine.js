@@ -1456,21 +1456,6 @@ var accumulateResult = function(ifResult, thenResult) {
         var parserResult = getParsedRule(rule, this);
         var functionBody = parserResult[0];
         var result = parserResult[1];
-        // var result = {
-        //     argIndex: 0,
-        //     args: [],
-        //     funcs: [],
-        //     spreads: [],
-        //     body: '',
-        //     properties: {}
-        // };
-
-        // this.parseRule(rule, result);
-        // var functionBody = 'return Promise.join(';
-        // functionBody += result.funcs.join(',');
-        // functionBody += ', function(';
-        // functionBody += result.spreads.join(',');
-        // functionBody += ') { return ' + result.body + ' });';
 
         return this.execParsedRule(topLevelObj, functionBody, result, ruleid);        
     };
