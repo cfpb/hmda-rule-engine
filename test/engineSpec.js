@@ -3326,7 +3326,7 @@ describe('Engine', function() {
             };
             var rewiredEngine = rewire('../engine');
             var getParsedRule = rewiredEngine.__get__('getParsedRule');
-            var result = getParsedRule(rule, engine);
+            var result = getParsedRule.apply(engine, [rule]);
             var parsedRule = {
                 argIndex: 1,
                 args: ['foo'],
