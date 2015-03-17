@@ -1645,17 +1645,3 @@ var accumulateResult = function(ifResult, thenResult) {
   return (typeof module !== 'undefined' && module.exports &&
     typeof window === 'undefined') ? global : window;
 }())));
-    .then(function() {
-            if (DEBUG) {
-                console.timeEnd('time to run special rules');
-            }
-        })
-        .catch(function(err) {
-            return resolveError(err);
-        });
-    };
-
-}.call((function() {
-  return (typeof module !== 'undefined' && module.exports &&
-    typeof window === 'undefined') ? global : window;
-}())));
