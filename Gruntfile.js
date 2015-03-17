@@ -78,6 +78,17 @@ module.exports = function (grunt) {
             }
         },
 
+        jsdoc : {
+            dist : {
+                src: ['engine.js', 'lib/*.js', 'README.md'],
+                options: {
+                    destination: 'doc',
+                    template : 'node_modules/grunt-jsdoc/node_modules/ink-docstrap/template',
+                    configure: '.jsdoc.conf.json'
+                }
+            }
+        }
+
     });
 
 
@@ -88,6 +99,7 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-env');
     grunt.loadNpmTasks('grunt-contrib-jshint');
     grunt.loadNpmTasks('grunt-release');
+    grunt.loadNpmTasks('grunt-jsdoc');
 
     // handle coverage event by sending data to coveralls
     grunt.event.on('coverage', function(lcov, done){

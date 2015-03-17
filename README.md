@@ -37,6 +37,17 @@ Running the tests:
 grunt test
 ```
 
+## Interface Documentation
+
+Documentation of this project is maintained inline with the source code using [JSDoc](http://usejsdoc.org/)
+
+To generate the documentation, run the grunt task:
+```shell
+grunt jsdoc
+```
+
+You can now open `./doc/index.html` in your browser to view the documentation.
+
 ## Getting involved
 
 For details on how to get involved, please first read our [CONTRIBUTING](CONTRIBUTING.md) guidelines.
