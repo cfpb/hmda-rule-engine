@@ -82,7 +82,7 @@ module.exports = function (grunt) {
             dist : {
                 src: ['engine.js', 'lib/*.js', 'README.md'],
                 options: {
-                    destination: 'doc',
+                    destination: 'docs',
                     template : 'node_modules/grunt-jsdoc/node_modules/ink-docstrap/template',
                     configure: '.jsdoc.conf.json'
                 }
@@ -115,5 +115,6 @@ module.exports = function (grunt) {
     grunt.registerTask('clean_all', [ 'clean:node_modules', 'clean:coverage', 'npm_install' ]);
     grunt.registerTask('test', ['env:test', 'clean:coverage', 'jshint', 'mocha_istanbul']);
     grunt.registerTask('coverage', ['test', 'open_coverage' ]);
+    grunt.registerTask('generate-docs', ['jsdoc']);
 
 };

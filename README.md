@@ -43,10 +43,10 @@ Documentation of this project is maintained inline with the source code using [J
 
 To generate the documentation, run the grunt task:
 ```shell
-grunt jsdoc
+grunt generate-docs
 ```
 
-You can now open `./doc/index.html` in your browser to view the documentation.
+You can now open `./docs/index.html` in your browser to view the documentation.
 
 ## Getting involved
 
