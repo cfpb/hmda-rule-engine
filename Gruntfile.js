@@ -58,6 +58,7 @@ module.exports = function (grunt) {
                 src: 'test', // the folder name for the tests
                 options: {
                     recursive: true,
+                    coverage: true, // emit the coverage event
                     //quiet: true,
                     excludes: [],
                     mochaOptions: [
@@ -77,12 +78,6 @@ module.exports = function (grunt) {
             }
         },
 
-        coveralls: {
-            options: {
-                src: 'coverage/lcov.info'
-            }
-        }
-
     });
 
 
@@ -93,12 +88,20 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-env');
     grunt.loadNpmTasks('grunt-contrib-jshint');
     grunt.loadNpmTasks('grunt-release');
-    grunt.loadNpmTasks('grunt-coveralls');
+
+    // handle coverage event by sending data to coveralls
+    grunt.event.on('coverage', function(lcov, done){
+        require('coveralls').handleInput(lcov, function(err){
+            if (err) {
+                return done(err);
+            }
+            done();
+        });
+    });
 
     // Register group tasks
     grunt.registerTask('clean_all', [ 'clean:node_modules', 'clean:coverage', 'npm_install' ]);
     grunt.registerTask('test', ['env:test', 'clean:coverage', 'jshint', 'mocha_istanbul']);
-    grunt.registerTask('travis-coverage', ['test', 'coveralls']);
     grunt.registerTask('coverage', ['test', 'open_coverage' ]);
 
 };
