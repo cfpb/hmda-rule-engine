@@ -100,30 +100,30 @@ $ npm install
 ### Unit Tests
 
 To run the unit tests, use the grunt task:
-    ```shell
-    $ grunt test
-    ```
+```shell
+$ grunt test
+```
 
 When complete, you will see the results of the tests (pass/fail) as well as a text summary of the code coverage if there are no failures:
-    ```
-      255 passing (775ms)
+```
+  255 passing (775ms)
 
-    ...
+...
 
-    =============================== Coverage summary ===============================
-    Statements   : 95.77% ( 883/922 )
-    Branches     : 89.6% ( 379/423 )
-    Functions    : 96.02% ( 217/226 )
-    Lines        : 95.77% ( 883/922 )
-    ================================================================================
-    ```
+=============================== Coverage summary ===============================
+Statements   : 95.77% ( 883/922 )
+Branches     : 89.6% ( 379/423 )
+Functions    : 96.02% ( 217/226 )
+Lines        : 95.77% ( 883/922 )
+================================================================================
+```
 
 You can view the full details of this coverage in a drill-down enabled report by opening `coverage/lcov-report/index.html` in your browser.
 
 If you are on a Mac, you can use a grunt task to run the tests and automatically open the coverage report in your browser:
-    ```shell
-    $ grunt coverage
-    ```
+```shell
+$ grunt coverage
+```
 
 ### Timing Performance Tests
 
@@ -138,6 +138,7 @@ Usage: ./run FILENAME YEAR APIURL [USE LOCALDB] [ENGINE DEBUG LEVEL] [RUN AS THE
 
 EX: ./run ./testdata/bank.dat 2013 http://localhost:9000 y 1 y
 ```
+
 The output will be shown on the screen, and a CSV file, `edit-timing.csv` will be created for easy manipulation of the data.
 
 #### Examples
@@ -185,16 +186,16 @@ total time: 50365ms
 Documentation of this project is maintained inline with the source code using [JSDoc](http://usejsdoc.org/) style code comments.
 
 To generate the documentation, run the grunt task:
-    ```shell
-    $ grunt generate-docs
-    ```
+```shell
+$ grunt generate-docs
+```
 
 You can now open `./docs/index.html` in your browser to view the documentation.
 
 If you are on a Mac, you can use a grunt task to generate the documentation and automatically open them in your browser:
-    ```shell
-    $ grunt view-docs
-    ```
+```shell
+$ grunt view-docs
+```
 
 ## Getting involved
 
