@@ -16,38 +16,24 @@ It also depends on [hmda-edit-check-api](https://github.com/cfpb/hmda-edit-check
 
 ## How to get this running or how to use it
 
-### Installation Steps
-
-Make sure you have [NodeJS](https://nodejs.org) installed (version 0.10.x), and you can use the `npm` command:
-
-```shell
-npm version
-```
-
-Install [Grunt](http://gruntjs.com) globally:
-
-```shell
-npm install -g grunt-cli
-```
-
-Then install dependencies from the project root directory:
-
-```shell
-npm install
-```
-
-Make sure you have a running instance of the [API](https://github.com/cfpb/hmda-edit-check-api)
-
 ### Basic usage
 
 This is a simple example of how to use the engine in your project. More detailed information about how to use the engine can be obtained in the [interface documentation](#interface-documentation) below.
 
-Install the engine:
+-  Make sure you have a running instance of the [API](https://github.com/cfpb/hmda-edit-check-api)
+-  Make sure you have [NodeJS](https://nodejs.org) installed (version 0.10.x), and you can use the `npm` command:
+
 ```shell
-npm install --save cfpb/hmda-rule-engine#master
+$ npm version
 ```
 
-Include the engine in your code:
+- Install the engine in your project:
+
+```shell
+$ npm install --save cfpb/hmda-rule-engine#master
+```
+
+- Include the engine in your code:
 
 ```javascript
 // Require the engine
@@ -86,52 +72,129 @@ engine.fileToJson(fileStream, year, function(fileErr) {
 });
 ```
 
+### Installation Steps For Development
+
+- Make sure you have [NodeJS](https://nodejs.org) installed (version 0.10.x), and you can use the `npm` command:
+```shell
+$ npm version
+```
+- Install [Grunt](http://gruntjs.com) globally:
+```shell
+$ npm install -g grunt-cli
+```
+- Checkout this repository:
+```shell
+$ git clone https://github.com/cfpb/hmda-rule-engine.git
+```
+- Go into the created directory:
+```shell
+$ cd hmda-rule-engine
+```
+- Then install dependencies from the project root directory:
+```shell
+$ npm install
+```
+
 ## Testing
 
 ### Unit Tests
 
 To run the unit tests, use the grunt task:
-```shell
-grunt test
-```
+    ```shell
+    $ grunt test
+    ```
 
 When complete, you will see the results of the tests (pass/fail) as well as a text summary of the code coverage if there are no failures:
-```
-  255 passing (775ms)
+    ```
+      255 passing (775ms)
 
-...
+    ...
 
-=============================== Coverage summary ===============================
-Statements   : 95.77% ( 883/922 )
-Branches     : 89.6% ( 379/423 )
-Functions    : 96.02% ( 217/226 )
-Lines        : 95.77% ( 883/922 )
-================================================================================
-```
+    =============================== Coverage summary ===============================
+    Statements   : 95.77% ( 883/922 )
+    Branches     : 89.6% ( 379/423 )
+    Functions    : 96.02% ( 217/226 )
+    Lines        : 95.77% ( 883/922 )
+    ================================================================================
+    ```
 
 You can view the full details of this coverage in a drill-down enabled report by opening `coverage/lcov-report/index.html` in your browser.
 
 If you are on a Mac, you can use a grunt task to run the tests and automatically open the coverage report in your browser:
+    ```shell
+    $ grunt coverage
+    ```
+
+### Timing Performance Tests
+
+We've provided a timing test harness that will run the complete edit rule suite for analysis on performance. You can run this suite if you have a working instance of the API, and a valid HMDA DAT file.
+
+To run the harness, go into the `timing` directory, and use the `./run` script provided:
 ```shell
-grunt coverage
+$ cd timing
+$ ./run
+
+Usage: ./run FILENAME YEAR APIURL [USE LOCALDB] [ENGINE DEBUG LEVEL] [RUN AS THEN, NOT ALL]
+
+EX: ./run ./testdata/bank.dat 2013 http://localhost:9000 y 1 y
+```
+The output will be shown on the screen, and a CSV file, `edit-timing.csv` will be created for easy manipulation of the data.
+
+#### Examples
+
+Using a DAT file with a single LAR
+```shell
+$ ./run dat/sample_1.dat 2013 http://localhost:8000
+lars in 'dat/sample_1.dat' = 1
+time to process hmda json: 6ms
+time to run all rules: 117ms
+total time: 125ms
 ```
 
+Using a DAT file with LARs, local db turned on, and debug level of 1:
+```shell
+$ ./run dat/larger_sample.dat 2013 http://localhost:8000 y 1
+lars in 'dat/larger_sample.dat' = 8421
+time to process hmda json: 344ms
+S100 - ts: 986ms
+ ...
+S205 - lar: 1230ms
+time to run syntactical rules: 1385ms
+V120 - ts: 5ms
+ ...
+V210 - lar: 1135ms
+time to run validity rules: 15591ms
+Q020 - ts: 1387ms
+ ...
+Q030 - hmda: 12115ms
+time to run quality rules: 12116ms
+Q011 - hmda: 3855ms
+ ...
+Q070 - hmda: 7040ms
+time to run macro rules: 12139ms
+Q029 - hmda: 577ms
+Q595 - hmda: 22254ms
+time to run special rules: 22255ms
+time to run IRS report: 29ms
+time to run all rules: 50021ms
+total time: 50365ms
+```
 
 ## Interface Documentation
 
 Documentation of this project is maintained inline with the source code using [JSDoc](http://usejsdoc.org/) style code comments.
 
 To generate the documentation, run the grunt task:
-```shell
-grunt generate-docs
-```
+    ```shell
+    $ grunt generate-docs
+    ```
 
 You can now open `./docs/index.html` in your browser to view the documentation.
 
 If you are on a Mac, you can use a grunt task to generate the documentation and automatically open them in your browser:
-```shell
-grunt view-docs
-```
+    ```shell
+    $ grunt view-docs
+    ```
 
 ## Getting involved
 

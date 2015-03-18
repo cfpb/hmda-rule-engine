@@ -3,9 +3,9 @@
 /* global -Promise */
 'use strict';
 
-var Promise = require('bluebird');
-var engine = require('../engine');
-var fs = require('fs');
+var Promise = require('bluebird'),
+    engine = require('../engine'),
+    fs = require('fs');
 
 var runSynValThen = function(year) {
     return engine.runSyntactical(year)
@@ -29,6 +29,18 @@ var runQualMacroAll = function(year) {
     return Promise.all([engine.runQuality(year), engine.runMacro(year)]);
 };
 
+var runIRS = function() {
+    if (engine.getDebug()) {
+        console.time('time to run IRS report');
+    }
+    return engine.getTotalsByMSA(engine.getHmdaJson().hmdaFile.loanApplicationRegisters)
+    .then(function() {
+        if (engine.getDebug()) {
+            console.timeEnd('time to run IRS report');
+        }
+    });
+};
+
 var runAll = function(year) {
     return runSynValAll(year)
     .then(function() {
@@ -38,11 +50,7 @@ var runAll = function(year) {
         return engine.runSpecial(year);
     })
     .then(function() {
-        console.time('time to run IRS report');
-        return engine.getTotalsByMSA(engine.getHmdaJson().hmdaFile.loanApplicationRegisters)
-        .then(function() {
-            console.timeEnd('time to run IRS report');
-        });
+        return runIRS();
     });
 };
 
@@ -55,15 +63,32 @@ var runThen = function(year) {
         return engine.runSpecial(year);
     })
     .then(function() {
-        console.time('time to run IRS report');
-        return engine.getTotalsByMSA(engine.getHmdaJson().hmdaFile.loanApplicationRegisters)
-        .then(function() {
-            console.timeEnd('time to run IRS report');
-        });
+        return runIRS();
     });
 };
 
-var runHarness = function(options) {
+/**
+ * Construct a new instance of TimingHarness for running performance timing tests
+ * @constructs TimingHarness
+ */
+var TimingHarness = function() {};
+
+/**
+ * Run the timing test harness
+ * @param  {object}   options Options object that contains filename, year, apiurl, use localdb flag, debug level, and run as then flag
+ * @example {@lang javascript}
+ * var harness = require('./harness');
+ * var options = {
+ *      'filename': '/path/to/file.dat',
+ *      'year': '2013',
+ *      'apiurl': 'http://localhost:8080',
+ *      'uselocaldb': 'y',  // (Optional: valid values: ['y', 'n'])
+ *      'debug': 1,         // (Optional: valid values: [1, 2, 3])
+ *      'asthen': 'n'       // (Optional: valid values: ['y', 'n'])
+ * }
+ * harness.run(options);
+ */
+TimingHarness.prototype.run = function(options) {
     var promise = runAll;
     engine.setAPIURL(options.apiurl);
     if (options.uselocaldb !== undefined && options.uselocaldb === 'y') {
@@ -78,7 +103,7 @@ var runHarness = function(options) {
 
     console.time('total time');
     console.time('time to process hmda json');
-    var fileStream = fs.createReadStream(options.fn);
+    var fileStream = fs.createReadStream(options.filename);
     fileStream.on('error', function(err) {
         console.error('File does not exist');
         process.exit(1);
@@ -87,7 +112,7 @@ var runHarness = function(options) {
         if (fileErr) {
             console.log(fileErr);
         } else {
-            console.log('lars in \'' + options.fn + '\' = ' + engine.getHmdaJson().hmdaFile.loanApplicationRegisters.length);
+            console.log('lars in \'' + options.filename + '\' = ' + engine.getHmdaJson().hmdaFile.loanApplicationRegisters.length);
             console.timeEnd('time to process hmda json');
             console.time('time to run all rules');
             promise(options.year)
@@ -104,28 +129,24 @@ var runHarness = function(options) {
     });
 };
 
-var run = function() {
+module.exports = new TimingHarness();
+if (process.argv.length && process.argv[1] === __dirname +'/harness.js') {
     if (process.argv.length < 5) {
         console.error('');
         console.error('Usage: ./run FILENAME YEAR APIURL [USE LOCALDB] [ENGINE DEBUG LEVEL] [RUN AS THEN, NOT ALL]');
         console.error('');
-        console.error('EX: ./run ./testdata/bank.dat 2013 http://localhost:9000 1 y');
+        console.error('EX: ./run ./testdata/bank.dat 2013 http://localhost:9000 y 1 y');
         console.error('');
         process.exit(1);
     }
 
     var options = {
-        'fn': process.argv[2],
+        'filename': process.argv[2],
         'year': process.argv[3],
         'apiurl': process.argv[4],
         'uselocaldb': process.argv[5],
         'debug': process.argv[6],
         'asthen': process.argv[7]
     };
-    runHarness(options);
-};
-
-module.exports = runHarness;
-if (process.argv.length && process.argv[1] === __dirname +'/harness.js') {
-    run();
+    module.exports.run(options);
 }

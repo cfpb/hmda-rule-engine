@@ -2,11 +2,10 @@
 
 'use strict';
 
-var inFN = __dirname + '/edit-timing.txt';
-var outFN = __dirname + '/edit-timing.csv';
-var chomp = require('line-chomper').chomp;
-var _ = require('underscore');
-var fs = require('fs');
+var outFN = __dirname + '/edit-timing.csv',
+    chomp = require('line-chomper').chomp,
+    _ = require('underscore'),
+    fs = require('fs');
 
 try {
     fs.unlinkSync(outFN);
@@ -18,8 +17,9 @@ var header = 'Info,Runtime in Seconds\n';
 
 var convert = function() {
     fs.appendFileSync(outFN, header);
-    chomp(inFN, function(err, lines) {
+    chomp(process.stdin, function(err, lines) {
         _.each(lines, function(line) {
+            console.log(line);
             var arr = _.map(line.split(':'), function(field) {
                 field = field.trim();
                 if (field.indexOf('ms') !== -1) {
