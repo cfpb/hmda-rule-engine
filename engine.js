@@ -131,7 +131,10 @@ var accumulateResult = function(ifResult, thenResult) {
     // Set root (global) scope
     var root = this;
 
-    // Constructor of our HMDAEngine
+    /**
+     * Construct a new HMDAEngine instance
+     * @constructs HMDAEngine
+     */
     var HMDAEngine = function(obj) {
         if (obj instanceof HMDAEngine) {
             return obj;
@@ -172,10 +175,20 @@ var accumulateResult = function(ifResult, thenResult) {
         _USE_LOCAL_DB = false,
         DEBUG = 0;
 
+    /**
+     * Set the base API URL
+     * @param {string} url The URL to the API
+     * @example
+     * engine.setAPIURL('http://localhost:9000');
+     */
     HMDAEngine.setAPIURL = function(url) {
         _API_BASE_URL = url;
     };
 
+    /**
+     * Get the currently set API URL
+     * @return {string} The URL to the API
+     */
     HMDAEngine.getAPIURL = function() {
         return _API_BASE_URL;
     };
@@ -188,6 +201,9 @@ var accumulateResult = function(ifResult, thenResult) {
         return _API_RULE_YEAR;
     };
 
+    /**
+     * Reset the internal errors object
+     */
     HMDAEngine.clearErrors = function() {
         errors = {
             syntactical: {},
@@ -198,26 +214,49 @@ var accumulateResult = function(ifResult, thenResult) {
         };
     };
 
+    /**
+     * Get the errors object populated after running edits
+     * @return {object} The {@link https://github.com/cfpb/hmda-pilot/wiki/Edit-Errors-JSON-schema|errors object}
+     */
     HMDAEngine.getErrors = function() {
         return errors;
     };
 
+    /**
+     * Clear the current HMDA JSON object from the engine
+     */
     HMDAEngine.clearHmdaJson = function() {
         _HMDA_JSON = {};
     };
 
+    /**
+     * Get the currently set HMDA JSON object
+     * @return {JSONOb} The HMDA JSON object
+     */
     HMDAEngine.getHmdaJson = function() {
         return _HMDA_JSON;
     };
 
+    /**
+     * Manually set the HMDA JSON object, usually set with {@link HMDAEngine#fileToJson|HMDAEngine.fileToJson()}
+     * @param {JSONOb} newHmdaJson The HMDA JSON object
+     */
     HMDAEngine.setHmdaJson = function(newHmdaJson) {
         _HMDA_JSON = newHmdaJson;
     };
 
+    /**
+     * Set the debugging level
+     * @param {integer} level Valid values: 1, 2, or 3
+     */
     HMDAEngine.setDebug = function(level) {
         DEBUG = level;
     };
 
+    /**
+     * Get the currently set debug level
+     * @return {integer} The current level
+     */
     HMDAEngine.getDebug = function() {
         return DEBUG;
     };
@@ -228,6 +267,10 @@ var accumulateResult = function(ifResult, thenResult) {
      * -----------------------------------------------------
      */
 
+    /**
+     * Allow the use of LocalDB to speed up queries during edit processing
+     * @param {boolean} bool Valid values: true, false
+     */
     HMDAEngine.setUseLocalDB = function(bool) {
         _USE_LOCAL_DB = bool;
         if (bool) {
@@ -381,10 +424,21 @@ var accumulateResult = function(ifResult, thenResult) {
      * -----------------------------------------------------
      */
 
+    /**
+     * Get the available years that have edits defined.
+     * Convenience method for {@link https://github.com/cfpb/hmda-rule-spec|SpecAPI.getValidYears}
+     * @return {array} Array of valid years
+     */
     HMDAEngine.getValidYears = function() {
         return hmdaRuleSpec.getValidYears();
     };
 
+    /**
+     * Get the defined file specification for the year.
+     * Convenience method for {@link https://github.com/cfpb/hmda-rule-spec|SpecAPI.getFileSpec}
+     * @param  {string} year Year for the file specification
+     * @return {object}      Object defining the file specification
+     */
     HMDAEngine.getFileSpec = function(year) {
         return hmdaRuleSpec.getFileSpec(year);
     };
@@ -763,6 +817,11 @@ var accumulateResult = function(ifResult, thenResult) {
         }.bind(this));
     };
 
+    /**
+     * Produces the HMDA Institution Register Summary (IRS) report data
+     * @param  {array} loanApplicationRegisters An array of the LARs to process
+     * @return {array}                          An array of the results
+     */
     HMDAEngine.getTotalsByMSA = function(loanApplicationRegisters) {
         return Promise.all(_.chain(loanApplicationRegisters)
         .groupBy('metroArea')
@@ -1291,6 +1350,14 @@ var accumulateResult = function(ifResult, thenResult) {
         return 'promise' + promises.length + 'result';
     };
 
+    /**
+     * Given a proper HMDA DAT file, and specified year, store a JSON representation
+     * of the DAT internally in the engine
+     * @param  {file}     file Either a browser FileReader, or stream
+     * @param  {string}   year Year for the file specification to process the file against
+     * @param  {Function} next callback function in form of callback(err, result)
+     * @see {@link HMDAProcessor#process|HMDAProcessor.process()} for more information
+     */
     HMDAEngine.fileToJson = function(file, year, next) {
         var spec = hmdaRuleSpec.getFileSpec(year);
 
@@ -1448,7 +1515,7 @@ var accumulateResult = function(ifResult, thenResult) {
         var functionBody = parserResult[0];
         var result = parserResult[1];
 
-        return this.execParsedRule(topLevelObj, functionBody, result, ruleid);        
+        return this.execParsedRule(topLevelObj, functionBody, result, ruleid);
     };
 
     /*
@@ -1539,6 +1606,11 @@ var accumulateResult = function(ifResult, thenResult) {
         }.bind(this), { concurrency: CONCURRENT_RULES });
     };
 
+    /**
+     * Run the Syntactical edits for a given year
+     * @param  {string}  year The specific year of the edit specification to work with
+     * @return {Promise}      A Promise for the finished edit process
+     */
     HMDAEngine.runSyntactical = function(year) {
         if (DEBUG) {
             console.time('time to run syntactical rules');
@@ -1558,6 +1630,11 @@ var accumulateResult = function(ifResult, thenResult) {
         });
     };
 
+    /**
+     * Run the Validity edits for a given year
+     * @param  {string}  year The specific year of the edit specification to work with
+     * @return {Promise}      A Promise for the finished edit process
+     */
     HMDAEngine.runValidity = function(year) {
         var validityPromise;
         if (this.shouldUseLocalDB()) {
@@ -1588,6 +1665,11 @@ var accumulateResult = function(ifResult, thenResult) {
         });
     };
 
+    /**
+     * Run the Quality edits for a given year
+     * @param  {string}  year The specific year of the edit specification to work with
+     * @return {Promise}      A Promise for the finished edit process
+     */
     HMDAEngine.runQuality = function(year) {
         if (DEBUG) {
             console.time('time to run quality rules');
@@ -1607,6 +1689,11 @@ var accumulateResult = function(ifResult, thenResult) {
         });
     };
 
+    /**
+     * Run the Macro Quality edits for a given year
+     * @param  {string}  year The specific year of the edit specification to work with
+     * @return {Promise}      A Promise for the finished edit process
+     */
     HMDAEngine.runMacro = function(year) {
         if (DEBUG) {
             console.time('time to run macro rules');
@@ -1624,6 +1711,11 @@ var accumulateResult = function(ifResult, thenResult) {
         });
     };
 
+    /**
+     * Run the Specialized edits (Q029, Q595) for a given year
+     * @param  {string}  year The specific year of the edit specification to work with
+     * @return {Promise}      A Promise for the finished edit process
+     */
     HMDAEngine.runSpecial = function(year) {
         if (DEBUG) {
             console.time('time to run special rules');
