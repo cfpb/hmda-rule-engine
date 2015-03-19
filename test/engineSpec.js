@@ -188,6 +188,7 @@ describe('Engine', function() {
         });
     });
 
+<<<<<<< HEAD
     describe('email_address', function() {
         it('should return true if property is a valid email address', function(done) {
             var test_addresses = [
@@ -817,6 +818,8 @@ describe('Engine', function() {
         });
     });
 
+=======
+>>>>>>> Start refactoring with mixings
     describe('accumulatedIf', function() {
         var hmdaJson = JSON.parse(JSON.stringify(require('./testdata/complete.json')));
         var ifCond = {
