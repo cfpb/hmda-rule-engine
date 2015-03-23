@@ -822,49 +822,58 @@ var accumulateResult = function(ifResult, thenResult) {
      * @param  {array} loanApplicationRegisters An array of the LARs to process
      * @return {array}                          An array of the results
      */
-    HMDAEngine.getTotalsByMSA = function(loanApplicationRegisters) {
-        return Promise.all(_.chain(loanApplicationRegisters)
-        .groupBy('metroArea')
-        .collect(function(value, key) {
-            return this.getMSAName(key).then(function(msaName) {
-                var result = {msaCode: key, msaName: msaName, totalLAR: 0, totalLoanAmount: 0, totalConventional: 0, totalFHA: 0, totalVA: 0, totalFSA: 0,
-                    total1To4Family: 0, totalMFD: 0, totalMultifamily: 0, totalHomePurchase: 0, totalHomeImprovement: 0, totalRefinance: 0};
+    HMDAEngine.getTotalsByMSA = function(hmdaFile) {
+        // get the msa branch list for depository to reduce calls to API
+        var depository = (hmdaFile.transmittalSheet.agencyCode==='7') ? false : true;
+        return this.getMSABranches(hmdaFile.transmittalSheet.agencyCode, hmdaFile.transmittalSheet.respondentID)
+        .then(function (branchResult) {
+            return Promise.all(_.chain(hmdaFile.loanApplicationRegisters)
+            .groupBy('metroArea')
+            .filter(function (msaCode) {
+                return (!depository && msaCode.length>=5) || 
+                    (depository && _.contains(branchResult,msaCode[0].metroArea.toString())) || 
+                    (msaCode[0].metroArea.toString()==='NA');
+            })
+            .collect(function(value, key) {
+                return this.getMSAName(_.first(value).metroArea).then(function(msaName) {
+                    var result = {msaCode: _.first(value).metroArea, msaName: msaName, totalLAR: 0, totalLoanAmount: 0, totalConventional: 0, totalFHA: 0, totalVA: 0, totalFSA: 0,
+                        total1To4Family: 0, totalMFD: 0, totalMultifamily: 0, totalHomePurchase: 0, totalHomeImprovement: 0, totalRefinance: 0};
+                    _.each(value, function(element) {
+                        result.totalLAR++;
+                        result.totalLoanAmount += +element.loanAmount;
 
-                _.each(value, function(element) {
-                    result.totalLAR++;
-                    result.totalLoanAmount += +element.loanAmount;
+                        if (element.loanType === '1') {
+                            result.totalConventional++;
+                        } else if (element.loanType === '2') {
+                            result.totalFHA++;
+                        } else if (element.loanType === '3') {
+                            result.totalVA++;
+                        } else if (element.loanType === '4') {
+                            result.totalFSA++;
+                        }
 
-                    if (element.loanType === '1') {
-                        result.totalConventional++;
-                    } else if (element.loanType === '2') {
-                        result.totalFHA++;
-                    } else if (element.loanType === '3') {
-                        result.totalVA++;
-                    } else if (element.loanType === '4') {
-                        result.totalFSA++;
-                    }
+                        if (element.propertyType === '1') {
+                            result.total1To4Family++;
+                        } else if (element.propertyType === '2') {
+                            result.totalMFD++;
+                        } else if (element.propertyType === '3') {
+                            result.totalMultifamily++;
+                        }
 
-                    if (element.propertyType === '1') {
-                        result.total1To4Family++;
-                    } else if (element.propertyType === '2') {
-                        result.totalMFD++;
-                    } else if (element.propertyType === '3') {
-                        result.totalMultifamily++;
-                    }
-
-                    if (element.loanPurpose === '1') {
-                        result.totalHomePurchase++;
-                    } else if (element.loanPurpose === '2') {
-                        result.totalHomeImprovement++;
-                    } else if (element.loanPurpose === '3') {
-                        result.totalRefinance++;
-                    }
+                        if (element.loanPurpose === '1') {
+                            result.totalHomePurchase++;
+                        } else if (element.loanPurpose === '2') {
+                            result.totalHomeImprovement++;
+                        } else if (element.loanPurpose === '3') {
+                            result.totalRefinance++;
+                        }
+                    });
+                    return result;
                 });
-                return result;
-            });
-        }.bind(this))
-        .sortBy('msaCode')
-        .value());
+            }.bind(this))
+            .sortBy('msaCode')
+            .value());
+        }.bind(this));
     };
 
     HMDAEngine.isValidNumMultifamilyLoans = function(hmdaFile) {
@@ -1338,6 +1347,13 @@ var accumulateResult = function(ifResult, thenResult) {
                 return resultFromResponse(response).msaName;
             });
         }
+    };
+
+    HMDAEngine.getMSABranches = function(agencyCode,respondentID) {
+        return this.apiGET('getMetroAreasOnRespondentPanel', [agencyCode, respondentID])
+        .then(function(response) {
+            return resultFromResponse(response).msa;
+        });
     };
 
     /*

@@ -3289,30 +3289,45 @@ describe('Engine', function() {
     });
 
     describe('getTotalsByMSA', function() {
-        it('should group the LARs by metro area and calculate totals', function(done) {
-            var hmdaJson = JSON.parse(JSON.stringify(require('./testdata/loans-to-total.json')));
-
+        it('should group the LARs by metro area and calculate totals for non-depository, filtering out totals < 5', function(done) {
+            var hmdaFile = JSON.parse(JSON.stringify(require('./testdata/loans-to-total.json'))).hmdaFile;
             var msaCode = '06920';
             var path = '/getMSAName/' + engine.getRuleYear() + '/' + msaCode;
             mockAPI('get', path, 200, JSON.stringify({ msaName: '' }));
-            msaCode = '35100';
-            path = '/getMSAName/' + engine.getRuleYear() + '/' + msaCode;
-            mockAPI('get', path, 200, JSON.stringify({ msaName: 'New Bern, NC' }));
+            path = '/getMetroAreasOnRespondentPanel/2013/7/0123456789';
+            mockAPI('get', path, 200, JSON.stringify({ msa: [] }));
 
-            engine.getTotalsByMSA(hmdaJson.hmdaFile.loanApplicationRegisters)
+            engine.getTotalsByMSA(hmdaFile)
             .then(function(result) {
+                expect(result.length).to.be(1);
+                expect(result[0].msaCode).to.be('06920');
+                expect(result[0].totalLAR).to.be(9);
+                expect(result[0].totalLoanAmount).to.be(90000);
+                expect(result[0].totalHomePurchase).to.be(7);
+                expect(result[0].totalHomeImprovement).to.be(0);
+                expect(result[0].totalRefinance).to.be(2);
+                done();
+            });
+        });
+
+        it('should group the LARs by metro area and calculate totals for depository, filtering out msas not in branches', function(done) {
+            var hmdaFile = JSON.parse(JSON.stringify(require('./testdata/loans-to-total.json'))).hmdaFile;
+            hmdaFile.transmittalSheet.agencyCode = '9';
+            var msaCode = '35100';
+            var path = '/getMSAName/' + engine.getRuleYear() + '/' + msaCode;
+            mockAPI('get', path, 200, JSON.stringify({ msaName: '' }));
+            path = '/getMetroAreasOnRespondentPanel/2013/9/0123456789';
+            mockAPI('get', path, 200, JSON.stringify({ msa: ['35100'] }));
+
+            engine.getTotalsByMSA(hmdaFile)
+            .then(function(result) {
+                expect(result.length).to.be(1);
                 expect(result[0].msaCode).to.be('35100');
                 expect(result[0].totalLAR).to.be(3);
                 expect(result[0].totalLoanAmount).to.be(30000);
                 expect(result[0].totalFHA).to.be(2);
                 expect(result[0].totalVA).to.be(0);
                 expect(result[0].totalFSA).to.be(1);
-                expect(result[1].msaCode).to.be('06920');
-                expect(result[1].totalLAR).to.be(9);
-                expect(result[1].totalLoanAmount).to.be(90000);
-                expect(result[1].totalHomePurchase).to.be(7);
-                expect(result[1].totalHomeImprovement).to.be(0);
-                expect(result[1].totalRefinance).to.be(2);
                 done();
             });
         });
