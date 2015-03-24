@@ -95,6 +95,7 @@ describe('Engine', function() {
             expect(engine.getDebug()).to.be(0);
             engine.setDebug(3);
             expect(engine.getDebug()).to.be(3);
+            engine.setDebug(0);
             done();
         });
     });
