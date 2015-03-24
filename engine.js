@@ -825,18 +825,18 @@ var accumulateResult = function(ifResult, thenResult) {
     HMDAEngine.getTotalsByMSA = function(hmdaFile) {
         // get the msa branch list for depository to reduce calls to API
         var depository = (hmdaFile.transmittalSheet.agencyCode==='7') ? false : true;
-        return this.getMSABranches(hmdaFile.transmittalSheet.agencyCode, hmdaFile.transmittalSheet.respondentID)
+        return this.getMetroAreasOnRespondentPanel(hmdaFile.transmittalSheet.agencyCode, hmdaFile.transmittalSheet.respondentID)
         .then(function (branchResult) {
             return Promise.all(_.chain(hmdaFile.loanApplicationRegisters)
             .groupBy('metroArea')
-            .filter(function (msaCode) {
-                return (!depository && msaCode.length>=5) || 
-                    (depository && _.contains(branchResult,msaCode[0].metroArea.toString())) || 
-                    (msaCode[0].metroArea.toString()==='NA');
+            .pick(function (lar, metroArea) {
+                return (!depository && lar.length>=5) || 
+                    (depository && _.contains(branchResult,metroArea)) || 
+                    (metroArea==='NA');
             })
             .collect(function(value, key) {
-                return this.getMSAName(_.first(value).metroArea).then(function(msaName) {
-                    var result = {msaCode: _.first(value).metroArea, msaName: msaName, totalLAR: 0, totalLoanAmount: 0, totalConventional: 0, totalFHA: 0, totalVA: 0, totalFSA: 0,
+                return this.getMSAName(key).then(function(msaName) {
+                    var result = {msaCode: key, msaName: msaName, totalLAR: 0, totalLoanAmount: 0, totalConventional: 0, totalFHA: 0, totalVA: 0, totalFSA: 0,
                         total1To4Family: 0, totalMFD: 0, totalMultifamily: 0, totalHomePurchase: 0, totalHomeImprovement: 0, totalRefinance: 0};
                     _.each(value, function(element) {
                         result.totalLAR++;
@@ -1349,7 +1349,7 @@ var accumulateResult = function(ifResult, thenResult) {
         }
     };
 
-    HMDAEngine.getMSABranches = function(agencyCode,respondentID) {
+    HMDAEngine.getMetroAreasOnRespondentPanel = function(agencyCode,respondentID) {
         return this.apiGET('getMetroAreasOnRespondentPanel', [agencyCode, respondentID])
         .then(function(response) {
             return resultFromResponse(response).msa;
