@@ -30,7 +30,6 @@ var setupCensusAPI = function() {
 };
 
 describe('Engine', function() {
-
     before(function(done) {
         mockAPIURL = 'http://localhost:' + port;
         mockYEAR = '2013';
@@ -51,9 +50,9 @@ describe('Engine', function() {
     describe('Make sure mockAPI is up', function() {
         it('should allow route define and respond with 200 first time, 404 second time called', function(done) {
             mockAPI('get', '/foo', 200, 'bar');
-            http.get(mockAPIURL+'/foo', function(resp) {
+            http.get(mockAPIURL + '/foo', function(resp) {
                 expect(resp.statusCode).to.be(200);
-                http.get(mockAPIURL+'/foo', function(resp) {
+                http.get(mockAPIURL + '/foo', function(resp) {
                     expect(resp.statusCode).to.be(404);
                     done();
                 });
@@ -62,9 +61,9 @@ describe('Engine', function() {
 
         it('should allow route define and respond with 200 every time called when persist option enabled', function(done) {
             mockAPI('get', '/bar', 200, 'foo', true);
-            http.get(mockAPIURL+'/bar', function(resp) {
+            http.get(mockAPIURL + '/bar', function(resp) {
                 expect(resp.statusCode).to.be(200);
-                http.get(mockAPIURL+'/bar', function(resp) {
+                http.get(mockAPIURL + '/bar', function(resp) {
                     expect(resp.statusCode).to.be(200);
                     done();
                 });
@@ -1047,19 +1046,20 @@ describe('Engine', function() {
     });
 
     describe('hasUniqueLoanNumbers', function() {
+        var hmdaFile = {
+            loanApplicationRegisters: [
+                {
+                    loanNumber: '1',
+                    lineNumber: '2'
+                },
+                {
+                    loanNumber: '1',
+                    lineNumber: '3'
+                }
+            ]
+        };
+
         it('should return false if any LARs have duplicate loanNumbers', function(done) {
-            var hmdaFile = {
-                loanApplicationRegisters: [
-                    {
-                        loanNumber: '1',
-                        lineNumber: '2'
-                    },
-                    {
-                        loanNumber: '1',
-                        lineNumber: '3'
-                    }
-                ]
-            };
             var result = engine.hasUniqueLoanNumbers(hmdaFile);
             expect(result.length).to.be(1);
             expect(result[0].properties.loanNumber).to.be('1');
@@ -1068,18 +1068,7 @@ describe('Engine', function() {
         });
 
         it('should return true if no LARs have the same loanNumber', function(done) {
-            var hmdaFile = {
-                loanApplicationRegisters: [
-                    {
-                        loanNumber: '1',
-                        lineNumber: '2'
-                    },
-                    {
-                        loanNumber: '2',
-                        lineNumber: '3'
-                    }
-                ]
-            };
+            hmdaFile.loanApplicationRegisters[1].loanNumber = '2';
             var result = engine.hasUniqueLoanNumbers(hmdaFile);
             expect(result).to.be(true);
             done();
@@ -1184,7 +1173,7 @@ describe('Engine', function() {
         });
 
         it('should return error array for an invalid lar count', function(done) {
-            expect(engine.checkTotalLARCount(hmdaJson.hmdaFile) instanceof Array).to.be(true);
+            expect(_.isArray(engine.checkTotalLARCount(hmdaJson.hmdaFile))).to.be(true);
             done();
         });
     });
@@ -1213,7 +1202,7 @@ describe('Engine', function() {
 
             engine.compareNumEntriesSingle(hmdaJson.hmdaFile.loanApplicationRegisters, rule, cond)
             .then(function(result) {
-                expect(result instanceof Array).to.be(false);
+                expect(_.isArray(result)).to.be(false);
                 done();
             });
         });
@@ -1233,7 +1222,7 @@ describe('Engine', function() {
 
             engine.compareNumEntriesSingle(hmdaJson.hmdaFile.loanApplicationRegisters, rule, cond)
             .then(function(result) {
-                expect(result instanceof Array).to.be(true);
+                expect(_.isArray(result)).to.be(true);
                 expect(result.length).to.be(1);
                 expect(result[0]).to.have.property('properties');
                 expect(result[0].properties).to.have.property('Total Filler');
@@ -1246,57 +1235,44 @@ describe('Engine', function() {
     describe('compareNumEntries', function() {
         var hmdaJson = {};
         var topLevelObj = {};
+        var ruleA, ruleB, cond;
 
         beforeEach(function() {
             hmdaJson = JSON.parse(JSON.stringify(require('./testdata/complete.json')));
             topLevelObj = hmdaJson.hmdaFile.transmittalSheet;
             engine.setHmdaJson(hmdaJson);
-        });
 
-        it('should return true for a passing comparison', function(done) {
-            var ruleA = {
+            ruleA = {
                 'property': 'filler',
                 'condition': 'equal',
                 'value': 'B'
             };
-            var ruleB = {
+            ruleB = {
                 'property': 'recordID',
                 'condition': 'equal',
                 'value': '2'
             };
-            var cond = {
+            cond = {
                 'property': 'result',
                 'condition': 'greater_than',
                 'value': '.6'
             };
+        });
 
+        it('should return true for a passing comparison', function(done) {
             engine.compareNumEntries(hmdaJson.hmdaFile.loanApplicationRegisters, ruleA, ruleB, cond)
             .then(function(result) {
-                expect(result instanceof Array).to.be(false);
+                expect(_.isArray(result)).to.be(false);
                 done();
             });
         });
 
         it('should return false for a non-passing comparison', function(done) {
-            var ruleA = {
-                'property': 'filler',
-                'condition': 'equal',
-                'value': 'B'
-            };
-            var ruleB = {
-                'property': 'recordID',
-                'condition': 'equal',
-                'value': '2'
-            };
-            var cond = {
-                'property': 'result',
-                'condition': 'less_than',
-                'value': '.6'
-            };
+            cond.condition = 'less_than';
 
             engine.compareNumEntries(hmdaJson.hmdaFile.loanApplicationRegisters, ruleA, ruleB, cond)
             .then(function(result) {
-                expect(result instanceof Array).to.be.true();
+                expect(_.isArray(result)).to.be.true();
                 expect(result.length).to.be(1);
                 expect(result[0]).to.have.property('properties');
                 done();
@@ -1333,7 +1309,7 @@ describe('Engine', function() {
         });
 
         it('should return false for an invalid number of multifamily loans', function(done) {
-            expect(engine.isValidNumMultifamilyLoans(hmdaJson.hmdaFile) instanceof Array).to.be(true);
+            expect(_.isArray(engine.isValidNumMultifamilyLoans(hmdaJson.hmdaFile))).to.be(true);
             done();
         });
     });
@@ -1341,7 +1317,7 @@ describe('Engine', function() {
     describe('isValidControlNumber', function() {
         it('should return true when the API response result is true', function(done) {
             var path = '/isValidControlNumber/' + engine.getRuleYear() + '/1/0000000001';
-            mockAPI('get', path, 200, JSON.stringify({ result: true }));
+            mockAPI('get', path, 200, JSON.stringify({result: true}));
             engine.isValidControlNumber({
                 transmittalSheet: {
                     agencyCode: '1',
@@ -1355,7 +1331,7 @@ describe('Engine', function() {
 
         it('should return error array when API response result is false', function(done) {
             var path = '/isValidControlNumber/' + engine.getRuleYear() + '/1/0000000001';
-            mockAPI('get', path, 200, JSON.stringify({ result: false }));
+            mockAPI('get', path, 200, JSON.stringify({result: false}));
             engine.isValidControlNumber({
                 transmittalSheet: {
                     agencyCode: '1',
@@ -1397,7 +1373,7 @@ describe('Engine', function() {
     describe('isValidMetroArea', function() {
         it('should return true when the API response result is true', function(done) {
             var path = '/isValidMSA/' + engine.getRuleYear() + '/22220';
-            mockAPI('get', path, 200, JSON.stringify({ result: true }));
+            mockAPI('get', path, 200, JSON.stringify({result: true}));
             engine.isValidMetroArea('22220')
             .then(function(result) {
                 expect(result).to.be(true);
@@ -1450,7 +1426,7 @@ describe('Engine', function() {
 
         it('should return true when the respondent is not CRA reporter', function(done) {
             var path = '/isCraReporter/' + engine.getRuleYear() + '/0123456789';
-            mockAPI('get', path, 200, JSON.stringify({ result: false }));
+            mockAPI('get', path, 200, JSON.stringify({result: false}));
             engine.isValidMsaMdCountyCensusForNonDepository(hmdaJson.hmdaFile)
             .then(function(result) {
                 expect(result).to.be(true);
@@ -1460,9 +1436,9 @@ describe('Engine', function() {
 
         it('should return true if CRA reporter and all the relevant LARs MSAs are good', function(done) {
             var path = '/isCraReporter/' + engine.getRuleYear() + '/0123456789';
-            mockAPI('get', path, 200, JSON.stringify({ result: true }));
-            path = '/isValidCensusInMSA/'+engine.getRuleYear()+'/06920/06/034/0100.01';
-            mockAPI('get', path, 200, JSON.stringify({ result: true }), true);
+            mockAPI('get', path, 200, JSON.stringify({result: true}));
+            path = '/isValidCensusInMSA/' + engine.getRuleYear() + '/06920/06/034/0100.01';
+            mockAPI('get', path, 200, JSON.stringify({result: true}), true);
 
             engine.isValidMsaMdCountyCensusForNonDepository(hmdaJson.hmdaFile)
             .then(function(result) {
@@ -1474,6 +1450,7 @@ describe('Engine', function() {
         it('should return true when we use local data and the result is true', function(done) {
             var path = '/isCraReporter/' + engine.getRuleYear() + '/0123456789';
             mockAPI('get', path, 200, JSON.stringify({result: true}), true);
+
             engine.setUseLocalDB(true)
             .then(function(db) {
                 setupCensusAPI();
@@ -1497,6 +1474,7 @@ describe('Engine', function() {
         it('should return false when we use local data and the result is false', function(done) {
             var path = '/isCraReporter/' + engine.getRuleYear() + '/0123456789';
             mockAPI('get', path, 200, JSON.stringify({result: true}), true);
+
             engine.setUseLocalDB(true)
             .then(function(db) {
                 setupCensusAPI();
@@ -1526,10 +1504,10 @@ describe('Engine', function() {
 
         it('should return false when one of the LARs census tract is NA', function(done) {
             var path = '/isCraReporter/' + engine.getRuleYear() + '/0123456789';
-            mockAPI('get', path, 200, JSON.stringify({ result: true }));
+            mockAPI('get', path, 200, JSON.stringify({result: true}));
             hmdaJson.hmdaFile.loanApplicationRegisters[0].censusTract = 'NA';
-            path = '/isValidCensusInMSA/'+engine.getRuleYear()+'/06920/06/034/0100.01';
-            mockAPI('get', path, 200, JSON.stringify({ result: true }), true);
+            path = '/isValidCensusInMSA/' + engine.getRuleYear() + '/06920/06/034/0100.01';
+            mockAPI('get', path, 200, JSON.stringify({result: true}), true);
 
             engine.isValidMsaMdCountyCensusForNonDepository(hmdaJson.hmdaFile)
             .then(function(result) {
@@ -1544,7 +1522,8 @@ describe('Engine', function() {
     describe('isValidMsaMdStateAndCountyCombo', function() {
         it('should return true when the API response result is true', function(done) {
             var path = '/isValidMSAStateCounty/' + engine.getRuleYear() + '/22220/05/143';
-            mockAPI('get', path, 200, JSON.stringify({ result: true }));
+            mockAPI('get', path, 200, JSON.stringify({result: true}));
+
             engine.isValidMsaMdStateAndCountyCombo('22220', '05', '143')
             .then(function(result) {
                 expect(result).to.be(true);
@@ -1586,7 +1565,8 @@ describe('Engine', function() {
     describe('isValidCensusTractCombo', function() {
         it('should return true when the API response result is true for MSA not = NA', function(done) {
             var path = '/isValidCensusTractCombo/' + engine.getRuleYear() + '/05/143/22220/9702.00';
-            mockAPI('get', path, 200, JSON.stringify({ result: true }));
+            mockAPI('get', path, 200, JSON.stringify({result: true}));
+
             engine.isValidCensusTractCombo('9702.00', '22220', '05', '143')
             .then(function(result) {
                 expect(result).to.be(true);
@@ -1597,6 +1577,7 @@ describe('Engine', function() {
         it('should return true when the API response result is true for MSA = NA', function(done) {
             var path = '/isValidCensusTractCombo/' + engine.getRuleYear() + '/05/143/NA/9702.00';
             mockAPI('get', path, 200, JSON.stringify({ result: true }));
+
             engine.isValidCensusTractCombo('9702.00', 'NA', '05', '143')
             .then(function(result) {
                 expect(result).to.be(true);
@@ -1666,7 +1647,8 @@ describe('Engine', function() {
     describe('isValidStateAndCounty', function() {
         it('should return true when the API response result is true', function(done) {
             var path = '/isValidStateCounty/' + engine.getRuleYear() + '/05/143';
-            mockAPI('get', path, 200, JSON.stringify({ result: true }));
+            mockAPI('get', path, 200, JSON.stringify({result: true}));
+
             engine.isValidStateAndCounty('05', '143')
             .then(function(result) {
                 expect(result).to.be(true);
@@ -1715,7 +1697,8 @@ describe('Engine', function() {
     describe('isRespondentMBS', function() {
         it('should return true when the API response result is true', function(done) {
             var path = '/isRespondentMBS/' + engine.getRuleYear() + '/9/0000000001';
-            mockAPI('get', path, 200, JSON.stringify({ result: true }));
+            mockAPI('get', path, 200, JSON.stringify({result: true}));
+
             engine.isRespondentMBS('0000000001', '9')
             .then(function(result) {
                 expect(result).to.be(true);
@@ -1815,6 +1798,7 @@ describe('Engine', function() {
             _.each(hmdaFile.loanApplicationRegisters, function (element) {
                 element.metroArea = '035100';
             });
+
             engine.isValidStateCountyCensusTractCombo(hmdaFile)
             .then(function(result) {
                 expect(result.length).to.be(3);
@@ -1832,6 +1816,7 @@ describe('Engine', function() {
             _.each(hmdaFile.loanApplicationRegisters, function (element) {
                 element.metroArea = 'NA';
             });
+
             engine.isValidStateCountyCensusTractCombo(hmdaFile)
             .then(function(result) {
                 expect(result.length).to.be(3);
@@ -1857,7 +1842,7 @@ describe('Engine', function() {
             var agencyCode = '9';
             var metroArea = '06920';
             var path = '/isNotIndependentMortgageCoOrMBS/' + engine.getRuleYear() + '/9/0123456789';
-            mockAPI('get', path, 200, JSON.stringify({ result: false }), true);
+            mockAPI('get', path, 200, JSON.stringify({result: false}), true);
 
             engine.isMetroAreaOnRespondentPanel(hmdaFile)
             .then(function(result) {
@@ -1872,7 +1857,7 @@ describe('Engine', function() {
                 element.actionTaken = '9';
             });
             var path = '/isNotIndependentMortgageCoOrMBS/' + engine.getRuleYear() + '/9/0123456789';
-            mockAPI('get', path, 200, JSON.stringify({ result: true }), true);
+            mockAPI('get', path, 200, JSON.stringify({result: true}), true);
 
             engine.isMetroAreaOnRespondentPanel(hmdaFile)
             .then(function(result) {
@@ -1884,9 +1869,9 @@ describe('Engine', function() {
         it('should return true when the respondent has a branch in the msa', function(done) {
             var hmdaFile = JSON.parse(JSON.stringify(require('./testdata/complete.json'))).hmdaFile;
             var path = '/isNotIndependentMortgageCoOrMBS/' + engine.getRuleYear() + '/9/0123456789';
-            mockAPI('get', path, 200, JSON.stringify({ result: true }), true);
+            mockAPI('get', path, 200, JSON.stringify({result: true}), true);
             path = '/isMetroAreaOnRespondentPanel/' + engine.getRuleYear() + '/9/0123456789/06920';
-            mockAPI('get', path, 200, JSON.stringify({ result: true }), true);
+            mockAPI('get', path, 200, JSON.stringify({result: true}), true);
 
             engine.isMetroAreaOnRespondentPanel(hmdaFile)
             .then(function(result) {
@@ -1901,9 +1886,9 @@ describe('Engine', function() {
                 element.metroArea = '35100';
             });
             var path = '/isNotIndependentMortgageCoOrMBS/' + engine.getRuleYear() + '/9/0123456789';
-            mockAPI('get', path, 200, JSON.stringify({ result: true }), true);
+            mockAPI('get', path, 200, JSON.stringify({result: true}), true);
             path = '/isMetroAreaOnRespondentPanel/' + engine.getRuleYear() + '/9/0123456789/35100';
-            mockAPI('get', path, 200, JSON.stringify({ result: false }), true);
+            mockAPI('get', path, 200, JSON.stringify({result: false}), true);
             path = '/getMsaName/' + engine.getRuleYear() + '/35100';
             mockAPI('get', path, 200, JSON.stringify({ msaName: 'New Bern, NC' }), true);
 
@@ -1923,7 +1908,8 @@ describe('Engine', function() {
             var respondentId = '0000001195';
             var timestamp = '201501010000';
             var path =  '/isValidTimestamp/' + engine.getRuleYear() + '/9/' + respondentId + '/' + timestamp;
-            mockAPI('get', path, 200, JSON.stringify({ result: true }));
+            mockAPI('get', path, 200, JSON.stringify({result: true}));
+
             engine.isTimestampLaterThanDatabase(respondentId, '9', timestamp)
             .then(function(result) {
                 expect(result).to.be.true();
@@ -1936,7 +1922,8 @@ describe('Engine', function() {
         it('should return true when the API response result is true', function(done) {
             var respondentID = '1';
             var path = '/isChildFI/' + engine.getRuleYear() + '/9/' + respondentID;
-            mockAPI('get', path, 200, JSON.stringify({ result: true }));
+            mockAPI('get', path, 200, JSON.stringify({result: true}));
+
             engine.isChildFI(respondentID, '9')
             .then(function(result) {
                 expect(result).to.be.true();
@@ -1952,6 +1939,7 @@ describe('Engine', function() {
             var year = engine.getRuleYear();
             var path = '/isTaxIDTheSameAsLastYear/' + year + '/9/' + respondentID + '/' + taxID;
             mockAPI('get', path, 200, JSON.stringify({result: true}));
+
             engine.isTaxIDTheSameAsLastYear(respondentID, '9', taxID)
             .then(function(result) {
                 expect(result).to.be.true();
@@ -1968,6 +1956,7 @@ describe('Engine', function() {
             var year = engine.getRuleYear();
             var path = '/isValidNumLoans/total/' + year + '/9/' + respondentID + '/' + numLoans;
             mockAPI('get', path, 200, JSON.stringify({result: true}));
+
             engine.isValidNumLoans(hmdaFile)
             .then(function(result) {
                 expect(result).to.be.true();
@@ -1979,10 +1968,10 @@ describe('Engine', function() {
     describe('isValidNumHomePurchaseLoans', function() {
         it('should return true when the number of purchase loans is valid', function(done) {
             var hmdaJson = JSON.parse(JSON.stringify(require('./testdata/home-purchase-loans.json')));
-
             var respondentID = '0123456789';
             var path = '/isValidNumLoans/homePurchase/' + engine.getRuleYear() + '/9/' + respondentID + '/10/9';
-            mockAPI('get', path, 200, JSON.stringify({ result: true }));
+            mockAPI('get', path, 200, JSON.stringify({result: true}));
+
             engine.isValidNumHomePurchaseLoans(hmdaJson.hmdaFile)
             .then(function(result) {
                 expect(result).to.be(true);
@@ -1994,10 +1983,10 @@ describe('Engine', function() {
     describe('isValidFannieFreddieLoans', function() {
         it('should return true when the number of fannie/freddie loans is valid', function(done) {
             var hmdaJson = JSON.parse(JSON.stringify(require('./testdata/fanniefreddie-loans.json')));
-
             var respondentID = '0000413208';
             var path = '/isValidNumLoans/fannieMae/' + engine.getRuleYear() + '/9/' + respondentID + '/6/3';
-            mockAPI('get', path, 200, JSON.stringify({ result: true }));
+            mockAPI('get', path, 200, JSON.stringify({result: true}));
+
             engine.isValidNumFannieMaeLoans(hmdaJson.hmdaFile)
             .then(function(result) {
                 expect(result).to.be(true);
@@ -2009,10 +1998,10 @@ describe('Engine', function() {
     describe('isValidNumGinnieMaeFHALoans', function() {
         it('should return true when the number of ginnie fha loans is valid', function(done) {
             var hmdaJson = JSON.parse(JSON.stringify(require('./testdata/ginnie-fha-loans.json')));
-
             var respondentID = '0000413208';
             var path = '/isValidNumLoans/ginnieMaeFHA/' + engine.getRuleYear() + '/9/' + respondentID + '/6/3';
-            mockAPI('get', path, 200, JSON.stringify({ result: true }));
+            mockAPI('get', path, 200, JSON.stringify({result: true}));
+
             engine.isValidNumGinnieMaeFHALoans(hmdaJson.hmdaFile)
             .then(function(result) {
                 expect(result).to.be(true);
@@ -2024,10 +2013,10 @@ describe('Engine', function() {
     describe('isValidNumGinnieMaeVALoans', function() {
         it('should return true when the number of ginnie loans is valid', function(done) {
             var hmdaJson = JSON.parse(JSON.stringify(require('./testdata/ginnie-va-loans.json')));
-
             var respondentID = '0000413208';
             var path = '/isValidNumLoans/ginnieMaeVA/' + engine.getRuleYear() + '/9/' + respondentID + '/6/3';
-            mockAPI('get', path, 200, JSON.stringify({ result: true }));
+            mockAPI('get', path, 200, JSON.stringify({result: true}));
+
             engine.isValidNumGinnieMaeVALoans(hmdaJson.hmdaFile)
             .then(function(result) {
                 expect(result).to.be(true);
@@ -2038,11 +2027,11 @@ describe('Engine', function() {
 
     describe('isValidNumRefinanceLoans', function() {
         it('should return true when the number of purchase loans is valid', function(done) {
-           var hmdaJson = JSON.parse(JSON.stringify(require('./testdata/refinance-loans.json')));
-
+            var hmdaJson = JSON.parse(JSON.stringify(require('./testdata/refinance-loans.json')));
             var respondentID = '0123456789';
             var path = '/isValidNumLoans/refinance/' + engine.getRuleYear() + '/9/' + respondentID + '/10/9';
-            mockAPI('get', path, 200, JSON.stringify({ result: true }));
+            mockAPI('get', path, 200, JSON.stringify({result: true}));
+
             engine.isValidNumRefinanceLoans(hmdaJson.hmdaFile)
             .then(function(result) {
                 expect(result).to.be(true);
@@ -2055,7 +2044,8 @@ describe('Engine', function() {
         it('should return an msa name when given an msa code', function(done) {
             var msaCode = '35100';
             var path = '/getMSAName/' + engine.getRuleYear() + '/' + msaCode;
-            mockAPI('get', path, 200, JSON.stringify({ msaName: 'New Bern, NC' }));
+            mockAPI('get', path, 200, JSON.stringify({msaName: 'New Bern, NC'}));
+
             engine.getMSAName(msaCode)
             .then(function(msaName) {
                 expect(msaName).to.be('New Bern, NC');
@@ -2083,6 +2073,7 @@ describe('Engine', function() {
                 'property': 'foo',
                 'condition': 'is_true'
             };
+
             engine.parseRule(rule, result);
             expect(result.funcs[0]).to.be('this.is_true(arguments[0])');
             expect(result.body).to.be(result.spreads[0]);
@@ -2095,6 +2086,7 @@ describe('Engine', function() {
                 'condition': 'equal',
                 'value': '1'
             };
+
             engine.parseRule(rule, result);
             expect(result.funcs[0]).to.be('this.equal(arguments[0], "1")');
             expect(result.body).to.be(result.spreads[0]);
@@ -2107,6 +2099,7 @@ describe('Engine', function() {
                 'condition': 'equal',
                 'value': 1
             };
+
             engine.parseRule(rule, result);
             expect(result.funcs[0]).to.be('this.equal(arguments[0], 1)');
             expect(result.body).to.be(result.spreads[0]);
@@ -2119,6 +2112,7 @@ describe('Engine', function() {
                 'condition': 'in',
                 'values': ['1', '2', '3']
             };
+
             engine.parseRule(rule, result);
             expect(result.funcs[0]).to.be('this.in(arguments[0], ["1","2","3"])');
             expect(result.body).to.be(result.spreads[0]);
@@ -2131,6 +2125,7 @@ describe('Engine', function() {
                 'condition': 'equal_property',
                 'value': 'bar'
             };
+
             engine.parseRule(rule, result);
             expect(result.funcs[0]).to.be('this.equal_property(arguments[0], arguments[1])');
             expect(result.body).to.be(result.spreads[0]);
@@ -2144,6 +2139,7 @@ describe('Engine', function() {
                 'start': '1',
                 'end': '9'
             };
+
             engine.parseRule(rule, result);
             expect(result.funcs[0]).to.be('this.between(arguments[0], "1", "9")');
             expect(result.body).to.be(result.spreads[0]);
@@ -2161,6 +2157,7 @@ describe('Engine', function() {
                     'condition': 'is_false'
                 }
             };
+
             engine.parseRule(rule, result);
             expect(result.funcs.length).to.be(2);
             expect(result.funcs[0]).to.be('this.is_true(arguments[0])');
@@ -2183,6 +2180,7 @@ describe('Engine', function() {
                     }
                 ]
             };
+
             engine.parseRule(rule, result);
             expect(result.funcs.length).to.be(2);
             expect(result.funcs[0]).to.be('this.is_true(arguments[0])');
@@ -2205,6 +2203,7 @@ describe('Engine', function() {
                     }
                 ]
             };
+
             engine.parseRule(rule, result);
             expect(result.funcs.length).to.be(2);
             expect(result.funcs[0]).to.be('this.is_true(arguments[0])');
@@ -2245,6 +2244,7 @@ describe('Engine', function() {
                     }
                 ]
             };
+
             engine.parseRule(rule, result);
             expect(result.funcs.length).to.be(4);
             expect(result.funcs[0]).to.be('this.is_true(arguments[0])');
@@ -2276,6 +2276,7 @@ describe('Engine', function() {
                     'value': '3'
                 }
             };
+
             engine.parseRule(rule, result);
             expect(result.funcs.length).to.be(3);
             expect(result.funcs[0]).to.be('this.is_true(arguments[0])');
@@ -2292,6 +2293,7 @@ describe('Engine', function() {
                 'condition': 'call',
                 'function': 'isFooValid'
             };
+
             engine.parseRule(rule, result);
             expect(result.funcs.length).to.be(1);
             expect(result.funcs[0]).to.be('this.isFooValid(arguments[0])');
@@ -2307,6 +2309,7 @@ describe('Engine', function() {
                 'function': 'isFooValid',
                 'args': ['foo', 'bar', 'baz']
             };
+
             engine.parseRule(rule, result);
             expect(result.funcs.length).to.be(1);
             expect(result.funcs[0]).to.be('this.isFooValid(arguments[0], arguments[1], arguments[2])');
@@ -2361,7 +2364,6 @@ describe('Engine', function() {
 
         it('should return true for a passing email_address format condition rule', function(done) {
             hmdaJson.hmdaFile.transmittalSheet.respondentEmail = 'krabapple@gmail.com';
-
             rule = {
                 'property': 'respondentEmail',
                 'condition': 'email_address'
@@ -2376,7 +2378,6 @@ describe('Engine', function() {
 
         it('should return a list of errors for a non-passing email_address format condition rule', function(done) {
             hmdaJson.hmdaFile.transmittalSheet.respondentEmail = 'krabapple.@gmail.com';
-
             rule = {
                 'property': 'respondentEmail',
                 'condition': 'email_address'
@@ -2406,7 +2407,6 @@ describe('Engine', function() {
 
         it('should return a list of errors for a non-passing zipcode format condition rule', function(done) {
             hmdaJson.hmdaFile.transmittalSheet.parentZip = '555-1234';
-
             rule = {
                 'property': 'parentZip',
                 'condition': 'zipcode'
@@ -2423,7 +2423,6 @@ describe('Engine', function() {
 
         it('should return true for a passing yyyy_mm_dd_hh_mm_ss format condition rule', function(done) {
             hmdaJson.hmdaFile.transmittalSheet.timestamp += '37';
-
             rule = {
                 'property': 'timestamp',
                 'condition': 'yyyy_mm_dd_hh_mm_ss'
@@ -2438,7 +2437,6 @@ describe('Engine', function() {
 
         it('should return a list of errors for a non-passing yyyy_mm_dd_hh_mm_ss format condition rule', function(done) {
             hmdaJson.hmdaFile.transmittalSheet.timestamp = hmdaJson.hmdaFile.transmittalSheet.timestamp  + '98';
-
             rule = {
                 'property': 'timestamp',
                 'condition': 'yyyy_mm_dd_hh_mm_ss'
@@ -2498,12 +2496,11 @@ describe('Engine', function() {
         });
 
         it('should return a list of errors for a non-passing is_integer rule', function(done) {
+            hmdaJson.hmdaFile.transmittalSheet.timestamp = '2013.01171330';
             rule = {
                 'property': 'timestamp',
                 'condition': 'is_integer'
             };
-
-            hmdaJson.hmdaFile.transmittalSheet.timestamp = '2013.01171330';
 
             engine.execRule(topLevelObj, rule)
             .then(function(result) {
@@ -2515,12 +2512,12 @@ describe('Engine', function() {
         });
 
         it('should return true for a passing is_float rule', function(done) {
+            hmdaJson.hmdaFile.transmittalSheet.timestamp = '2013.01171330';
             rule = {
                 'property': 'timestamp',
                 'condition': 'is_float'
             };
 
-            hmdaJson.hmdaFile.transmittalSheet.timestamp = '2013.01171330';
             engine.execRule(topLevelObj, rule)
             .then(function(result) {
                 expect(result.length).to.be(0);
@@ -2545,7 +2542,6 @@ describe('Engine', function() {
 
         it('should return true for a passing equal rule', function(done) {
             topLevelObj = hmdaJson.hmdaFile.loanApplicationRegisters[0];
-
             rule = {
                 'property': 'recordID',
                 'condition': 'equal',
@@ -2561,7 +2557,6 @@ describe('Engine', function() {
 
         it('should return a list of errors for a non-passing equal rule', function(done) {
             topLevelObj = hmdaJson.hmdaFile.loanApplicationRegisters[0];
-
             rule = {
                 'property': 'recordID',
                 'condition': 'equal',
@@ -2578,13 +2573,13 @@ describe('Engine', function() {
         });
 
         it('should return true for a passing equal_property rule', function(done) {
+            hmdaJson.hmdaFile.transmittalSheet.timestamp = '2013';
             rule = {
                 'property': 'timestamp',
                 'condition': 'equal_property',
                 'value': 'activityYear'
             };
 
-            hmdaJson.hmdaFile.transmittalSheet.timestamp = '2013';
             engine.execRule(topLevelObj, rule)
             .then(function(result) {
                 expect(result.length).to.be(0);
@@ -2975,34 +2970,24 @@ describe('Engine', function() {
     });
 
     describe('resolveArg', function() {
-        var hmdaJson = {};
-        var topLevelObj = {};
-
-        beforeEach(function() {
-            hmdaJson = JSON.parse(JSON.stringify(require('./testdata/complete.json')));
-            topLevelObj = hmdaJson.hmdaFile.transmittalSheet;
-            engine.setHmdaJson(hmdaJson);
-            engine.clearErrors();
-        });
+        var hmdaJson = JSON.parse(JSON.stringify(require('./testdata/complete.json')));
+        var topLevelObj = hmdaJson.hmdaFile.transmittalSheet;
+        var resolveArg = rewiredEngine.__get__('resolveArg');
+        var contextList = [topLevelObj, hmdaJson.hmdaFile];
+        engine.setHmdaJson(hmdaJson);
+        engine.clearErrors();
 
         it('should return a value for an existing property in topLevelObj', function(done) {
-            var resolveArg = rewiredEngine.__get__('resolveArg');
-            var contextList = [topLevelObj, hmdaJson.hmdaFile];
             expect(resolveArg('parentState', contextList)).to.be('CA');
             done();
         });
 
         it('should return a value for an existing property in hmdaFile', function(done) {
-            var resolveArg = rewiredEngine.__get__('resolveArg');
-            var contextList = [topLevelObj, hmdaJson.hmdaFile];
             expect(resolveArg('transmittalSheet.activityYear', contextList)).to.be('2013');
             done();
         });
 
         it('should throw an exception for a non-existent property', function(done) {
-            var resolveArg = rewiredEngine.__get__('resolveArg');
-            var contextList = [topLevelObj, hmdaJson.hmdaFile];
-
             expect(function() {
                 resolveArg('transmittalSheet.loanPurpose', contextList);
             }).to.throw('Failed to resolve argument!');
@@ -3011,21 +2996,15 @@ describe('Engine', function() {
     });
 
     describe('retrieveProps', function() {
-        var hmdaJson = {};
-        var topLevelObj = {};
-
-        beforeEach(function() {
-            hmdaJson = JSON.parse(JSON.stringify(require('./testdata/complete.json')));
-            topLevelObj = hmdaJson.hmdaFile.transmittalSheet;
-            engine.setHmdaJson(hmdaJson);
-            engine.clearErrors();
-        });
+        var hmdaJson = JSON.parse(JSON.stringify(require('./testdata/complete.json')));
+        var topLevelObj = hmdaJson.hmdaFile.transmittalSheet;
+        var retrieveProps = rewiredEngine.__get__('retrieveProps');
+        engine.setHmdaJson(hmdaJson);
+        engine.clearErrors();
 
         it('should add properties to the error object', function(done) {
             var error = {'properties': {}};
-            var retrieveProps = rewiredEngine.__get__('retrieveProps');
             retrieveProps(error, topLevelObj, ['institutionName', 'respondentZip', 'recordID']);
-
             var expectedError = {
                 'properties': {
                     'institutionName': 'MIKES SMALL BANK   XXXXXXXXXXX',
@@ -3040,7 +3019,6 @@ describe('Engine', function() {
 
         it('should return an exception for a non-existent property', function(done) {
             var error = {'properties': {}};
-            var retrieveProps = rewiredEngine.__get__('retrieveProps');
 
             expect(function() {
                 retrieveProps(error, topLevelObj, ['loanNumber']);
@@ -3051,19 +3029,13 @@ describe('Engine', function() {
     });
 
     describe('handleArrayErrors', function() {
-        var hmdaJson = {};
-        var topLevelObj = {};
-
-        beforeEach(function() {
-            hmdaJson = JSON.parse(JSON.stringify(require('./testdata/complete.json')));
-            topLevelObj = hmdaJson.hmdaFile.transmittalSheet;
-            engine.setHmdaJson(hmdaJson);
-            engine.clearErrors();
-        });
-
         it('should return a list of errors for a list of line numbers', function(done) {
+            var hmdaJson = JSON.parse(JSON.stringify(require('./testdata/complete.json')));
+            var topLevelObj = hmdaJson.hmdaFile.transmittalSheet;
             var handleArrayErrors = rewiredEngine.__get__('handleArrayErrors');
             var array_errors = require('./testdata/array-errors.json');
+            engine.setHmdaJson(hmdaJson);
+            engine.clearErrors();
 
             expect(_.isEqual(handleArrayErrors(hmdaJson.hmdaFile, [1, 3], ['recordID', 'filler']), array_errors)).to.be(true);
             done();
@@ -3071,20 +3043,14 @@ describe('Engine', function() {
     });
 
     describe('handleUniqueLoanNumberErrors', function() {
-        var hmdaJson = {};
-        var topLevelObj = {};
-
-        beforeEach(function() {
-            hmdaJson = JSON.parse(JSON.stringify(require('./testdata/complete.json')));
-            topLevelObj = hmdaJson.hmdaFile.transmittalSheet;
-            engine.setHmdaJson(hmdaJson);
-            engine.clearErrors();
-        });
-
         it('should return a list of errors for a list of line counts', function(done) {
+            var hmdaJson = JSON.parse(JSON.stringify(require('./testdata/complete.json')));
+            var topLevelObj = hmdaJson.hmdaFile.transmittalSheet;
             var handleUniqueLoanNumberErrors = rewiredEngine.__get__('handleUniqueLoanNumberErrors');
             var counts = require('./testdata/counts.json');
             var errors = require('./testdata/loan-number-errors.json');
+            engine.setHmdaJson(hmdaJson);
+            engine.clearErrors();
 
             expect(_.isEqual(handleUniqueLoanNumberErrors(counts), errors)).to.be(true);
             done();
@@ -3103,11 +3069,11 @@ describe('Engine', function() {
 
         it('should return an unmodified set of errors for passing syntactical edits', function(done) {
             // S013
-            var path = '/isValidTimestamp/'+engine.getRuleYear()+'/9/0123456789/201301171330';
-            mockAPI('get', path, 200, JSON.stringify({ result: true }), true);
-
+            var path = '/isValidTimestamp/' + engine.getRuleYear() + '/9/0123456789/201301171330';
+            mockAPI('get', path, 200, JSON.stringify({result: true}), true);
             hmdaJson.hmdaFile.loanApplicationRegisters[1].loanNumber = '1000000000000000000000000';
             hmdaJson.hmdaFile.loanApplicationRegisters[2].loanNumber = '2000000000000000000000000';
+
             rewiredEngine.runSyntactical('2013')
             .then(function(result) {
                 expect(Object.keys(rewiredEngine.getErrors().syntactical).length).to.be(0);
@@ -3121,9 +3087,8 @@ describe('Engine', function() {
             rewiredEngine.setHmdaJson(hmdaJson);
 
             // S013
-            var path = '/isValidTimestamp/'+engine.getRuleYear()+'/9/0123456789/cat';
-            mockAPI('get', path, 200, JSON.stringify({ result: true }), true);
-
+            var path = '/isValidTimestamp/' + engine.getRuleYear() + '/9/0123456789/cat';
+            mockAPI('get', path, 200, JSON.stringify({result: true}), true);
             var errors_syntactical = require('./testdata/errors-syntactical.json');
 
             rewiredEngine.runSyntactical('2013')
@@ -3135,6 +3100,7 @@ describe('Engine', function() {
 
         it('should return an error when there is a connection problem', function(done) {
             engine.setAPIURL('/');
+
             engine.runSyntactical('2013')
             .catch(function(err) {
                 expect(err.message).to.be('There was a problem connecting to the HMDA server. Please check your connection or try again later.');
@@ -3156,7 +3122,6 @@ describe('Engine', function() {
 
         it('should return a modified set of errors for failing validity edits', function(done) {
             var errors_validity = require('./testdata/errors-validity.json');
-
             hmdaJson.hmdaFile.loanApplicationRegisters[1].preapprovals = ' ';
 
             rewiredEngine.runValidity('2013')
@@ -3168,6 +3133,7 @@ describe('Engine', function() {
 
         it('should return an error when there is a connection problem', function(done) {
             engine.setAPIURL('/');
+
             engine.runValidity('2013')
             .catch(function(err) {
                 expect(err.message).to.be('There was a problem connecting to the HMDA server. Please check your connection or try again later.');
@@ -3203,6 +3169,7 @@ describe('Engine', function() {
 
             hmdaJson.hmdaFile.transmittalSheet.parentName = '                              ';
             var errors_quality = require('./testdata/errors-quality.json');
+
             rewiredEngine.runQuality('2013')
             .then(function(result) {
                 expect(_.isEqual(rewiredEngine.getErrors(), errors_quality)).to.be(true);
@@ -3212,6 +3179,7 @@ describe('Engine', function() {
 
         it('should return an error when there is a connection problem', function(done) {
             engine.setAPIURL('/');
+
             engine.runQuality('2013')
             .catch(function(err) {
                 expect(err.message).to.be('There was a problem connecting to the HMDA server. Please check your connection or try again later.');
@@ -3294,9 +3262,9 @@ describe('Engine', function() {
             var hmdaFile = JSON.parse(JSON.stringify(require('./testdata/loans-to-total.json'))).hmdaFile;
             var msaCode = '06920';
             var path = '/getMSAName/' + engine.getRuleYear() + '/' + msaCode;
-            mockAPI('get', path, 200, JSON.stringify({ msaName: '' }));
+            mockAPI('get', path, 200, JSON.stringify({msaName: ''}));
             path = '/getMetroAreasOnRespondentPanel/2013/7/0123456789';
-            mockAPI('get', path, 200, JSON.stringify({ msa: [] }));
+            mockAPI('get', path, 200, JSON.stringify({msa: []}));
 
             engine.getTotalsByMSA(hmdaFile)
             .then(function(result) {
@@ -3316,9 +3284,9 @@ describe('Engine', function() {
             hmdaFile.transmittalSheet.agencyCode = '9';
             var msaCode = '35100';
             var path = '/getMSAName/' + engine.getRuleYear() + '/' + msaCode;
-            mockAPI('get', path, 200, JSON.stringify({ msaName: '' }));
+            mockAPI('get', path, 200, JSON.stringify({msaName: ''}));
             path = '/getMetroAreasOnRespondentPanel/2013/9/0123456789';
-            mockAPI('get', path, 200, JSON.stringify({ msa: ['35100'] }));
+            mockAPI('get', path, 200, JSON.stringify({msa: ['35100']}));
 
             engine.getTotalsByMSA(hmdaFile)
             .then(function(result) {
