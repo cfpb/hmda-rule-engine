@@ -50,6 +50,7 @@ describe('Engine', function() {
     describe('Make sure mockAPI is up', function() {
         it('should allow route define and respond with 200 first time, 404 second time called', function(done) {
             mockAPI('get', '/foo', 200, 'bar');
+
             http.get(mockAPIURL + '/foo', function(resp) {
                 expect(resp.statusCode).to.be(200);
                 http.get(mockAPIURL + '/foo', function(resp) {
@@ -61,6 +62,7 @@ describe('Engine', function() {
 
         it('should allow route define and respond with 200 every time called when persist option enabled', function(done) {
             mockAPI('get', '/bar', 200, 'foo', true);
+
             http.get(mockAPIURL + '/bar', function(resp) {
                 expect(resp.statusCode).to.be(200);
                 http.get(mockAPIURL + '/bar', function(resp) {
@@ -160,6 +162,7 @@ describe('Engine', function() {
         it('should return json object when hmda file is valid and provided by stream', function(done) {
             var fs = require('fs');
             var stream = fs.createReadStream('test/testdata/complete.dat');
+
             engine.fileToJson(stream, 2013, function(err, result) {
                 expect(err).to.be.null();
                 expect(result).to.have.property('hmdaFile');
@@ -192,6 +195,7 @@ describe('Engine', function() {
                 'test15.cat@test.testing                                           ',
                 'test15.cat@test.cat.testing                                       '
             ];
+
             for (var i = 0; i < test_addresses.length; i++) {
                 expect(engine.email_address(test_addresses[i])).to.be(true);
             }
@@ -206,6 +210,7 @@ describe('Engine', function() {
                 'te@st@test.com                                                    ', // Double '@''
                 'test@test..com                                                    '  // Double '.'
             ];
+
             for (var i = 0; i < test_addresses.length; i++) {
                 expect(engine.email_address(test_addresses[i])).to.be(false);
             }
@@ -424,6 +429,7 @@ describe('Engine', function() {
         it('should return true if property is in values', function(done) {
             var valueNums = [1, 2, 3];
             var valueStrs = ['1', '2', '3'];
+
             expect(engine.in(1, valueNums)).to.be(true);
             expect(engine.in('1', valueStrs)).to.be(true);
             done();
@@ -432,6 +438,7 @@ describe('Engine', function() {
         it('should return false if property not in values', function(done) {
             var valueNums = [1, 2, 3];
             var valueStrs = ['1', '2', '3'];
+
             expect(engine.in(1, valueStrs)).to.be(false);
             expect(engine.in('1', valueNums)).to.be(false);
             expect(engine.in(4, valueNums)).to.be(false);
@@ -444,6 +451,7 @@ describe('Engine', function() {
         it('should return false if property is in values', function(done) {
             var valueNums = [1, 2, 3];
             var valueStrs = ['1', '2', '3'];
+
             expect(engine.not_in(1, valueNums)).to.be(false);
             expect(engine.not_in('1', valueStrs)).to.be(false);
             done();
@@ -452,6 +460,7 @@ describe('Engine', function() {
         it('should return true if property not in values', function(done) {
             var valueNums = [1, 2, 3];
             var valueStrs = ['1', '2', '3'];
+
             expect(engine.not_in(1, valueStrs)).to.be(true);
             expect(engine.not_in('1', valueNums)).to.be(true);
             expect(engine.not_in(4, valueNums)).to.be(true);
@@ -464,6 +473,7 @@ describe('Engine', function() {
         it('should return true if value is in property', function(done) {
             var propNums = [1, 2, 3];
             var propStrs = ['1', '2', '3'];
+
             expect(engine.contains(propNums, 1)).to.be(true);
             expect(engine.contains(propStrs, '1')).to.be(true);
             expect(engine.contains('foobar', 'oba')).to.be(true);
@@ -473,6 +483,7 @@ describe('Engine', function() {
         it('should return false if value not in property', function(done) {
             var propNums = [1, 2, 3];
             var propStrs = ['1', '2', '3'];
+
             expect(engine.contains(propStrs, 1)).to.be(false);
             expect(engine.contains(propNums, '1')).to.be(false);
             expect(engine.contains(propNums, 4)).to.be(false);
@@ -486,6 +497,7 @@ describe('Engine', function() {
         it('should return false if value is in property', function(done) {
             var propNums = [1, 2, 3];
             var propStrs = ['1', '2', '3'];
+
             expect(engine.does_not_contain(propNums, 1)).to.be(false);
             expect(engine.does_not_contain(propStrs, '1')).to.be(false);
             done();
@@ -494,6 +506,7 @@ describe('Engine', function() {
         it('should return false if value not in property', function(done) {
             var propNums = [1, 2, 3];
             var propStrs = ['1', '2', '3'];
+
             expect(engine.does_not_contain(propStrs, 1)).to.be(true);
             expect(engine.does_not_contain(propNums, '1')).to.be(true);
             expect(engine.does_not_contain(propNums, 4)).to.be(true);
@@ -508,6 +521,7 @@ describe('Engine', function() {
             var valueStrs = ['1', '2', '3'];
             var propNums = [3, 4, 2, 5, 1];
             var propStrs = ['3', '4', '2', '5', '1'];
+
             expect(engine.includes_all(propNums, valueNums)).to.be(true);
             expect(engine.includes_all(propStrs, valueStrs)).to.be(true);
             done();
@@ -518,6 +532,7 @@ describe('Engine', function() {
             var valueStrs = ['1', '2', '3'];
             var propNums = [3, 4, 2, 5, 1];
             var propStrs = ['3', '4', '2', '5', '1'];
+
             expect(engine.includes_all(propStrs, valueNums)).to.be(false);
             expect(engine.includes_all(propNums, valueStrs)).to.be(false);
             expect(engine.includes_all(propNums, [6])).to.be(false);
@@ -533,6 +548,7 @@ describe('Engine', function() {
             var valueStrs = ['1', '2', '3'];
             var propNums = [3, 4, 2, 5, 1];
             var propStrs = ['3', '4', '2', '5', '1'];
+
             expect(engine.includes_none(propNums, valueNums)).to.be(false);
             expect(engine.includes_none(propStrs, valueStrs)).to.be(false);
             done();
@@ -543,6 +559,7 @@ describe('Engine', function() {
             var valueStrs = ['1', '2', '3'];
             var propNums = [3, 4, 2, 5, 1];
             var propStrs = ['3', '4', '2', '5', '1'];
+
             expect(engine.includes_none(propStrs, valueNums)).to.be(true);
             expect(engine.includes_none(propNums, valueStrs)).to.be(true);
             expect(engine.includes_none(propNums, [6])).to.be(true);
@@ -858,6 +875,7 @@ describe('Engine', function() {
 
         it('should return an empty array when both conditions pass', function(done) {
             ifCond.args[2].condition = 'greater_than';
+
             engine.accumulatedIf(hmdaJson.hmdaFile, ifCond, thenCond)
             .then(function(result) {
                 expect(Array.isArray(result) && result.length === 0).to.be.true();
@@ -868,6 +886,7 @@ describe('Engine', function() {
         it('should return an array with an error object when the if condition passes but the then condition fails', function(done) {
             ifCond.args[2].condition = 'greater_than';
             thenCond.args[3].condition = 'greater_than';
+
             engine.accumulatedIf(hmdaJson.hmdaFile, ifCond, thenCond)
             .then(function(result) {
                 expect(Array.isArray(result) && result.length === 1).to.be.true();
@@ -895,6 +914,7 @@ describe('Engine', function() {
                 ]
             };
             var result = engine.hasRecordIdentifiersForEachRow(hmdaFile);
+
             expect(result).to.be(true);
             done();
         });
@@ -907,6 +927,7 @@ describe('Engine', function() {
                 }
             };
             var result = engine.hasRecordIdentifiersForEachRow(hmdaFile);
+
             expect(result.length).to.be(1);
             expect(result[0].properties.recordID).to.be('2');
             expect(result[0].lineNumber).to.be('1');
@@ -935,6 +956,7 @@ describe('Engine', function() {
                 ]
             };
             var result = engine.hasRecordIdentifiersForEachRow(hmdaFile);
+
             expect(result.length).to.be(1);
             expect(result[0].properties.recordID).to.be('1');
             expect(result[0].lineNumber).to.be('3');
@@ -953,6 +975,7 @@ describe('Engine', function() {
                 ]
             };
             var result = engine.hasAtLeastOneLAR(hmdaFile);
+
             expect(result).to.be(true);
             done();
         });
@@ -962,6 +985,7 @@ describe('Engine', function() {
                 loanApplicationRegisters: []
             };
             var result = engine.hasAtLeastOneLAR(hmdaFile);
+
             expect(result[0].properties['Total Loan/Application records in file']).to.be(0);
             done();
         });
@@ -976,6 +1000,7 @@ describe('Engine', function() {
                 }
             };
             var result = engine.isValidAgencyCode(hmdaFile);
+
             expect(result.length).to.be(1);
             expect(result[0].lineNumber).to.be('1');
             expect(result[0].properties.agencyCode).to.be('11');
@@ -996,6 +1021,7 @@ describe('Engine', function() {
                 ]
             };
             var result = engine.isValidAgencyCode(hmdaFile);
+
             expect(result.length).to.be(1);
             expect(result[0].lineNumber).to.be('2');
             expect(result[0].properties.agencyCode).to.be('11');
@@ -1016,6 +1042,7 @@ describe('Engine', function() {
                 ]
             };
             var result = engine.isValidAgencyCode(hmdaFile);
+
             expect(result.length).to.be(1);
             expect(result[0].lineNumber).to.be('2');
             expect(result[0].properties.agencyCode).to.be('3');
@@ -1040,6 +1067,7 @@ describe('Engine', function() {
                 ]
             };
             var result = engine.isValidAgencyCode(hmdaFile);
+
             expect(result).to.be(true);
             done();
         });
@@ -1061,6 +1089,7 @@ describe('Engine', function() {
 
         it('should return false if any LARs have duplicate loanNumbers', function(done) {
             var result = engine.hasUniqueLoanNumbers(hmdaFile);
+
             expect(result.length).to.be(1);
             expect(result[0].properties.loanNumber).to.be('1');
             expect(result[0].lineNumber).to.be('2, 3');
@@ -1070,6 +1099,7 @@ describe('Engine', function() {
         it('should return true if no LARs have the same loanNumber', function(done) {
             hmdaFile.loanApplicationRegisters[1].loanNumber = '2';
             var result = engine.hasUniqueLoanNumbers(hmdaFile);
+
             expect(result).to.be(true);
             done();
         });
@@ -1168,6 +1198,7 @@ describe('Engine', function() {
 
         it('should return true for a valid lar count', function(done) {
             topLevelObj.totalLineEntries = '0000003';
+
             expect(engine.checkTotalLARCount(hmdaJson.hmdaFile)).to.be(true);
             done();
         });
@@ -1318,6 +1349,7 @@ describe('Engine', function() {
         it('should return true when the API response result is true', function(done) {
             var path = '/isValidControlNumber/' + engine.getRuleYear() + '/1/0000000001';
             mockAPI('get', path, 200, JSON.stringify({result: true}));
+
             engine.isValidControlNumber({
                 transmittalSheet: {
                     agencyCode: '1',
@@ -1332,6 +1364,7 @@ describe('Engine', function() {
         it('should return error array when API response result is false', function(done) {
             var path = '/isValidControlNumber/' + engine.getRuleYear() + '/1/0000000001';
             mockAPI('get', path, 200, JSON.stringify({result: false}));
+
             engine.isValidControlNumber({
                 transmittalSheet: {
                     agencyCode: '1',
@@ -1353,9 +1386,9 @@ describe('Engine', function() {
         it('should return an error array when the API response is true but the control number is not consistent across the file', function(done) {
             var path = '/isValidControlNumber/' + engine.getRuleYear() + '/9/0123456789';
             mockAPI('get', path, 200, JSON.stringify({result: true}), true);
-
             var hmdaJson = JSON.parse(JSON.stringify(require('./testdata/complete.json')));
             hmdaJson.hmdaFile.loanApplicationRegisters[0].respondentID = 'cat';
+
             engine.isValidControlNumber(hmdaJson.hmdaFile)
             .then(function(result) {
                 expect(result.length).to.be(1);
@@ -1374,6 +1407,7 @@ describe('Engine', function() {
         it('should return true when the API response result is true', function(done) {
             var path = '/isValidMSA/' + engine.getRuleYear() + '/22220';
             mockAPI('get', path, 200, JSON.stringify({result: true}));
+
             engine.isValidMetroArea('22220')
             .then(function(result) {
                 expect(result).to.be(true);
@@ -1427,6 +1461,7 @@ describe('Engine', function() {
         it('should return true when the respondent is not CRA reporter', function(done) {
             var path = '/isCraReporter/' + engine.getRuleYear() + '/0123456789';
             mockAPI('get', path, 200, JSON.stringify({result: false}));
+
             engine.isValidMsaMdCountyCensusForNonDepository(hmdaJson.hmdaFile)
             .then(function(result) {
                 expect(result).to.be(true);
@@ -2345,13 +2380,12 @@ describe('Engine', function() {
         });
 
         it('should return list of errors for a non-passing function rule', function(done) {
+            hmdaJson.hmdaFile.loanApplicationRegisters[0].recordID = '3';
             rule = {
                 'property': 'hmdaFile',
                 'condition': 'call',
                 'function': 'hasRecordIdentifiersForEachRow'
             };
-
-            hmdaJson.hmdaFile.loanApplicationRegisters[0].recordID = '3';
 
             engine.execRule(hmdaJson, rule)
             .then(function(result) {
