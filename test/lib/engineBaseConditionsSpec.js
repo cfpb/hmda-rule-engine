@@ -28,6 +28,7 @@ describe('EngineBaseConditions', function() {
                 'test15.cat@test.testing                                           ',
                 'test15.cat@test.cat.testing                                       '
             ];
+
             for (var i = 0; i < test_addresses.length; i++) {
                 expect(engine.email_address(test_addresses[i])).to.be(true);
             }
@@ -42,6 +43,7 @@ describe('EngineBaseConditions', function() {
                 'te@st@test.com                                                    ', // Double '@''
                 'test@test..com                                                    '  // Double '.'
             ];
+
             for (var i = 0; i < test_addresses.length; i++) {
                 expect(engine.email_address(test_addresses[i])).to.be(false);
             }
@@ -260,6 +262,7 @@ describe('EngineBaseConditions', function() {
         it('should return true if property is in values', function(done) {
             var valueNums = [1, 2, 3];
             var valueStrs = ['1', '2', '3'];
+
             expect(engine.in(1, valueNums)).to.be(true);
             expect(engine.in('1', valueStrs)).to.be(true);
             done();
@@ -268,6 +271,7 @@ describe('EngineBaseConditions', function() {
         it('should return false if property not in values', function(done) {
             var valueNums = [1, 2, 3];
             var valueStrs = ['1', '2', '3'];
+
             expect(engine.in(1, valueStrs)).to.be(false);
             expect(engine.in('1', valueNums)).to.be(false);
             expect(engine.in(4, valueNums)).to.be(false);
@@ -280,6 +284,7 @@ describe('EngineBaseConditions', function() {
         it('should return false if property is in values', function(done) {
             var valueNums = [1, 2, 3];
             var valueStrs = ['1', '2', '3'];
+
             expect(engine.not_in(1, valueNums)).to.be(false);
             expect(engine.not_in('1', valueStrs)).to.be(false);
             done();
@@ -288,6 +293,7 @@ describe('EngineBaseConditions', function() {
         it('should return true if property not in values', function(done) {
             var valueNums = [1, 2, 3];
             var valueStrs = ['1', '2', '3'];
+
             expect(engine.not_in(1, valueStrs)).to.be(true);
             expect(engine.not_in('1', valueNums)).to.be(true);
             expect(engine.not_in(4, valueNums)).to.be(true);
@@ -300,6 +306,7 @@ describe('EngineBaseConditions', function() {
         it('should return true if value is in property', function(done) {
             var propNums = [1, 2, 3];
             var propStrs = ['1', '2', '3'];
+
             expect(engine.contains(propNums, 1)).to.be(true);
             expect(engine.contains(propStrs, '1')).to.be(true);
             expect(engine.contains('foobar', 'oba')).to.be(true);
@@ -309,6 +316,7 @@ describe('EngineBaseConditions', function() {
         it('should return false if value not in property', function(done) {
             var propNums = [1, 2, 3];
             var propStrs = ['1', '2', '3'];
+
             expect(engine.contains(propStrs, 1)).to.be(false);
             expect(engine.contains(propNums, '1')).to.be(false);
             expect(engine.contains(propNums, 4)).to.be(false);
@@ -322,6 +330,7 @@ describe('EngineBaseConditions', function() {
         it('should return false if value is in property', function(done) {
             var propNums = [1, 2, 3];
             var propStrs = ['1', '2', '3'];
+
             expect(engine.does_not_contain(propNums, 1)).to.be(false);
             expect(engine.does_not_contain(propStrs, '1')).to.be(false);
             done();
@@ -330,6 +339,7 @@ describe('EngineBaseConditions', function() {
         it('should return false if value not in property', function(done) {
             var propNums = [1, 2, 3];
             var propStrs = ['1', '2', '3'];
+
             expect(engine.does_not_contain(propStrs, 1)).to.be(true);
             expect(engine.does_not_contain(propNums, '1')).to.be(true);
             expect(engine.does_not_contain(propNums, 4)).to.be(true);
@@ -344,6 +354,7 @@ describe('EngineBaseConditions', function() {
             var valueStrs = ['1', '2', '3'];
             var propNums = [3, 4, 2, 5, 1];
             var propStrs = ['3', '4', '2', '5', '1'];
+
             expect(engine.includes_all(propNums, valueNums)).to.be(true);
             expect(engine.includes_all(propStrs, valueStrs)).to.be(true);
             done();
@@ -354,6 +365,7 @@ describe('EngineBaseConditions', function() {
             var valueStrs = ['1', '2', '3'];
             var propNums = [3, 4, 2, 5, 1];
             var propStrs = ['3', '4', '2', '5', '1'];
+
             expect(engine.includes_all(propStrs, valueNums)).to.be(false);
             expect(engine.includes_all(propNums, valueStrs)).to.be(false);
             expect(engine.includes_all(propNums, [6])).to.be(false);
@@ -369,6 +381,7 @@ describe('EngineBaseConditions', function() {
             var valueStrs = ['1', '2', '3'];
             var propNums = [3, 4, 2, 5, 1];
             var propStrs = ['3', '4', '2', '5', '1'];
+
             expect(engine.includes_none(propNums, valueNums)).to.be(false);
             expect(engine.includes_none(propStrs, valueStrs)).to.be(false);
             done();
@@ -379,6 +392,7 @@ describe('EngineBaseConditions', function() {
             var valueStrs = ['1', '2', '3'];
             var propNums = [3, 4, 2, 5, 1];
             var propStrs = ['3', '4', '2', '5', '1'];
+
             expect(engine.includes_none(propStrs, valueNums)).to.be(true);
             expect(engine.includes_none(propNums, valueStrs)).to.be(true);
             expect(engine.includes_none(propNums, [6])).to.be(true);
