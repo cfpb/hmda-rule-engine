@@ -5,6 +5,7 @@
 
 var Promise = require('bluebird'),
     engine = require('../engine'),
+    memwatch = require('memwatch'),
     fs = require('fs');
 
 var runSynValThen = function(year) {
@@ -108,6 +109,7 @@ TimingHarness.prototype.run = function(options) {
         console.error('File does not exist');
         process.exit(1);
     });
+    var heapDiff = new memwatch.HeapDiff();
     engine.fileToJson(fileStream, options.year, function(fileErr) {
         if (fileErr) {
             console.log(fileErr);
@@ -119,6 +121,12 @@ TimingHarness.prototype.run = function(options) {
             .then(function() {
                 console.timeEnd('time to run all rules');
                 console.timeEnd('total time');
+
+                var diff = heapDiff.end();
+                console.log('before size: ' + diff.before.size);
+                console.log('before nodes: ' + diff.before.nodes);
+                console.log('after size: ' + diff.after.size);
+                console.log('after nodes: ' + diff.after.nodes);
                 //console.log(JSON.stringify(engine.getErrors(), null, 2));
                 //console.log(engine.getErrors());
             })
