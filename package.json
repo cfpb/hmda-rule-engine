@@ -30,6 +30,7 @@
     "grunt-release": "^0.7.0",
     "istanbul": "^0.2.10",
     "jsdoc": "^3.2.2",
+    "memwatch": "^0.2.2",
     "mocha": "^1.18.0",
     "must": "^0.12.0",
     "rewire": "2.1.3",

@@ -603,6 +603,7 @@ var accumulateResult = function(ifResult, thenResult) {
         var ifCondId,
             thenCondId;
 
+        /* istanbul ignore if */
         if (DEBUG > 1) {
             ifCondId = '- accumulatedIf';
             thenCondId = '- accumulatedThen';
@@ -718,6 +719,7 @@ var accumulateResult = function(ifResult, thenResult) {
             ruleid,
             condid;
 
+        /* istanbul ignore if */
         if (DEBUG > 1) {
             ruleid = '- compareNumEntriesSingleRule';
             condid = '- compareNumEntriesSingleCond';
@@ -761,6 +763,7 @@ var accumulateResult = function(ifResult, thenResult) {
             ruleBid,
             condid;
 
+        /* istanbul ignore if */
         if (DEBUG > 1) {
             ruleAid = '- compareNumEntriesRuleA';
             ruleBid = '- compareNumEntriesRuleB';
@@ -1556,6 +1559,7 @@ var accumulateResult = function(ifResult, thenResult) {
     };
 
     HMDAEngine.getExecRulePromise = function(args) {
+        /* istanbul ignore if */
         if (DEBUG > 2) {
             console.time('    ' + args.rule.id + ' - ' + args.scope + (args.topLevelObj.hasOwnProperty('loanNumber') ? ' - ' + args.topLevelObj.loanNumber : ''));
         }
@@ -1564,6 +1568,7 @@ var accumulateResult = function(ifResult, thenResult) {
             if (_.isArray(result) && result.length !== 0) {
                 addToErrors(result, args.rule, args.editType, args.scope);
             }
+            /* istanbul ignore if */
             if (DEBUG > 2) {
                 console.timeEnd('    ' + args.rule.id + ' - ' + args.scope + (args.topLevelObj.hasOwnProperty('loanNumber') ? ' - ' + args.topLevelObj.loanNumber : ''));
             }
@@ -1588,6 +1593,7 @@ var accumulateResult = function(ifResult, thenResult) {
         }
 
         return Promise.map(rules, function(currentRule) {
+            /* istanbul ignore if */
             if (DEBUG > 0) {
                 console.time('    ' + currentRule.id + ' - ' + scope);
             }
@@ -1607,6 +1613,7 @@ var accumulateResult = function(ifResult, thenResult) {
                     return this.getExecRulePromise(args);
                 }.bind(this), { concurrency: CONCURRENT_RULES })
                 .then(function() {
+                    /* istanbul ignore if */
                     if (DEBUG > 0) {
                         console.timeEnd('    ' + currentRule.id + ' - ' + scope);
                     }
@@ -1614,6 +1621,7 @@ var accumulateResult = function(ifResult, thenResult) {
             } else {
                 return this.getExecRulePromise(args)
                 .then(function() {
+                    /* istanbul ignore if */
                     if (DEBUG > 0) {
                         console.timeEnd('    ' + currentRule.id + ' - ' + scope);
                     }
@@ -1628,6 +1636,7 @@ var accumulateResult = function(ifResult, thenResult) {
      * @return {Promise}      A Promise for the finished edit process
      */
     HMDAEngine.runSyntactical = function(year) {
+        /* istanbul ignore if */
         if (DEBUG) {
             console.time('time to run syntactical rules');
         }
@@ -1637,6 +1646,7 @@ var accumulateResult = function(ifResult, thenResult) {
             this.runEdits(year, 'hmda', 'syntactical')
         ])
         .then(function() {
+            /* istanbul ignore if */
             if (DEBUG) {
                 console.timeEnd('time to run syntactical rules');
             }
@@ -1667,11 +1677,13 @@ var accumulateResult = function(ifResult, thenResult) {
                 this.runEdits(year, 'lar', 'validity')
             ]);
         }
+        /* istanbul ignore if */
         if (DEBUG) {
             console.time('time to run validity rules');
         }
         return validityPromise
         .then(function() {
+            /* istanbul ignore if */
             if (DEBUG) {
                 console.timeEnd('time to run validity rules');
             }
@@ -1687,6 +1699,7 @@ var accumulateResult = function(ifResult, thenResult) {
      * @return {Promise}      A Promise for the finished edit process
      */
     HMDAEngine.runQuality = function(year) {
+        /* istanbul ignore if */
         if (DEBUG) {
             console.time('time to run quality rules');
         }
@@ -1696,6 +1709,7 @@ var accumulateResult = function(ifResult, thenResult) {
             this.runEdits(year, 'hmda', 'quality')
         ])
         .then(function() {
+            /* istanbul ignore if */
             if (DEBUG) {
                 console.timeEnd('time to run quality rules');
             }
@@ -1711,6 +1725,7 @@ var accumulateResult = function(ifResult, thenResult) {
      * @return {Promise}      A Promise for the finished edit process
      */
     HMDAEngine.runMacro = function(year) {
+        /* istanbul ignore if */
         if (DEBUG) {
             console.time('time to run macro rules');
         }
@@ -1718,6 +1733,7 @@ var accumulateResult = function(ifResult, thenResult) {
             this.runEdits(year, 'hmda', 'macro')
         ])
         .then(function() {
+            /* istanbul ignore if */
             if (DEBUG) {
                 console.timeEnd('time to run macro rules');
             }
@@ -1733,6 +1749,7 @@ var accumulateResult = function(ifResult, thenResult) {
      * @return {Promise}      A Promise for the finished edit process
      */
     HMDAEngine.runSpecial = function(year) {
+        /* istanbul ignore if */
         if (DEBUG) {
             console.time('time to run special rules');
         }
@@ -1740,6 +1757,7 @@ var accumulateResult = function(ifResult, thenResult) {
             this.runEdits(year, 'hmda', 'special')
         ])
         .then(function() {
+            /* istanbul ignore if */
             if (DEBUG) {
                 console.timeEnd('time to run special rules');
             }
