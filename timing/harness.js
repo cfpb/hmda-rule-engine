@@ -33,7 +33,7 @@ var runIRS = function() {
     if (engine.getDebug()) {
         console.time('time to run IRS report');
     }
-    return engine.getTotalsByMSA(engine.getHmdaJson().hmdaFile.loanApplicationRegisters)
+    return engine.getTotalsByMSA(engine.getHmdaJson().hmdaFile)
     .then(function() {
         if (engine.getDebug()) {
             console.timeEnd('time to run IRS report');
