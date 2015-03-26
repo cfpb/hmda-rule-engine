@@ -64,10 +64,18 @@ HMDAEngine.prototype.getAPIURL = function() {
     return this.apiURL;
 };
 
+/**
+ * Set the current year the engine is working against
+ * @param {string} year The year
+ */
 HMDAEngine.prototype.setRuleYear = function(year) {
     this.currentYear = year;
 };
 
+/**
+ * Get the current year the engine is working against
+ * @return {string} The year
+ */
 HMDAEngine.prototype.getRuleYear = function() {
     return this.currentYear;
 };

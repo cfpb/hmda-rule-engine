@@ -91,6 +91,17 @@ describe('Engine', function() {
         });
     });
 
+    describe('get/set/clear HMDA JSON', function() {
+        it('should get/set/clear HMDA JSON correctly', function(done) {
+            expect(_.isEqual(engine.getHmdaJson(), {}));
+            engine.setHmdaJson({'foo':'bar'});
+            expect(_.isEqual(engine.getHmdaJson(), {'foo':'bar'}));
+            engine.clearHmdaJson();
+            expect(_.isEqual(engine.getHmdaJson(), {}));
+            done();
+        });
+    });
+
     describe('get/set debug level', function() {
         it('should get/set debug level correctly', function(done) {
             expect(engine.getDebug()).to.be(0);
