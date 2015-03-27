@@ -14,7 +14,25 @@ var utils = require('../../lib/utils'),
 
 describe('lib/utils', function() {
 
-   describe('resolveArg', function() {
+    describe('resultBodyAsError', function() {
+        it('if result is false, delete result from response, and return error json', function(done) {
+            var body = JSON.stringify({
+                result: false,
+                foo: 'bar'
+            });
+            var expected = [
+                {
+                    properties: {
+                        foo: 'bar'
+                    }
+                }
+            ];
+            expect(_.isEqual(utils.resultBodyAsError(body), expected));
+            done();
+        });
+    });
+
+    describe('resolveArg', function() {
         var hmdaJson = JSON.parse(JSON.stringify(require('../testdata/complete.json')));
         var topLevelObj = hmdaJson.hmdaFile.transmittalSheet;
         var contextList = [topLevelObj, hmdaJson.hmdaFile];
@@ -67,28 +85,7 @@ describe('lib/utils', function() {
 
     });
 
-    describe('handleArrayErrors', function() {
-        it('should return a list of errors for a list of line numbers', function(done) {
-            var hmdaJson = JSON.parse(JSON.stringify(require('../testdata/complete.json')));
-            var array_errors = require('../testdata/array-errors.json');
-
-            expect(_.isEqual(utils.handleArrayErrors(hmdaJson.hmdaFile, [1, 3], ['recordID', 'filler']), array_errors)).to.be(true);
-            done();
-        });
-    });
-
-    describe('handleUniqueLoanNumberErrors', function() {
-        it('should return a list of errors for a list of line counts', function(done) {
-            var hmdaJson = JSON.parse(JSON.stringify(require('../testdata/complete.json')));
-            var counts = require('../testdata/counts.json');
-            var errors = require('../testdata/loan-number-errors.json');
-
-            expect(_.isEqual(utils.handleUniqueLoanNumberErrors(counts), errors)).to.be(true);
-            done();
-        });
-    });
-
-    describe('getRuleFunc', function() {
+    describe('getParsedRule', function() {
         it('should return the function text and parsed rule for a given rule', function(done) {
             var rule = {
                 'property': 'foo',
@@ -110,6 +107,49 @@ describe('lib/utils', function() {
             expect(result[0]).to.be('return Promise.join(this.is_true(arguments[0]), function(promise0result) { return promise0result });');
             expect(_.isEqual(result[1], parsedRule)).to.be.true();
             done();
+        });
+    });
+
+    describe('handleArrayErrors', function() {
+        it('should return a list of errors for a list of line numbers', function(done) {
+            var hmdaJson = JSON.parse(JSON.stringify(require('../testdata/complete.json')));
+            var array_errors = require('../testdata/array-errors.json');
+
+            expect(_.isEqual(utils.handleArrayErrors(hmdaJson.hmdaFile, [1, 3], ['recordID', 'filler']), array_errors)).to.be(true);
+            done();
+        });
+    });
+
+    describe('handleUniqueLoanNumberErrors', function() {
+        it('should return a list of errors for a list of line counts', function(done) {
+            var hmdaJson = JSON.parse(JSON.stringify(require('../testdata/complete.json')));
+            var counts = require('../testdata/counts.json');
+            var errors = require('../testdata/loan-number-errors.json');
+
+            expect(_.isEqual(utils.handleUniqueLoanNumberErrors(counts), errors)).to.be(true);
+            done();
+        });
+    });
+
+    describe('resolveError', function() {
+        it('should reject on failed resolved argument', function(done) {
+            var err = new Error();
+            err.message = 'Failed to resolve argument!';
+            err.property = 'foo';
+            utils.resolveError(err)
+            .catch(function(err) {
+                expect(err.toString()).to.be('Error: Rule-spec error: Invalid property\nProperty: foo not found!');
+                done();
+            });
+        });
+
+        it('should reject with original error', function(done) {
+            var err = new Error('FAIL');
+            utils.resolveError(err)
+            .catch(function (err) {
+                expect(err.toString()).to.be('Error: FAIL');
+                done();
+            });
         });
     });
 
