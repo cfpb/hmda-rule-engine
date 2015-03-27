@@ -9,7 +9,8 @@
 /*global port:false*/
 'use strict';
 
-var utils = require('../../lib/utils');
+var utils = require('../../lib/utils'),
+    RuleParseAndExec = require('../../lib/ruleParseAndExec');
 
 describe('lib/utils', function() {
 
@@ -83,6 +84,31 @@ describe('lib/utils', function() {
             var errors = require('../testdata/loan-number-errors.json');
 
             expect(_.isEqual(utils.handleUniqueLoanNumberErrors(counts), errors)).to.be(true);
+            done();
+        });
+    });
+
+    describe('getRuleFunc', function() {
+        it('should return the function text and parsed rule for a given rule', function(done) {
+            var rule = {
+                'property': 'foo',
+                'condition': 'is_true'
+            };
+            var Engine = function() {};
+            RuleParseAndExec.call(Engine.prototype);
+            var engine = new Engine();
+            var result = utils.getParsedRule.apply(engine, [rule]);
+            var parsedRule = {
+                argIndex: 1,
+                args: ['foo'],
+                funcs: ['this.is_true(arguments[0])'],
+                spreads: ['promise0result'],
+                body: 'promise0result',
+                properties: {foo: true}
+            };
+
+            expect(result[0]).to.be('return Promise.join(this.is_true(arguments[0]), function(promise0result) { return promise0result });');
+            expect(_.isEqual(result[1], parsedRule)).to.be.true();
             done();
         });
     });
