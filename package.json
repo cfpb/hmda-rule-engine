@@ -40,7 +40,7 @@
   "dependencies": {
     "bluebird": "^2.9.12",
     "brij-spec": "0.0.4",
-    "hmda-rule-spec": "cfpb/hmda-rule-spec#milestone8",
+    "hmda-rule-spec": "cfpb/hmda-rule-spec#milestone9",
     "level-browserify": "^0.18.1",
     "line-chomper": "^0.4.5",
     "moment": "^2.9.0",
