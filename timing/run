@@ -1,3 +1,3 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
-./harness.js "${@:1}" > edit-timing.txt && ./convert2csv.js
+./harness.js "${@:1}" | ./convert2csv.js

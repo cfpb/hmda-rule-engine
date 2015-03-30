@@ -3,22 +3,9 @@
 var rewire = require('rewire');
 
 var RewiredEngine = function() {
-    var engine = {};
-    wireFunctions(engine);
-    return engine;
 };
+RewiredEngine.prototype = rewire('../engine');
 
-var wireFunctions = function(engine) {
-    var rewiredEngine = rewire('../engine'),
-        keys = Object.keys(rewiredEngine);
-
-    engine.__get__ = rewiredEngine.__get__;
-    engine.__set__ = rewiredEngine.__set__;
-
-    for (var i = 0; i < keys.length; i++) {
-        engine[keys[i]] = (RewiredEngine[keys[i]] ? RewiredEngine[keys[i]] : rewiredEngine[keys[i]]);
-    }
-};
 
 /*
  * -----------------------------------------------------
@@ -27,29 +14,29 @@ var wireFunctions = function(engine) {
  */
 
 /* lar-quality */
-RewiredEngine.isLoanAmountFiveTimesIncome = function(loanAmount, applicantIncome) {
+RewiredEngine.prototype.isLoanAmountFiveTimesIncome = function(loanAmount, applicantIncome) {
     return true;
 };
 
-RewiredEngine.isValidLoanAmount = function(loanAmount, applicantIncome) {
+RewiredEngine.prototype.isValidLoanAmount = function(loanAmount, applicantIncome) {
     return true;
 };
 
 /* ts-quality */
-RewiredEngine.checkTotalLARCount = function(totalLineEntries) {
+RewiredEngine.prototype.checkTotalLARCount = function(totalLineEntries) {
     return true;
 };
 
 /* hmda-macro */
-RewiredEngine.compareNumEntriesSingle = function(loanApplicationRegisters, rule, cond) {
+RewiredEngine.prototype.compareNumEntriesSingle = function(loanApplicationRegisters, rule, cond) {
     return true;
 };
 
-RewiredEngine.compareNumEntries = function(loanApplicationRegisters, ruleA, ruleB, cond) {
+RewiredEngine.prototype.compareNumEntries = function(loanApplicationRegisters, ruleA, ruleB, cond) {
     return true;
 };
 
-RewiredEngine.isValidNumMultifamilyLoans = function(hmdaFile) {
+RewiredEngine.prototype.isValidNumMultifamilyLoans = function(hmdaFile) {
     return true;
 };
 
@@ -62,69 +49,69 @@ RewiredEngine.isValidNumMultifamilyLoans = function(hmdaFile) {
 /* ts-syntactical */
 
 /* hmda-syntactical */
-RewiredEngine.isValidControlNumber = function(hmdaFile) {
+RewiredEngine.prototype.isValidControlNumber = function(hmdaFile) {
     return true;
 };
 
 /* lar-validity */
-RewiredEngine.isValidMetroArea = function(metroArea) {
+RewiredEngine.prototype.isValidMetroArea = function(metroArea) {
     return true;
 };
 
-RewiredEngine.isValidMsaMdStateAndCountyCombo = function(metroArea, fipsState, fipsCounty) {
+RewiredEngine.prototype.isValidMsaMdStateAndCountyCombo = function(metroArea, fipsState, fipsCounty) {
     return true;
 };
 
-RewiredEngine.isValidStateAndCounty = function(fipsState, fipsCounty) {
+RewiredEngine.prototype.isValidStateAndCounty = function(fipsState, fipsCounty) {
     return true;
 };
 
-RewiredEngine.isValidCensusTractCombo = function(censusTract, metroArea, fipsState, fipsCounty) {
+RewiredEngine.prototype.isValidCensusTractCombo = function(censusTract, metroArea, fipsState, fipsCounty) {
     return true;
 };
 
 /* lar-quality */
 
-RewiredEngine.isNotIndependentMortgageCoOrMBS = function(respondentID, agencyCode) {
+RewiredEngine.prototype.isNotIndependentMortgageCoOrMBS = function(respondentID, agencyCode) {
     return true;
 };
 
-RewiredEngine.isMetroAreaOnRespondentPanel = function(metroArea, respondentID, agencyCode) {
+RewiredEngine.prototype.isMetroAreaOnRespondentPanel = function(metroArea, respondentID, agencyCode) {
     return true;
 };
 
 /* ts-validity */
-RewiredEngine.isRespondentMBS = function(respondentID) {
+RewiredEngine.prototype.isRespondentMBS = function(respondentID) {
     return true;
 };
 
 /* hmda-macro */
-RewiredEngine.isValidNumLoans = function(hmdaFile) {
+RewiredEngine.prototype.isValidNumLoans = function(hmdaFile) {
     return true;
 };
 
-RewiredEngine.isValidNumFannieMaeLoans = function(hmdaFile) {
+RewiredEngine.prototype.isValidNumFannieMaeLoans = function(hmdaFile) {
     return true;
 };
 
-RewiredEngine.isValidNumGinnieMaeFHALoans = function(hmdaFile) {
+RewiredEngine.prototype.isValidNumGinnieMaeFHALoans = function(hmdaFile) {
     return true;
 };
 
-RewiredEngine.isValidNumGinnieMaeVALoans = function(hmdaFile) {
+RewiredEngine.prototype.isValidNumGinnieMaeVALoans = function(hmdaFile) {
     return true;
 };
 
-RewiredEngine.isValidNumHomePurchaseLoans = function(hmdaFile) {
+RewiredEngine.prototype.isValidNumHomePurchaseLoans = function(hmdaFile) {
     return true;
 };
 
-RewiredEngine.isValidNumRefinanceLoans = function(hmdaFile) {
+RewiredEngine.prototype.isValidNumRefinanceLoans = function(hmdaFile) {
     return true;
 };
 
 /* ts-quality */
-RewiredEngine.isTaxIDTheSameAsLastYear = function(respondentID, agencyCode, taxID) {
+RewiredEngine.prototype.isTaxIDTheSameAsLastYear = function(respondentID, agencyCode, taxID) {
     return true;
 };
 
