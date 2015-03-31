@@ -8,11 +8,13 @@ var EngineBaseConditions = require('./lib/engineBaseConditions'),
     EngineApiInterface = require('./lib/engineApiInterface'),
     EngineLocalDB = require('./lib/engineLocalDB'),
     RuleParseAndExec = require('./lib/ruleParseAndExec'),
+    RuleProgress = require('./lib/ruleProgress'),
     utils = require('./lib/utils'),
     hmdajson = require('./lib/hmdajson'),
     hmdaRuleSpec = require('hmda-rule-spec'),
     _ = require('underscore'),
     stream = require('stream'),
+    EventEmitter = require('events').EventEmitter,
     Promise = require('bluebird');
 
 function Errors() {
@@ -25,6 +27,15 @@ function Errors() {
     };
 }
 
+function Progress() {
+    return {
+        events: new EventEmitter(),
+        throttle: 0,
+        count: 0,
+        estimate: 0
+    };
+}
+
 /**
  * Construct a new HMDAEngine instance
  * @constructs HMDAEngine
@@ -33,6 +44,7 @@ function HMDAEngine() {
     this.apiURL;
     this.currentYear;
     this.errors = new Errors();
+    this.progress = new Progress();
     this._DEBUG_LEVEL = 0;
     this._HMDA_JSON = {};
     this._CONCURRENT_RULES = 10;
@@ -94,6 +106,23 @@ HMDAEngine.prototype.clearErrors = function() {
 HMDAEngine.prototype.getErrors = function() {
     return this.errors;
 };
+
+/**
+ * clears out the counts and estimates for the progress object
+ */
+HMDAEngine.prototype.clearProgress = function() {
+    this.progress.count = 0;
+    this.progress.estimate = 0;
+};
+
+/**
+ * Get the progress object used for task completion events displayed on the progress bar
+ * @return {object} Progress object containing an eventemitter for progress notification
+ */
+HMDAEngine.prototype.getProgress = function() {
+    return this.progress;
+};
+
 
 /**
  * Clear the current HMDA JSON object from the engine
@@ -283,6 +312,7 @@ HMDAEngine.prototype.runSyntactical = function(year) {
     if (this.getDebug()) {
         console.time('time to run syntactical rules');
     }
+    this.calcEstimatedTasks(year, ['ts','lar','hmda'], 'syntactical');
     return Promise.all([
         this.runEdits(year, 'ts', 'syntactical'),
         this.runEdits(year, 'lar', 'syntactical'),
@@ -306,6 +336,7 @@ HMDAEngine.prototype.runSyntactical = function(year) {
  */
 HMDAEngine.prototype.runValidity = function(year) {
     var validityPromise;
+    this.calcEstimatedTasks(year, ['ts','lar'], 'validity');
     if (this.shouldUseLocalDB()) {
         validityPromise = this.loadCensusData()
         .then(function() {
@@ -346,6 +377,7 @@ HMDAEngine.prototype.runQuality = function(year) {
     if (this.getDebug()) {
         console.time('time to run quality rules');
     }
+    this.calcEstimatedTasks(year, ['ts','lar','hmda'], 'quality');
     return Promise.all([
         this.runEdits(year, 'ts', 'quality'),
         this.runEdits(year, 'lar', 'quality'),
@@ -372,6 +404,7 @@ HMDAEngine.prototype.runMacro = function(year) {
     if (this.getDebug()) {
         console.time('time to run macro rules');
     }
+    this.calcEstimatedTasks(year, ['hmda'], 'macro');
     return Promise.all([
         this.runEdits(year, 'hmda', 'macro')
     ])
@@ -396,6 +429,7 @@ HMDAEngine.prototype.runSpecial = function(year) {
     if (this.getDebug()) {
         console.time('time to run special rules');
     }
+    this.calcEstimatedTasks(year, ['hmda'], 'special');
     return Promise.all([
         this.runEdits(year, 'hmda', 'special')
     ])
@@ -422,6 +456,7 @@ EngineBaseConditions.call(HMDAEngine.prototype);
 EngineCustomConditions.call(HMDAEngine.prototype);
 EngineCustomDataLookupConditions.call(HMDAEngine.prototype);
 RuleParseAndExec.call(HMDAEngine.prototype);
+RuleProgress.call(HMDAEngine.prototype);
 
 /*
  * -----------------------------------------------------
