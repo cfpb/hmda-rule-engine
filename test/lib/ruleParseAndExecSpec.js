@@ -23,6 +23,7 @@ describe('RuleParseAndExec', function() {
         Engine.prototype.setHmdaJson = function(json) {
             this._HMDA_JSON = json;
         };
+        Engine.prototype.postTaskCompletedMessage = function() { };
         engine = new Engine();
         done();
     });

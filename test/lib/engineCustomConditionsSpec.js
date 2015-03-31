@@ -24,6 +24,7 @@ describe('EngineCustomConditions', function() {
             this._HMDA_JSON = json;
         };
         Engine.prototype.getDebug = function() { return 0; };
+        Engine.prototype.postTaskCompletedMessage = function() { };
         engine = new Engine();
         done();
     });
