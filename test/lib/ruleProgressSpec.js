@@ -13,6 +13,22 @@ var EngineCustomConditions = require('../../lib/engineCustomConditions'),
     EventEmitter = require('events').EventEmitter,
     Engine = function() {
         this._HMDA_JSON = {};
+        this.progress = {
+            events: {},
+            throttle: 0,
+            count: 0,
+            estimate: 0
+        };
+        this.getProgress = function() {
+            return this.progress;
+        };
+        this.clearProgress = function() {
+            this.progress.estimate = 0;
+            this.progress.count = 0;
+        };
+        this.getHmdaJson = function() {
+            return this._HMDA_JSON;
+        };
     },
     engine;
 
@@ -21,23 +37,7 @@ RuleProgress.call(Engine.prototype);
 describe('RuleProgress', function() {
 
     before(function(done) {
-        Engine.prototype.getProgress = function() {
-            return this.progress;
-        };
-        Engine.prototype.clearProgress = function() {
-            this.progress.estimate = 0;
-            this.progress.count = 0;
-        };
-        Engine.prototype.getHmdaJson = function() {
-            return this._HMDA_JSON;
-        };
         engine = new Engine();
-        engine.progress = {
-            events: {},
-            throttle: 0,
-            count: 0,
-            estimate: 0
-        };
         done();
     });
 
