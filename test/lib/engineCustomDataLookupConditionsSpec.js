@@ -37,7 +37,7 @@ EngineApiInterface.call(Engine.prototype);
 EngineLocalDB.call(Engine.prototype);
 EngineCustomDataLookupConditions.call(Engine.prototype);
 
-describe('EngineCustomConditions', function() {
+describe('EngineCustomDataLookupConditions', function() {
 
     before(function(done) {
         Engine.prototype.setHmdaJson = function(json) {
@@ -639,7 +639,7 @@ describe('EngineCustomConditions', function() {
             var path = '/isNotIndependentMortgageCoOrMBS/' + engine.getRuleYear() + '/9/0123456789';
             mockAPI('get', path, 200, JSON.stringify({result: true}));
             path = '/isMetroAreaOnRespondentPanel/' + engine.getRuleYear() + '/9/0123456789/35100';
-            mockAPI('get', path, 200, JSON.stringify({result: false}));
+            mockAPI('get', path, 200, JSON.stringify({result: false}), true);
             path = '/getMsaName/' + engine.getRuleYear() + '/35100';
             mockAPI('get', path, 200, JSON.stringify({ msaName: 'New Bern, NC' }));
             var hmdaFile = JSON.parse(JSON.stringify(require('../testdata/complete.json'))).hmdaFile;
