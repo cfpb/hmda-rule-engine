@@ -31,6 +31,22 @@ var setupCensusAPI = function() {
         JSON.parse(JSON.stringify(require('./testdata/api_localdb_census_stateCountyTractMSA.json'))));
 };
 
+var createCsvTestStream = function(expectedOutput, done) {
+    var output = '';
+    var writeStream = new stream.Writable();
+
+    writeStream._write = function(chunk, encoding, callback) {
+        output += chunk.toString();
+        callback();
+    };
+    writeStream.on('finish', function() {
+        expect(_.isEqual(output, expectedOutput)).to.be.true();
+        done();
+    });
+
+    return writeStream;
+};
+
 describe('Engine', function() {
     before(function(done) {
         mockAPIURL = 'http://localhost:' + port;
@@ -449,17 +465,8 @@ describe('Engine', function() {
     describe('exportIndividual', function() {
         it('should correctly export errors for an individual syntactical edit', function(done) {
             engine.errors = require('./testdata/errors-syntactical');
-            var exportOutput = '';
             var expectedOutput = fs.readFileSync('test/testdata/S270.csv').toString();
-            var testStream = new stream.Writable();
-            testStream._write = function(chunk, encoding, callback) {
-                exportOutput += chunk.toString();
-                callback();
-            };
-            testStream.on('finish', function() {
-                expect(_.isEqual(exportOutput, expectedOutput)).to.be.true();
-                done();
-            });
+            var testStream = createCsvTestStream(expectedOutput, done);
             engine.exportIndividual('2013', 'syntactical', 'S270', testStream);
         });
     });

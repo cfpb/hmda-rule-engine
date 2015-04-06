@@ -1,71 +1,12 @@
-#!/usr/bin/env node -max-old-space-size=8192
+#!/usr/bin/env node
 
 /* global -Promise */
 'use strict';
 
 var Promise = require('bluebird'),
     engine = require('../engine'),
-    utils = require('../lib/utils'),
-    hmdaRuleSpec = require('hmda-rule-spec'),
     memwatch = require('memwatch'),
-    csv = require('csv'),
-    _ = require('underscore'),
     fs = require('fs');
-
-var transformErrors = function(currentErrors, year, fileSpec) {
-    _.each(_.keys(currentErrors), function(id, index, list) {
-        var header = ['Edit Number', 'Line Number'];
-        var firstError = currentErrors[id].errors[0];
-        if (firstError.loanNumber) {
-            header.push('Loan/Application Number');
-        }
-        var errorProps = firstError.properties;
-
-        _.each(_.keys(errorProps), function(field, index, list) {
-            var contextList = [];
-            if (currentErrors[id].scope === 'ts') {
-                contextList.push(fileSpec.hmdaFile.transmittalSheet);
-            }
-            if (currentErrors[id].scope === 'lar') {
-                contextList.push(fileSpec.hmdaFile.loanApplicationRegister);
-            }
-            contextList.push(fileSpec);
-            if (currentErrors[id].scope === 'hmda') {
-                contextList.push(fileSpec.hmdaFile.transmittalSheet);
-                contextList.push(fileSpec.hmdaFile.loanApplicationRegister);
-            }
-            var specBody = utils.resolveArg(field, contextList);
-            header.push(specBody.label);
-        });
-
-        process.stdout.write(header.join(',') + '\n');
-        
-        _.each(currentErrors[id].errors, function(error, index, list) {
-            var line = [id, error.lineNumber];
-            if (error.loanNumber) {
-                line.push(error.loanNumber);
-            }
-            _.each(_.keys(errorProps), function(field, index, list) {
-                line.push(error.properties[field]);
-            });
-
-            process.stdout.write(line.join(',') + '\n');
-        });
-
-        process.stdout.write('\n'); 
-    });
-};
-
-var printCsv = function(errors, year) {
-    var fileSpec = {'hmdaFile': hmdaRuleSpec.getFileSpec(year)};
-
-    if (errors.syntactical) {
-        transformErrors(errors.syntactical, year, fileSpec);
-    }
-    if (errors.validity) {
-        transformErrors(errors.validity, year, fileSpec);
-    }
-};
 
 var runSynValThen = function(year) {
     return engine.runSyntactical(year)
@@ -186,8 +127,6 @@ TimingHarness.prototype.run = function(options) {
                 console.log('before nodes: ' + diff.before.nodes);
                 console.log('after size: ' + diff.after.size);
                 console.log('after nodes: ' + diff.after.nodes);
-
-                printCsv(engine.getErrors(), options.year);
                 //console.log(JSON.stringify(engine.getErrors(), null, 2));
                 //console.log(engine.getErrors());
             })
