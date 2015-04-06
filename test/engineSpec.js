@@ -31,6 +31,7 @@ var setupCensusAPI = function() {
         JSON.parse(JSON.stringify(require('./testdata/api_localdb_census_stateCountyTractMSA.json'))));
 };
 
+// Set up a simple mock writeable stream for the csv exporter tests
 var createCsvTestStream = function(expectedOutput, done) {
     var output = '';
     var writeStream = new stream.Writable();
@@ -492,6 +493,15 @@ describe('Engine', function() {
             var expectedOutput = fs.readFileSync('test/testdata/Q015.csv').toString();
             var testStream = createCsvTestStream(expectedOutput, done);
             engine.exportIndividual('2013', 'macro', 'Q015', testStream);
+        });
+    });
+
+    describe('exportAll', function() {
+        it('should correctly export errors for all syntactical edits', function(done) {
+            engine.errors = require('./testdata/errors-syntactical');
+            var expectedOutput = fs.readFileSync('test/testdata/syntactical.csv').toString();
+            var testStream = createCsvTestStream(expectedOutput, done);
+            engine.exportAll('2013', 'syntactical', testStream);
         });
     });
 });
