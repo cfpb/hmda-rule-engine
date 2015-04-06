@@ -129,8 +129,6 @@ TimingHarness.prototype.run = function(options) {
                 console.log('after nodes: ' + diff.after.nodes);
                 //console.log(JSON.stringify(engine.getErrors(), null, 2));
                 //console.log(engine.getErrors());
-
-                engine.exportAll('2013', 'macro', fs.createWriteStream('macro.csv'));
             })
             .catch(function(err) {
                 console.log(err.message);
