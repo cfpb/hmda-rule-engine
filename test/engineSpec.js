@@ -120,6 +120,16 @@ describe('Engine', function() {
         });
     });
 
+    describe('get/clear Progress', function() {
+        it('should get/clear Progress correctly', function(done) {
+            expect(_.isEqual(engine.getProgress().count, 0));
+            engine.getProgress().count = 10;
+            engine.clearProgress();
+            expect(_.isEqual(engine.getProgress().count, 0));
+            done();
+        });
+    });
+
     describe('get/set debug level', function() {
         it('should get/set debug level correctly', function(done) {
             expect(engine.getDebug()).to.be(0);
