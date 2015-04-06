@@ -478,6 +478,7 @@ describe('Engine', function() {
             engine.errors = require('./testdata/errors-syntactical');
             var expectedOutput = fs.readFileSync('test/testdata/S270.csv').toString();
             var testStream = createCsvTestStream(expectedOutput, done);
+
             engine.exportIndividual('2013', 'syntactical', 'S270', testStream);
         });
 
@@ -485,6 +486,7 @@ describe('Engine', function() {
             engine.errors = require('./testdata/errors-syntactical');
             var expectedOutput = fs.readFileSync('test/testdata/S040.csv').toString();
             var testStream = createCsvTestStream(expectedOutput, done);
+
             engine.exportIndividual('2013', 'syntactical', 'S040', testStream);
         });
 
@@ -492,6 +494,7 @@ describe('Engine', function() {
             engine.errors = require('./testdata/errors-macro');
             var expectedOutput = fs.readFileSync('test/testdata/Q015.csv').toString();
             var testStream = createCsvTestStream(expectedOutput, done);
+
             engine.exportIndividual('2013', 'macro', 'Q015', testStream);
         });
     });
@@ -501,6 +504,7 @@ describe('Engine', function() {
             engine.errors = require('./testdata/errors-syntactical');
             var expectedOutput = fs.readFileSync('test/testdata/syntactical.csv').toString();
             var testStream = createCsvTestStream(expectedOutput, done);
+            
             engine.exportAll('2013', 'syntactical', testStream);
         });
     });
