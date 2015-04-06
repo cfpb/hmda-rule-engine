@@ -2,7 +2,8 @@
 /* global -Promise */
 'use strict';
 
-var EngineBaseConditions = require('./lib/engineBaseConditions'),
+var CSVProcessor = require('./lib/csvprocessor'),
+    EngineBaseConditions = require('./lib/engineBaseConditions'),
     EngineCustomConditions = require('./lib/engineCustomConditions'),
     EngineCustomDataLookupConditions = require('./lib/engineCustomDataLookupConditions'),
     EngineApiInterface = require('./lib/engineApiInterface'),
@@ -408,6 +409,26 @@ HMDAEngine.prototype.runSpecial = function(year) {
     .catch(function(err) {
         return utils.resolveError(err);
     });
+};
+
+HMDAEngine.prototype.exportIndividual = function(year, errorType, errorID, writeStream) {
+    var csvProcessorIndividual = new CSVProcessor(year, writeStream, 'individual');
+    if (this.getErrors()[errorType][errorID]) {
+        var errorsIndividual = {};
+        errorsIndividual[errorID] = this.getErrors()[errorType][errorID];
+        csvProcessorIndividual.write(errorsIndividual);
+    }
+
+    csvProcessorIndividual.end();
+};
+
+HMDAEngine.prototype.exportAll = function(year, errorType, writeStream) {
+    var csvProcessorAll = new CSVProcessor(year, writeStream, 'all');
+    if (this.getErrors()[errorType]) {
+        csvProcessorAll.write(this.getErrors()[errorType]);
+    }
+
+    csvProcessorAll.end();
 };
 
 /*

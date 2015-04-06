@@ -13,6 +13,8 @@ var engine = require('../engine'),
     rewiredEngine = require('./rewiredEngine'),
     levelup = require('level-browserify'),
     http = require('http'),
+    stream = require('stream'),
+    fs = require('fs'),
     mockAPIURL,
     mockYEAR;
 
@@ -444,5 +446,21 @@ describe('Engine', function() {
         });
     });
 
-
+    describe('exportIndividual', function() {
+        it('should correctly export errors for an individual syntactical edit', function(done) {
+            engine.errors = require('./testdata/errors-syntactical');
+            var exportOutput = '';
+            var expectedOutput = fs.readFileSync('test/testdata/S270.csv').toString();
+            var testStream = new stream.Writable();
+            testStream._write = function(chunk, encoding, callback) {
+                exportOutput += chunk.toString();
+                callback();
+            };
+            testStream.on('finish', function() {
+                expect(_.isEqual(exportOutput, expectedOutput)).to.be.true();
+                done();
+            });
+            engine.exportIndividual('2013', 'syntactical', 'S270', testStream);
+        });
+    });
 });
