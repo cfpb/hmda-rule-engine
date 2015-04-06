@@ -4,7 +4,7 @@
 
 var outFN = __dirname + '/edit-timing.csv',
     chomp = require('line-chomper').chomp,
-    _ = require('underscore'),
+    _ = require('lodash'),
     fs = require('fs');
 
 try {

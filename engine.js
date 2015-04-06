@@ -14,7 +14,7 @@ var CSVProcessor = require('./lib/csvProcessor'),
     utils = require('./lib/utils'),
     hmdajson = require('./lib/hmdajson'),
     hmdaRuleSpec = require('hmda-rule-spec'),
-    _ = require('underscore'),
+    _ = require('lodash'),
     stream = require('stream'),
     EventEmitter = require('events').EventEmitter,
     Promise = require('bluebird');
@@ -266,8 +266,10 @@ HMDAEngine.prototype.getTotalsByMSA = function(hmdaFile) {
         .collect(function(value, key) {
             return this.getMSAName(key).then(function(msaName) {
                 var result = {msaCode: key, msaName: msaName, totalLAR: 0, totalLoanAmount: 0, totalConventional: 0, totalFHA: 0, totalVA: 0, totalFSA: 0,
-                    total1To4Family: 0, totalMFD: 0, totalMultifamily: 0, totalHomePurchase: 0, totalHomeImprovement: 0, totalRefinance: 0};
-                _.each(value, function(element) {
+                    total1To4Family: 0, totalMFD: 0, totalMultifamily: 0, totalHomePurchase: 0, totalHomeImprovement: 0, totalRefinance: 0},
+                    len = value.length;
+                for (var i=0; i < len; i++) {
+                    var element = value[i];
                     result.totalLAR++;
                     result.totalLoanAmount += +element.loanAmount;
 
@@ -296,7 +298,7 @@ HMDAEngine.prototype.getTotalsByMSA = function(hmdaFile) {
                     } else if (element.loanPurpose === '3') {
                         result.totalRefinance++;
                     }
-                });
+                }
                 return result;
             });
         }.bind(this))

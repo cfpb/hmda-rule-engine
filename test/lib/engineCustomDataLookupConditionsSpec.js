@@ -69,7 +69,10 @@ describe('EngineCustomDataLookupConditions', function() {
                 transmittalSheet: {
                     agencyCode: '1',
                     respondentID: '0000000001'
-            }})
+                },
+                loanApplicationRegisters: [
+                ]
+            })
             .then(function(result) {
                 expect(result).to.be(true);
                 done();
