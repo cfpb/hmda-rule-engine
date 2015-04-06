@@ -2,7 +2,7 @@
 /* global -Promise */
 'use strict';
 
-var CSVProcessor = require('./lib/csvprocessor'),
+var CSVProcessor = require('./lib/csvProcessor'),
     EngineBaseConditions = require('./lib/engineBaseConditions'),
     EngineCustomConditions = require('./lib/engineCustomConditions'),
     EngineCustomDataLookupConditions = require('./lib/engineCustomDataLookupConditions'),
