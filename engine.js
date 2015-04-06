@@ -448,7 +448,7 @@ HMDAEngine.prototype.runSpecial = function(year) {
 /**
  * Export errors in csv format for an individual edit
  * @param {string} year         The specific year of the file specification to work with
- * @param {string} errorType    The edit category. Valid values: 'syntactical', 'validity', 'quality', 'macro'
+ * @param {string} errorType    The edit category. Valid values: 'syntactical', 'validity', 'quality', 'macro', 'special'
  * @param {string} errorID      The ID of the edit to export
  * @param {object} writeStream  Handle to a {@link https://nodejs.org/api/stream.html#stream_class_stream_writable_1|stream.Writable} instance to output to
  * @see {@link CSVProcessor|CSVProcessor} for more info
@@ -473,7 +473,7 @@ HMDAEngine.prototype.exportIndividual = function(year, errorType, errorID, write
  */
 HMDAEngine.prototype.exportAll = function(year, errorType, writeStream) {
     var csvProcessorAll = new CSVProcessor(year, writeStream, 'all');
-    if (this.getErrors()[errorType] && errorType !== 'macro') {
+    if (this.getErrors()[errorType] && errorType !== 'macro' && errorType !== 'special') {
         csvProcessorAll.write(this.getErrors()[errorType]);
     }
 
