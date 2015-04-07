@@ -499,13 +499,13 @@ describe('Engine', function() {
         });
     });
 
-    describe('exportAll', function() {
+    describe('exportType', function() {
         it('should correctly export errors for all syntactical edits', function(done) {
             engine.errors = require('./testdata/errors-syntactical');
             var expectedOutput = fs.readFileSync('test/testdata/syntactical.csv').toString();
             var testStream = createCsvTestStream(expectedOutput, done);
             
-            engine.exportAll('2013', 'syntactical', testStream);
+            engine.exportType('2013', 'syntactical', testStream);
         });
     });
 });

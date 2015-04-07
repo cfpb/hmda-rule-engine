@@ -471,13 +471,13 @@ HMDAEngine.prototype.exportIndividual = function(year, errorType, errorID, write
  * @param {object} writeStream  Handle to a {@link https://nodejs.org/api/stream.html#stream_class_stream_writable_1|stream.Writable} instance to output to
  * @see {@link CSVProcessor|CSVProcessor} for more info
  */
-HMDAEngine.prototype.exportAll = function(year, errorType, writeStream) {
-    var csvProcessorAll = new CSVProcessor(year, writeStream, 'all');
+HMDAEngine.prototype.exportType = function(year, errorType, writeStream) {
+    var csvProcessorType = new CSVProcessor(year, writeStream, 'all');
     if (this.getErrors()[errorType] && errorType !== 'macro' && errorType !== 'special') {
-        csvProcessorAll.write(this.getErrors()[errorType]);
+        csvProcessorType.write(this.getErrors()[errorType]);
     }
 
-    csvProcessorAll.end();
+    csvProcessorType.end();
 };
 
 /*
