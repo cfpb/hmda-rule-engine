@@ -3,6 +3,7 @@
 'use strict';
 
 var CSVProcessor = require('./lib/csvProcessor'),
+    StringStream = require('./lib/stringStream'),
     EngineBaseConditions = require('./lib/engineBaseConditions'),
     EngineCustomConditions = require('./lib/engineCustomConditions'),
     EngineCustomDataLookupConditions = require('./lib/engineCustomDataLookupConditions'),
@@ -479,6 +480,8 @@ HMDAEngine.prototype.exportType = function(year, errorType, writeStream) {
 
     csvProcessorType.end();
 };
+
+HMDAEngine.prototype.StringStream = StringStream;
 
 /*
  * -----------------------------------------------------

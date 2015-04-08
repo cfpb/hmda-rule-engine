@@ -33,14 +33,7 @@ var setupCensusAPI = function() {
 
 // Set up a simple mock writeable stream for the csv exporter tests
 var createCsvTestStream = function(expectedOutput, done) {
-    var output = '';
-    var writeStream = new stream.Writable();
-
-    writeStream._write = function(chunk, encoding, callback) {
-        output += chunk.toString();
-        callback();
-    };
-    writeStream.on('finish', function() {
+    var writeStream = new engine.StringStream(function(output) {
         expect(_.isEqual(output, expectedOutput)).to.be.true();
         done();
     });
