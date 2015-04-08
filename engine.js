@@ -49,7 +49,6 @@ function HMDAEngine() {
     this.progress = new Progress();
     this._DEBUG_LEVEL = 0;
     this._HMDA_JSON = {};
-    this._CONCURRENT_RULES = 1;
     this._CONCURRENT_LARS = 100;
     this._LOCAL_DB = null;
     this._USE_LOCAL_DB = false;
