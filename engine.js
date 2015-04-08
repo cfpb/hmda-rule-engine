@@ -473,7 +473,7 @@ HMDAEngine.prototype.exportIndividual = function(year, errorType, errorID, write
  * @see {@link CSVProcessor|CSVProcessor} for more info
  */
 HMDAEngine.prototype.exportType = function(year, errorType, writeStream) {
-    var csvProcessorType = new CSVProcessor(year, writeStream, 'all');
+    var csvProcessorType = new CSVProcessor(year, writeStream, 'type');
     if (this.getErrors()[errorType] && errorType !== 'macro' && errorType !== 'special') {
         csvProcessorType.write(this.getErrors()[errorType]);
     }
