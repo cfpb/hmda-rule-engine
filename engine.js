@@ -2,7 +2,9 @@
 /* global -Promise */
 'use strict';
 
-var EngineBaseConditions = require('./lib/engineBaseConditions'),
+var CSVProcessor = require('./lib/csvProcessor'),
+    StringStreamPromise = require('./lib/stringStreamPromise'),
+    EngineBaseConditions = require('./lib/engineBaseConditions'),
     EngineCustomConditions = require('./lib/engineCustomConditions'),
     EngineCustomDataLookupConditions = require('./lib/engineCustomDataLookupConditions'),
     EngineApiInterface = require('./lib/engineApiInterface'),
@@ -442,6 +444,68 @@ HMDAEngine.prototype.runSpecial = function(year) {
     .catch(function(err) {
         return utils.resolveError(err);
     });
+};
+
+/**
+ * Export errors in csv format for an individual edit
+ * @param {string} errorType    The edit category. Valid values: 'syntactical', 'validity', 'quality', 'macro', 'special'
+ * @param {string} errorID      The ID of the edit to export
+ * @return {object}             A readable stream of the csv output
+ * @see {@link CSVProcessor|CSVProcessor} for more info
+ */
+HMDAEngine.prototype.exportIndividualStream = function(errorType, errorID) {
+    var csvProcessorIndividual = new CSVProcessor(this.getRuleYear(), 'individual');
+    if (this.getErrors()[errorType][errorID]) {
+        var errorsIndividual = {};
+        errorsIndividual[errorID] = this.getErrors()[errorType][errorID];
+        csvProcessorIndividual.write(errorsIndividual);
+    }
+
+    return csvProcessorIndividual;
+};
+
+/**
+ * Export errors in csv format for all errors of a specific type
+ * @param {string} errorType    The edit category. Valid values: 'syntactical', 'validity', 'quality',
+ * @return {object}             A readable stream of the csv output
+ * @see {@link CSVProcessor|CSVProcessor} for more info
+ */
+HMDAEngine.prototype.exportTypeStream = function(errorType) {
+    var csvProcessorType = new CSVProcessor(this.getRuleYear(), 'type');
+    if (this.getErrors()[errorType] && errorType !== 'macro' && errorType !== 'special') {
+        csvProcessorType.write(this.getErrors()[errorType]);
+    }
+
+    return csvProcessorType;
+};
+
+/**
+ * Export errors in csv format for an individual edit
+ * @param {string} errorType    The edit category. Valid values: 'syntactical', 'validity', 'quality', 'macro', 'special'
+ * @param {string} errorID      The ID of the edit to export
+ * @return {object}             A promise for a string containing the csv output
+ * @see {@link CSVProcessor|CSVProcessor} for more info
+ */
+HMDAEngine.prototype.exportIndividualPromise = function(errorType, errorID) {
+    var csvProcessorIndividual = this.exportIndividualStream(errorType, errorID);
+
+    var promise = StringStreamPromise(csvProcessorIndividual);
+    csvProcessorIndividual.end();
+    return promise;
+};
+
+/**
+ * Export errors in csv format for all errors of a specific type
+ * @param {string} errorType    The edit category. Valid values: 'syntactical', 'validity', 'quality',
+ * @return {object}             A promise for a string containing the csv output
+ * @see {@link CSVProcessor|CSVProcessor} for more info
+ */
+HMDAEngine.prototype.exportTypePromise = function(errorType) {
+    var csvProcessorType = this.exportTypeStream(errorType);
+
+    var promise = StringStreamPromise(csvProcessorType);
+    csvProcessorType.end();
+    return promise;
 };
 
 /*

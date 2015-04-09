@@ -1,0 +1,63 @@
+{
+    "macro": {
+        "Q015": {
+            "errors": [
+                {
+                    "properties": {
+                        "Total Multifamily Loans": 3,
+                        "Total Loans": 3,
+                        "% of Total Loans": "100.00",
+                        "Total Dollar Amount of Multifamily Loans": 30000,
+                        "Total Dollar Amount of All Loans": 30000,
+                        "% of Total Dollar Amount": "100.00"
+                    }
+                }
+            ],
+            "description": "If property type = 3, then the total number of these loan applications should be < 10% of all loan applications or < 10% of the total dollar amount of all loan applications reported.",
+            "explanation": "Multifamily loan applications is ≥ 10% of total loan applications and/or ≥ 10% of the total dollar amount of the loan applications.",
+            "scope": "hmda"
+        },
+        "Q048": {
+            "errors": [
+                {
+                    "properties": {
+                        "Loans where preapproval = 1 and action taken = 5": 3,
+                        "Total Loan Applications": 3,
+                        "% of Total Loan Applications": "100.00"
+                    }
+                }
+            ],
+            "description": "If preapproval = 1, and action taken type = 5, then the total number of these loans should be ≤ 5% of the total number of loan applications.",
+            "explanation": "Total number of loan applications with a preapproval = 1 and action taken type = 5 is > 5% of the total number of loan applications.",
+            "scope": "hmda"
+        },
+        "Q009": {
+            "errors": [
+                {
+                    "properties": {
+                        "Loans where action taken = 5": 3,
+                        "Total Loan Applications": 3,
+                        "% of Total Loan Applications": "100.00"
+                    }
+                }
+            ],
+            "description": "If action taken type = 5, then the total number of these loans should be ≤ 15% of the total number of loan applications.",
+            "explanation": "Total number of loan applications with an action code of 5 is > 15% of the total number of loan applications.",
+            "scope": "hmda"
+        },
+        "Q010": {
+            "errors": [
+                {
+                    "properties": {
+                        "Loans where action taken = 1": 0,
+                        "Loans where action taken is 1-6": 3,
+                        "% of Loans where action taken is 1-6": "0.00"
+                    }
+                }
+            ],
+            "description": "The number of loan applications that report action taken type = 1 should be ≥ 20% of the total number of loan applications where action taken type = 1-6.",
+            "explanation": "Total number of loan applications with an action code of 1 is < 20% of the total number of loan applications where action taken type = 1-6.",
+            "scope": "hmda"
+        }
+    }
+}
