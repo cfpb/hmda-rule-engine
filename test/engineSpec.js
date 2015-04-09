@@ -471,11 +471,6 @@ describe('Engine', function() {
     });
 
     describe('exportIndividualStream', function() {
-        before(function(done) {
-            engine.setRuleYear('2013');
-            done();
-        });
-
         it('should correctly export errors for an individual syntactical edit', function(done) {
             engine.errors = require('./testdata/errors-syntactical');
             var expectedOutput = fs.readFileSync('test/testdata/S270.csv').toString();
@@ -498,12 +493,38 @@ describe('Engine', function() {
         });
     });
 
-    describe('exportType', function() {
+    describe('exportTypeStream', function() {
         it('should correctly export errors for all syntactical edits', function(done) {
             engine.errors = require('./testdata/errors-syntactical');
             var expectedOutput = fs.readFileSync('test/testdata/syntactical.csv').toString();
             var outputStream = engine.exportTypeStream('syntactical');
             createCsvTestStream(outputStream, expectedOutput, done);
+        });
+    });
+
+    describe('exportIndividualPromise', function() {
+        it('should correctly export errors for an individual syntactical edit', function(done) {
+            engine.errors = require('./testdata/errors-syntactical');
+            var expectedOutput = fs.readFileSync('test/testdata/S270.csv').toString();
+            var testPromise = engine.exportIndividualPromise('syntactical', 'S270');
+
+            testPromise.then(function(output) {
+                expect(_.isEqual(expectedOutput, output)).to.be.true();
+                done();
+            });
+        });
+    });
+
+    describe('exportTypePromise', function() {
+        it('should correctly export errors for all syntactical edits', function(done) {
+            engine.errors = require('./testdata/errors-syntactical');
+            var expectedOutput = fs.readFileSync('test/testdata/syntactical.csv').toString();
+            var testPromise = engine.exportTypePromise('syntactical');
+            
+            testPromise.then(function(output) {
+                expect(_.isEqual(expectedOutput, output)).to.be.true();
+                done();
+            });
         });
     });
 });

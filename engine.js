@@ -479,6 +479,35 @@ HMDAEngine.prototype.exportTypeStream = function(errorType) {
     return csvProcessorType;
 };
 
+/**
+ * Export errors in csv format for an individual edit
+ * @param {string} errorType    The edit category. Valid values: 'syntactical', 'validity', 'quality', 'macro', 'special'
+ * @param {string} errorID      The ID of the edit to export
+ * @return {object}             A promise for a string containing the csv output
+ * @see {@link CSVProcessor|CSVProcessor} for more info
+ */
+HMDAEngine.prototype.exportIndividualPromise = function(errorType, errorID) {
+    var csvProcessorIndividual = this.exportIndividualStream(errorType, errorID);
+
+    var promise = StringStreamPromise(csvProcessorIndividual);
+    csvProcessorIndividual.end();
+    return promise;
+};
+
+/**
+ * Export errors in csv format for all errors of a specific type
+ * @param {string} errorType    The edit category. Valid values: 'syntactical', 'validity', 'quality',
+ * @return {object}             A promise for a string containing the csv output
+ * @see {@link CSVProcessor|CSVProcessor} for more info
+ */
+HMDAEngine.prototype.exportTypePromise = function(errorType) {
+    var csvProcessorType = this.exportTypeStream(errorType);
+
+    var promise = StringStreamPromise(csvProcessorType);
+    csvProcessorType.end();
+    return promise;
+};
+
 /*
  * -----------------------------------------------------
  * Extend the Engine with Mixins
