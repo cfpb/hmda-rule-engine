@@ -14,6 +14,7 @@ var engine = require('../engine'),
     levelup = require('level-browserify'),
     http = require('http'),
     stream = require('stream'),
+    StringStreamPromise = require('../lib/stringStreamPromise'),
     fs = require('fs'),
     mockAPIURL,
     mockYEAR;
@@ -32,13 +33,16 @@ var setupCensusAPI = function() {
 };
 
 // Set up a simple mock writeable stream for the csv exporter tests
-var createCsvTestStream = function(expectedOutput, done) {
-    var writeStream = new engine.StringStream(function(output) {
-        expect(_.isEqual(output, expectedOutput)).to.be.true();
+var createCsvTestStream = function(outputStream, expectedOutput, done) {
+    var testPromise = StringStreamPromise(outputStream);
+
+    testPromise
+    .then(function(output) {
+        expect(_.isEqual(expectedOutput, output)).to.be.true();
         done();
     });
 
-    return writeStream;
+    outputStream.end();
 };
 
 describe('Engine', function() {
@@ -466,29 +470,26 @@ describe('Engine', function() {
         });
     });
 
-    describe('exportIndividual', function() {
+    describe('exportIndividualStream', function() {
         it('should correctly export errors for an individual syntactical edit', function(done) {
             engine.errors = require('./testdata/errors-syntactical');
             var expectedOutput = fs.readFileSync('test/testdata/S270.csv').toString();
-            var testStream = createCsvTestStream(expectedOutput, done);
-
-            engine.exportIndividual('2013', 'syntactical', 'S270', testStream);
+            var outputStream = engine.exportIndividualStream('2013', 'syntactical', 'S270');
+            createCsvTestStream(outputStream, expectedOutput, done);
         });
 
         it('should correctly export errors for S040', function(done) {
             engine.errors = require('./testdata/errors-syntactical');
             var expectedOutput = fs.readFileSync('test/testdata/S040.csv').toString();
-            var testStream = createCsvTestStream(expectedOutput, done);
-
-            engine.exportIndividual('2013', 'syntactical', 'S040', testStream);
+            var outputStream = engine.exportIndividualStream('2013', 'syntactical', 'S040');
+            createCsvTestStream(outputStream, expectedOutput, done);
         });
 
         it('should correctly export errors for an individual macro edit', function(done) {
             engine.errors = require('./testdata/errors-macro');
             var expectedOutput = fs.readFileSync('test/testdata/Q015.csv').toString();
-            var testStream = createCsvTestStream(expectedOutput, done);
-
-            engine.exportIndividual('2013', 'macro', 'Q015', testStream);
+            var outputStream = engine.exportIndividualStream('2013', 'macro', 'Q015');
+            createCsvTestStream(outputStream, expectedOutput, done);
         });
     });
 
@@ -496,9 +497,8 @@ describe('Engine', function() {
         it('should correctly export errors for all syntactical edits', function(done) {
             engine.errors = require('./testdata/errors-syntactical');
             var expectedOutput = fs.readFileSync('test/testdata/syntactical.csv').toString();
-            var testStream = createCsvTestStream(expectedOutput, done);
-            
-            engine.exportType('2013', 'syntactical', testStream);
+            var outputStream = engine.exportTypeStream('2013', 'syntactical');
+            createCsvTestStream(outputStream, expectedOutput, done);
         });
     });
 });

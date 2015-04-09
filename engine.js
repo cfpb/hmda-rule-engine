@@ -3,7 +3,7 @@
 'use strict';
 
 var CSVProcessor = require('./lib/csvProcessor'),
-    StringStream = require('./lib/stringStream'),
+    StringStreamPromise = require('./lib/stringStreamPromise'),
     EngineBaseConditions = require('./lib/engineBaseConditions'),
     EngineCustomConditions = require('./lib/engineCustomConditions'),
     EngineCustomDataLookupConditions = require('./lib/engineCustomDataLookupConditions'),
@@ -454,15 +454,15 @@ HMDAEngine.prototype.runSpecial = function(year) {
  * @param {object} writeStream  Handle to a {@link https://nodejs.org/api/stream.html#stream_class_stream_writable_1|stream.Writable} instance to output to
  * @see {@link CSVProcessor|CSVProcessor} for more info
  */
-HMDAEngine.prototype.exportIndividual = function(year, errorType, errorID, writeStream) {
-    var csvProcessorIndividual = new CSVProcessor(year, writeStream, 'individual');
+HMDAEngine.prototype.exportIndividualStream = function(year, errorType, errorID) {
+    var csvProcessorIndividual = new CSVProcessor(year, 'individual');
     if (this.getErrors()[errorType][errorID]) {
         var errorsIndividual = {};
         errorsIndividual[errorID] = this.getErrors()[errorType][errorID];
         csvProcessorIndividual.write(errorsIndividual);
     }
 
-    csvProcessorIndividual.end();
+    return csvProcessorIndividual.stringifier;
 };
 
 /**
@@ -472,16 +472,14 @@ HMDAEngine.prototype.exportIndividual = function(year, errorType, errorID, write
  * @param {object} writeStream  Handle to a {@link https://nodejs.org/api/stream.html#stream_class_stream_writable_1|stream.Writable} instance to output to
  * @see {@link CSVProcessor|CSVProcessor} for more info
  */
-HMDAEngine.prototype.exportType = function(year, errorType, writeStream) {
-    var csvProcessorType = new CSVProcessor(year, writeStream, 'type');
+HMDAEngine.prototype.exportTypeStream = function(year, errorType) {
+    var csvProcessorType = new CSVProcessor(year, 'type');
     if (this.getErrors()[errorType] && errorType !== 'macro' && errorType !== 'special') {
         csvProcessorType.write(this.getErrors()[errorType]);
     }
 
-    csvProcessorType.end();
+    return csvProcessorType.stringifier;
 };
-
-HMDAEngine.prototype.StringStream = StringStream;
 
 /*
  * -----------------------------------------------------
