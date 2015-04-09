@@ -448,37 +448,35 @@ HMDAEngine.prototype.runSpecial = function(year) {
 
 /**
  * Export errors in csv format for an individual edit
- * @param {string} year         The specific year of the file specification to work with
  * @param {string} errorType    The edit category. Valid values: 'syntactical', 'validity', 'quality', 'macro', 'special'
  * @param {string} errorID      The ID of the edit to export
- * @param {object} writeStream  Handle to a {@link https://nodejs.org/api/stream.html#stream_class_stream_writable_1|stream.Writable} instance to output to
+ * @return {object}             A readable stream of the csv output
  * @see {@link CSVProcessor|CSVProcessor} for more info
  */
-HMDAEngine.prototype.exportIndividualStream = function(year, errorType, errorID) {
-    var csvProcessorIndividual = new CSVProcessor(year, 'individual');
+HMDAEngine.prototype.exportIndividualStream = function(errorType, errorID) {
+    var csvProcessorIndividual = new CSVProcessor(this.getRuleYear(), 'individual');
     if (this.getErrors()[errorType][errorID]) {
         var errorsIndividual = {};
         errorsIndividual[errorID] = this.getErrors()[errorType][errorID];
         csvProcessorIndividual.write(errorsIndividual);
     }
 
-    return csvProcessorIndividual.stringifier;
+    return csvProcessorIndividual;
 };
 
 /**
  * Export errors in csv format for all errors of a specific type
- * @param {string} year         The specific year of the file specification to work with
  * @param {string} errorType    The edit category. Valid values: 'syntactical', 'validity', 'quality',
- * @param {object} writeStream  Handle to a {@link https://nodejs.org/api/stream.html#stream_class_stream_writable_1|stream.Writable} instance to output to
+ * @return {object}             A readable stream of the csv output
  * @see {@link CSVProcessor|CSVProcessor} for more info
  */
-HMDAEngine.prototype.exportTypeStream = function(year, errorType) {
-    var csvProcessorType = new CSVProcessor(year, 'type');
+HMDAEngine.prototype.exportTypeStream = function(errorType) {
+    var csvProcessorType = new CSVProcessor(this.getRuleYear(), 'type');
     if (this.getErrors()[errorType] && errorType !== 'macro' && errorType !== 'special') {
         csvProcessorType.write(this.getErrors()[errorType]);
     }
 
-    return csvProcessorType.stringifier;
+    return csvProcessorType;
 };
 
 /*

@@ -471,24 +471,29 @@ describe('Engine', function() {
     });
 
     describe('exportIndividualStream', function() {
+        before(function(done) {
+            engine.setRuleYear('2013');
+            done();
+        });
+
         it('should correctly export errors for an individual syntactical edit', function(done) {
             engine.errors = require('./testdata/errors-syntactical');
             var expectedOutput = fs.readFileSync('test/testdata/S270.csv').toString();
-            var outputStream = engine.exportIndividualStream('2013', 'syntactical', 'S270');
+            var outputStream = engine.exportIndividualStream('syntactical', 'S270');
             createCsvTestStream(outputStream, expectedOutput, done);
         });
 
         it('should correctly export errors for S040', function(done) {
             engine.errors = require('./testdata/errors-syntactical');
             var expectedOutput = fs.readFileSync('test/testdata/S040.csv').toString();
-            var outputStream = engine.exportIndividualStream('2013', 'syntactical', 'S040');
+            var outputStream = engine.exportIndividualStream('syntactical', 'S040');
             createCsvTestStream(outputStream, expectedOutput, done);
         });
 
         it('should correctly export errors for an individual macro edit', function(done) {
             engine.errors = require('./testdata/errors-macro');
             var expectedOutput = fs.readFileSync('test/testdata/Q015.csv').toString();
-            var outputStream = engine.exportIndividualStream('2013', 'macro', 'Q015');
+            var outputStream = engine.exportIndividualStream('macro', 'Q015');
             createCsvTestStream(outputStream, expectedOutput, done);
         });
     });
@@ -497,7 +502,7 @@ describe('Engine', function() {
         it('should correctly export errors for all syntactical edits', function(done) {
             engine.errors = require('./testdata/errors-syntactical');
             var expectedOutput = fs.readFileSync('test/testdata/syntactical.csv').toString();
-            var outputStream = engine.exportTypeStream('2013', 'syntactical');
+            var outputStream = engine.exportTypeStream('syntactical');
             createCsvTestStream(outputStream, expectedOutput, done);
         });
     });
