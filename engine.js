@@ -32,7 +32,6 @@ function Errors() {
 function Progress() {
     return {
         events: new EventEmitter(),
-        throttle: 0,
         count: 0,
         estimate: 0
     };
