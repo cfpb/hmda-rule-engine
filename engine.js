@@ -415,6 +415,13 @@ HMDAEngine.prototype.runSpecial = function(year) {
     });
 };
 
+/**
+ * Run edits of a single type for an individual lar
+ * @param {string} year     The specific year of the edit specification to work with
+ * @param {string} type     The edit type to run. Valid values: 'syntactical', 'validity', 'quality'
+ * @param {string} lar      The lar to run in .dat format
+ * @return {Promise}        A promise for the finished edit process
+ */
 HMDAEngine.prototype.runLarType = function(year, type, lar) {
     var fileSpec = hmdaRuleSpec.getFileSpec(year);
     var parsedLar = hmdajson.parseLine('loanApplicationRegister', fileSpec.loanApplicationRegister, lar);
@@ -428,6 +435,12 @@ HMDAEngine.prototype.runLarType = function(year, type, lar) {
     }
 };
 
+/**
+ * Run all edits for an individual lar
+ * @param {string} year     The specific year of the edit specification to work with
+ * @param {string} lar      The lar to run in .dat format
+ * @return {Promise}        A promise for the finished edit process
+ */
 HMDAEngine.prototype.runLar = function(year, lar) {
     var editTypes = hmdaRuleSpec.getValidEditTypes();
     return Promise.each(editTypes, function(currentEditType) {
