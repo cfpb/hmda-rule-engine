@@ -14,7 +14,7 @@ var CSVProcessor = require('./lib/csvProcessor'),
     utils = require('./lib/utils'),
     hmdajson = require('./lib/hmdajson'),
     hmdaRuleSpec = require('hmda-rule-spec'),
-    _ = require('underscore'),
+    _ = require('lodash'),
     stream = require('stream'),
     EventEmitter = require('events').EventEmitter,
     Promise = require('bluebird');
@@ -49,7 +49,7 @@ function HMDAEngine() {
     this.progress = new Progress();
     this._DEBUG_LEVEL = 0;
     this._HMDA_JSON = {};
-    this._CONCURRENT_RULES = 10;
+    this._CONCURRENT_LARS = 100;
     this._LOCAL_DB = null;
     this._USE_LOCAL_DB = false;
 }
@@ -265,8 +265,10 @@ HMDAEngine.prototype.getTotalsByMSA = function(hmdaFile) {
         .collect(function(value, key) {
             return this.getMSAName(key).then(function(msaName) {
                 var result = {msaCode: key, msaName: msaName, totalLAR: 0, totalLoanAmount: 0, totalConventional: 0, totalFHA: 0, totalVA: 0, totalFSA: 0,
-                    total1To4Family: 0, totalMFD: 0, totalMultifamily: 0, totalHomePurchase: 0, totalHomeImprovement: 0, totalRefinance: 0};
-                _.each(value, function(element) {
+                    total1To4Family: 0, totalMFD: 0, totalMultifamily: 0, totalHomePurchase: 0, totalHomeImprovement: 0, totalRefinance: 0},
+                    len = value.length;
+                for (var i=0; i < len; i++) {
+                    var element = value[i];
                     result.totalLAR++;
                     result.totalLoanAmount += +element.loanAmount;
 
@@ -295,7 +297,7 @@ HMDAEngine.prototype.getTotalsByMSA = function(hmdaFile) {
                     } else if (element.loanPurpose === '3') {
                         result.totalRefinance++;
                     }
-                });
+                }
                 return result;
             });
         }.bind(this))
@@ -315,11 +317,7 @@ HMDAEngine.prototype.runSyntactical = function(year) {
         console.time('time to run syntactical rules');
     }
     this.calcEstimatedTasks(year, ['ts','lar','hmda'], 'syntactical');
-    return Promise.all([
-        this.runEdits(year, 'ts', 'syntactical'),
-        this.runEdits(year, 'lar', 'syntactical'),
-        this.runEdits(year, 'hmda', 'syntactical')
-    ])
+    return this.getEditRunPromise(year, 'syntactical')
     .then(function() {
         /* istanbul ignore if */
         if (this.getDebug()) {
@@ -342,16 +340,10 @@ HMDAEngine.prototype.runValidity = function(year) {
     if (this.shouldUseLocalDB()) {
         validityPromise = this.loadCensusData()
         .then(function() {
-            return Promise.all([
-                this.runEdits(year, 'ts', 'validity'),
-                this.runEdits(year, 'lar', 'validity')
-            ]);
+            return this.getEditRunPromise(year, 'validity');
         }.bind(this));
     } else {
-        validityPromise = Promise.all([
-            this.runEdits(year, 'ts', 'validity'),
-            this.runEdits(year, 'lar', 'validity')
-        ]);
+        validityPromise = this.getEditRunPromise(year, 'validity');
     }
     /* istanbul ignore if */
     if (this.getDebug()) {
@@ -380,11 +372,7 @@ HMDAEngine.prototype.runQuality = function(year) {
         console.time('time to run quality rules');
     }
     this.calcEstimatedTasks(year, ['ts','lar','hmda'], 'quality');
-    return Promise.all([
-        this.runEdits(year, 'ts', 'quality'),
-        this.runEdits(year, 'lar', 'quality'),
-        this.runEdits(year, 'hmda', 'quality')
-    ])
+    return this.getEditRunPromise(year, 'quality')
     .then(function() {
         /* istanbul ignore if */
         if (this.getDebug()) {
@@ -407,9 +395,7 @@ HMDAEngine.prototype.runMacro = function(year) {
         console.time('time to run macro rules');
     }
     this.calcEstimatedTasks(year, ['hmda'], 'macro');
-    return Promise.all([
-        this.runEdits(year, 'hmda', 'macro')
-    ])
+    return this.getEditRunPromise(year, 'macro')
     .then(function() {
         /* istanbul ignore if */
         if (this.getDebug()) {
@@ -432,9 +418,7 @@ HMDAEngine.prototype.runSpecial = function(year) {
         console.time('time to run special rules');
     }
     this.calcEstimatedTasks(year, ['hmda'], 'special');
-    return Promise.all([
-        this.runEdits(year, 'hmda', 'special')
-    ])
+    return this.getEditRunPromise(year, 'special')
     .then(function() {
         /* istanbul ignore if */
         if (this.getDebug()) {

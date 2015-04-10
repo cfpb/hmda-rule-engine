@@ -86,7 +86,7 @@ describe('lib/utils', function() {
     });
 
     describe('getParsedRule', function() {
-        it('should return the function text and parsed rule for a given rule', function(done) {
+        it('should return the function text and parsed rule for a given single function rule', function(done) {
             var rule = {
                 'property': 'foo',
                 'condition': 'is_true'
@@ -104,7 +104,37 @@ describe('lib/utils', function() {
                 properties: {foo: true}
             };
 
-            expect(result[0]).to.be('return Promise.join(this.is_true(arguments[0]), function(promise0result) { return promise0result });');
+            expect(result[0]).to.be('return Promise.resolve(this.is_true(arguments[0]));');
+            expect(_.isEqual(result[1], parsedRule)).to.be.true();
+            done();
+        });
+        it('should return the function text and parsed rule for a given combination function rule', function(done) {
+            var rule = {
+                'and': [
+                    {
+                        'property': 'foo',
+                        'condition': 'is_true'
+                    },
+                    {
+                        'property': 'bar',
+                        'condition': 'is_false'
+                    }
+                ]
+            };
+            var Engine = function() {};
+            RuleParseAndExec.call(Engine.prototype);
+            var engine = new Engine();
+            var result = utils.getParsedRule.apply(engine, [rule]);
+            var parsedRule = {
+                argIndex: 2,
+                args: ['foo', 'bar'],
+                funcs: ['this.is_true(arguments[0])', 'this.is_false(arguments[1])'],
+                spreads: ['promise0result','promise1result'],
+                body: '(promise0result && promise1result)',
+                properties: {foo: true, bar: true}
+            };
+
+            expect(result[0]).to.be('return Promise.join(this.is_true(arguments[0]),this.is_false(arguments[1]), function(promise0result,promise1result) { return (promise0result && promise1result) });');
             expect(_.isEqual(result[1], parsedRule)).to.be.true();
             done();
         });

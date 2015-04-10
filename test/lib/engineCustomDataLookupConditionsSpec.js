@@ -37,7 +37,7 @@ EngineApiInterface.call(Engine.prototype);
 EngineLocalDB.call(Engine.prototype);
 EngineCustomDataLookupConditions.call(Engine.prototype);
 
-describe('EngineCustomConditions', function() {
+describe('EngineCustomDataLookupConditions', function() {
 
     before(function(done) {
         Engine.prototype.setHmdaJson = function(json) {
@@ -69,7 +69,10 @@ describe('EngineCustomConditions', function() {
                 transmittalSheet: {
                     agencyCode: '1',
                     respondentID: '0000000001'
-            }})
+                },
+                loanApplicationRegisters: [
+                ]
+            })
             .then(function(result) {
                 expect(result).to.be(true);
                 done();
@@ -590,6 +593,8 @@ describe('EngineCustomConditions', function() {
         it('should return true when the respondent is Independent Mortgage comapny or MBS', function(done) {
             var path = '/isNotIndependentMortgageCoOrMBS/' + engine.getRuleYear() + '/9/0123456789';
             mockAPI('get', path, 200, JSON.stringify({result: false}));
+            path = '/getMetroAreasOnRespondentPanel/' + engine.getRuleYear() + '/9/0123456789';
+            mockAPI('get', path, 200, JSON.stringify({'msa':['06920']}), true);
             var hmdaFile = JSON.parse(JSON.stringify(require('../testdata/complete.json'))).hmdaFile;
             var respondentID = '0123456789';
             var agencyCode = '9';
@@ -622,8 +627,6 @@ describe('EngineCustomConditions', function() {
         it('should return true when the respondent has a branch in the msa', function(done) {
             var path = '/isNotIndependentMortgageCoOrMBS/' + engine.getRuleYear() + '/9/0123456789';
             mockAPI('get', path, 200, JSON.stringify({result: true}));
-            path = '/isMetroAreaOnRespondentPanel/' + engine.getRuleYear() + '/9/0123456789/06920';
-            mockAPI('get', path, 200, JSON.stringify({result: true}));
             path = '/getMsaName/' + engine.getRuleYear() + '/35100';
             mockAPI('get', path, 200, JSON.stringify({ msaName: 'New Bern, NC' }));
             var hmdaFile = JSON.parse(JSON.stringify(require('../testdata/complete.json'))).hmdaFile;
@@ -638,8 +641,6 @@ describe('EngineCustomConditions', function() {
         it('should return error data when the respondent doesnt have a branch in the msa', function(done) {
             var path = '/isNotIndependentMortgageCoOrMBS/' + engine.getRuleYear() + '/9/0123456789';
             mockAPI('get', path, 200, JSON.stringify({result: true}));
-            path = '/isMetroAreaOnRespondentPanel/' + engine.getRuleYear() + '/9/0123456789/35100';
-            mockAPI('get', path, 200, JSON.stringify({result: false}));
             path = '/getMsaName/' + engine.getRuleYear() + '/35100';
             mockAPI('get', path, 200, JSON.stringify({ msaName: 'New Bern, NC' }));
             var hmdaFile = JSON.parse(JSON.stringify(require('../testdata/complete.json'))).hmdaFile;
