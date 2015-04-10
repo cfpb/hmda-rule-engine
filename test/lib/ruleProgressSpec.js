@@ -15,7 +15,6 @@ var EngineCustomConditions = require('../../lib/engineCustomConditions'),
         this._HMDA_JSON = {};
         this.progress = {
             events: {},
-            throttle: 0,
             count: 0,
             estimate: 0
         };
@@ -41,37 +40,47 @@ describe('RuleProgress', function() {
         done();
     });
 
-    it('should send out an event when calling postTaskCompletedMessage and count is correct', function(done) {
+    beforeEach(function(done) {
         engine.getProgress().count = 0;
-        engine.getProgress().throttle = 1;
+        engine.getProgress().estimate = 0;
+        done();
+    });
+
+    it('should calcuate a percent of 100', function(done) {
+        engine.getProgress().count = 0;
+        engine.getProgress().estimate = 1;
         engine.getProgress().events = new EventEmitter();
 
         engine.getProgress().events.on('progressStep', function(percent) {
-            expect(percent).to.be(1);
+            expect(percent).to.be(100);
             done();
         });
 
         engine.postTaskCompletedMessage();
     });
 
-    it('should send out an event with a larger percent if postTaskCompletedMessage is passed a count parameter', function(done) {
+    it('should calcuate a percent of 75', function(done) {
         engine.getProgress().count = 5;
-        engine.getProgress().throttle = 1;
+        engine.getProgress().estimate = 8;
         engine.getProgress().events = new EventEmitter();
 
         engine.getProgress().events.on('progressStep', function(percent) {
-            expect(percent).to.be(10);
+            expect(percent).to.be(75);
             done();
         });
-
-        engine.postTaskCompletedMessage(5);
+        engine.postTaskCompletedMessage();
     });
 
-    it('should not send out an event calling postTaskCompletedMessage with count not equal to throttle', function(done) {
-        engine.getProgress().count = 0;
-        engine.getProgress().throttle = 2;
-        expect(engine.postTaskCompletedMessage()).to.be(false);
-        done();
+    it('should calcuate a percent of 50', function(done) {
+        engine.getProgress().count = 1;
+        engine.getProgress().estimate = 4;
+        engine.getProgress().events = new EventEmitter();
+
+        engine.getProgress().events.on('progressStep', function(percent) {
+            expect(percent).to.be(50);
+            done();
+        });
+        engine.postTaskCompletedMessage();
     });
 
     it('should calculate estimated tasks for transmittal sheet scope', function(done) {
@@ -85,7 +94,7 @@ describe('RuleProgress', function() {
         engine.clearProgress();
         engine._HMDA_JSON = JSON.parse(JSON.stringify(require('../testdata/complete.json')));
         engine.calcEstimatedTasks('2013',['lar'],'validity');
-        expect(engine.getProgress().estimate).to.be(189);
+        expect(engine.getProgress().estimate).to.be(63);
         done();
     });
 
@@ -93,7 +102,7 @@ describe('RuleProgress', function() {
         engine.clearProgress();
         engine._HMDA_JSON = JSON.parse(JSON.stringify(require('../testdata/complete.json')));
         engine.calcEstimatedTasks('2013',['hmda'],'macro');
-        expect(engine.getProgress().estimate).to.be(167);
+        expect(engine.getProgress().estimate).to.be(33);
         done();
     });
 
