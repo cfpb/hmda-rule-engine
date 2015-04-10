@@ -428,6 +428,13 @@ HMDAEngine.prototype.runLarType = function(year, type, lar) {
     }
 };
 
+HMDAEngine.prototype.runLar = function(year, lar) {
+    var editTypes = hmdaRuleSpec.getValidEditTypes();
+    return Promise.each(editTypes, function(currentEditType) {
+        return this.runLarType(year, currentEditType, lar);
+    }.bind(this));
+};
+
 /*
  * -----------------------------------------------------
  * Public Interface for CSV Exporting
