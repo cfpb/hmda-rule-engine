@@ -485,6 +485,38 @@ describe('Engine', function() {
         });
     });
 
+    describe('runLarType', function() {
+        it('should return no errors for a passing lar', function(done) {
+            var lar = '284-15426429304320874623954000000000020130117111100256212013012019740080590098.40255    8    2500508   NA   21                                                                                                                                                                                                                                                                              ';
+            rewiredEngine.clearErrors();
+            var emptyErrors = {
+                'syntactical': {},
+                'validity': {},
+                'quality': {},
+                'macro': {},
+                'special': {}
+            };
+
+            rewiredEngine.runLarType('2013', 'validity', lar)
+            .then(function() {
+                expect(_.isEqual(emptyErrors, rewiredEngine.getErrors())).to.be.true();
+                done();
+            })
+        });
+
+        it('should return a set of errors for a non passing lar', function(done) {
+            var lar = '201234567899ABCDEFGHIJKLMNOPQRSTUVWXY20130117432110000152013011906920060340100.01457432187654129000098701.0524B                                                                                                                                                                                                                                                                            x ';
+            rewiredEngine.clearErrors();
+            var expectedErrors = require('./testdata/errors-validity-single');
+
+            rewiredEngine.runLarType('2013', 'validity', lar)
+            .then(function() {
+                expect(_.isEqual(expectedErrors, rewiredEngine.getErrors())).to.be.true();
+                done();
+            });
+        });
+    });
+
     describe('getTotalsByMSA', function() {
         it('should group the LARs by metro area and calculate totals for non-depository, filtering out totals < 5', function(done) {
             var hmdaFile = JSON.parse(JSON.stringify(require('./testdata/loans-to-total.json'))).hmdaFile;

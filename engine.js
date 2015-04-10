@@ -38,6 +38,7 @@ function HMDAEngine() {
     this.errors = new Errors();
     this._DEBUG_LEVEL = 0;
     this._HMDA_JSON = {};
+    this._CONCURRENT_RULES = 10;
     this._CONCURRENT_LARS = 100;
     this._LOCAL_DB = null;
     this._USE_LOCAL_DB = false;
@@ -413,6 +414,25 @@ HMDAEngine.prototype.runSpecial = function(year) {
         return utils.resolveError(err);
     });
 };
+
+HMDAEngine.prototype.runLarType = function(year, type, lar) {
+    var fileSpec = hmdaRuleSpec.getFileSpec(year);
+    var parsedLar = hmdajson.parseLine('loanApplicationRegister', fileSpec.loanApplicationRegister, lar);
+    var larPromise = this.getEditRunPromiseLar(year, type, parsedLar.record);
+    if (larPromise) {
+        return larPromise
+        .then(function() {})
+        .catch(function(err) {
+            return utils.resolveError(err);
+        });
+    }
+};
+
+/*
+ * -----------------------------------------------------
+ * Public Interface for CSV Exporting
+ * -----------------------------------------------------
+ */
 
 /**
  * Export errors in csv format for an individual edit
