@@ -425,13 +425,16 @@ HMDAEngine.prototype.runSpecial = function(year) {
 HMDAEngine.prototype.runLarType = function(year, type, lar) {
     var fileSpec = hmdaRuleSpec.getFileSpec(year);
     var parsedLar = hmdajson.parseLine('loanApplicationRegister', fileSpec.loanApplicationRegister, lar);
-    var larPromise = this.getEditRunPromiseLar(year, type, parsedLar.record);
-    if (larPromise) {
-        return larPromise
-        .then(function() {})
-        .catch(function(err) {
-            return utils.resolveError(err);
-        });
+
+    if (type !== 'special' && type !== 'macro') {
+        var larPromise = this.getEditRunPromiseLar(year, type, parsedLar.record);
+        if (larPromise) {
+            return larPromise
+            .then(function() {})
+            .catch(function(err) {
+                return utils.resolveError(err);
+            });
+        }
     }
 };
 
