@@ -24,6 +24,7 @@ describe('EngineCustomConditions', function() {
             this._HMDA_JSON = json;
         };
         Engine.prototype.getDebug = function() { return 0; };
+        Engine.prototype.postTaskCompletedMessage = function() { };
         engine = new Engine();
         done();
     });
@@ -298,7 +299,7 @@ describe('EngineCustomConditions', function() {
             ]
         };
 
-        it('should return false if any LARs have duplicate loanNumbers', function(done) {
+        it('should return array with errors if any LARs have duplicate loanNumbers', function(done) {
             var result = engine.hasUniqueLoanNumbers(hmdaFile);
 
             expect(result.length).to.be(1);
@@ -307,11 +308,11 @@ describe('EngineCustomConditions', function() {
             done();
         });
 
-        it('should return true if no LARs have the same loanNumber', function(done) {
+        it('should return empty array if no LARs have the same loanNumber', function(done) {
             hmdaFile.loanApplicationRegisters[1].loanNumber = '2';
             var result = engine.hasUniqueLoanNumbers(hmdaFile);
 
-            expect(result).to.be(true);
+            expect(result.length).to.be(0);
             done();
         });
     });

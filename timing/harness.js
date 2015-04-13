@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+#!/usr/bin/env node --max-old-space-size=3072
 
 /* global -Promise */
 'use strict';

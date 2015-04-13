@@ -4,7 +4,7 @@
 
 global.expect = require('must');
 global.rewire = require('rewire');
-global._ = require('underscore');
+global._ = require('lodash');
 global.port = 0;
 
 var child = require('child_process').fork(__dirname + '/server.js');

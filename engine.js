@@ -2,17 +2,21 @@
 /* global -Promise */
 'use strict';
 
-var EngineBaseConditions = require('./lib/engineBaseConditions'),
+var CSVProcessor = require('./lib/csvProcessor'),
+    StringStreamPromise = require('./lib/stringStreamPromise'),
+    EngineBaseConditions = require('./lib/engineBaseConditions'),
     EngineCustomConditions = require('./lib/engineCustomConditions'),
     EngineCustomDataLookupConditions = require('./lib/engineCustomDataLookupConditions'),
     EngineApiInterface = require('./lib/engineApiInterface'),
     EngineLocalDB = require('./lib/engineLocalDB'),
     RuleParseAndExec = require('./lib/ruleParseAndExec'),
+    RuleProgress = require('./lib/ruleProgress'),
     utils = require('./lib/utils'),
     hmdajson = require('./lib/hmdajson'),
     hmdaRuleSpec = require('hmda-rule-spec'),
-    _ = require('underscore'),
+    _ = require('lodash'),
     stream = require('stream'),
+    EventEmitter = require('events').EventEmitter,
     Promise = require('bluebird');
 
 function Errors() {
@@ -25,6 +29,14 @@ function Errors() {
     };
 }
 
+function Progress() {
+    return {
+        events: new EventEmitter(),
+        count: 0,
+        estimate: 0
+    };
+}
+
 /**
  * Construct a new HMDAEngine instance
  * @constructs HMDAEngine
@@ -33,9 +45,10 @@ function HMDAEngine() {
     this.apiURL;
     this.currentYear;
     this.errors = new Errors();
+    this.progress = new Progress();
     this._DEBUG_LEVEL = 0;
     this._HMDA_JSON = {};
-    this._CONCURRENT_RULES = 10;
+    this._CONCURRENT_LARS = 100;
     this._LOCAL_DB = null;
     this._USE_LOCAL_DB = false;
 }
@@ -94,6 +107,23 @@ HMDAEngine.prototype.clearErrors = function() {
 HMDAEngine.prototype.getErrors = function() {
     return this.errors;
 };
+
+/**
+ * clears out the counts and estimates for the progress object
+ */
+HMDAEngine.prototype.clearProgress = function() {
+    this.progress.count = 0;
+    this.progress.estimate = 0;
+};
+
+/**
+ * Get the progress object used for task completion events displayed on the progress bar
+ * @return {object} Progress object containing an eventemitter for progress notification
+ */
+HMDAEngine.prototype.getProgress = function() {
+    return this.progress;
+};
+
 
 /**
  * Clear the current HMDA JSON object from the engine
@@ -234,8 +264,10 @@ HMDAEngine.prototype.getTotalsByMSA = function(hmdaFile) {
         .collect(function(value, key) {
             return this.getMSAName(key).then(function(msaName) {
                 var result = {msaCode: key, msaName: msaName, totalLAR: 0, totalLoanAmount: 0, totalConventional: 0, totalFHA: 0, totalVA: 0, totalFSA: 0,
-                    total1To4Family: 0, totalMFD: 0, totalMultifamily: 0, totalHomePurchase: 0, totalHomeImprovement: 0, totalRefinance: 0};
-                _.each(value, function(element) {
+                    total1To4Family: 0, totalMFD: 0, totalMultifamily: 0, totalHomePurchase: 0, totalHomeImprovement: 0, totalRefinance: 0},
+                    len = value.length;
+                for (var i=0; i < len; i++) {
+                    var element = value[i];
                     result.totalLAR++;
                     result.totalLoanAmount += +element.loanAmount;
 
@@ -264,7 +296,7 @@ HMDAEngine.prototype.getTotalsByMSA = function(hmdaFile) {
                     } else if (element.loanPurpose === '3') {
                         result.totalRefinance++;
                     }
-                });
+                }
                 return result;
             });
         }.bind(this))
@@ -283,11 +315,8 @@ HMDAEngine.prototype.runSyntactical = function(year) {
     if (this.getDebug()) {
         console.time('time to run syntactical rules');
     }
-    return Promise.all([
-        this.runEdits(year, 'ts', 'syntactical'),
-        this.runEdits(year, 'lar', 'syntactical'),
-        this.runEdits(year, 'hmda', 'syntactical')
-    ])
+    this.calcEstimatedTasks(year, ['ts','lar','hmda'], 'syntactical');
+    return this.getEditRunPromise(year, 'syntactical')
     .then(function() {
         /* istanbul ignore if */
         if (this.getDebug()) {
@@ -306,19 +335,14 @@ HMDAEngine.prototype.runSyntactical = function(year) {
  */
 HMDAEngine.prototype.runValidity = function(year) {
     var validityPromise;
+    this.calcEstimatedTasks(year, ['ts','lar'], 'validity');
     if (this.shouldUseLocalDB()) {
         validityPromise = this.loadCensusData()
         .then(function() {
-            return Promise.all([
-                this.runEdits(year, 'ts', 'validity'),
-                this.runEdits(year, 'lar', 'validity')
-            ]);
+            return this.getEditRunPromise(year, 'validity');
         }.bind(this));
     } else {
-        validityPromise = Promise.all([
-            this.runEdits(year, 'ts', 'validity'),
-            this.runEdits(year, 'lar', 'validity')
-        ]);
+        validityPromise = this.getEditRunPromise(year, 'validity');
     }
     /* istanbul ignore if */
     if (this.getDebug()) {
@@ -346,11 +370,8 @@ HMDAEngine.prototype.runQuality = function(year) {
     if (this.getDebug()) {
         console.time('time to run quality rules');
     }
-    return Promise.all([
-        this.runEdits(year, 'ts', 'quality'),
-        this.runEdits(year, 'lar', 'quality'),
-        this.runEdits(year, 'hmda', 'quality')
-    ])
+    this.calcEstimatedTasks(year, ['ts','lar','hmda'], 'quality');
+    return this.getEditRunPromise(year, 'quality')
     .then(function() {
         /* istanbul ignore if */
         if (this.getDebug()) {
@@ -372,9 +393,8 @@ HMDAEngine.prototype.runMacro = function(year) {
     if (this.getDebug()) {
         console.time('time to run macro rules');
     }
-    return Promise.all([
-        this.runEdits(year, 'hmda', 'macro')
-    ])
+    this.calcEstimatedTasks(year, ['hmda'], 'macro');
+    return this.getEditRunPromise(year, 'macro')
     .then(function() {
         /* istanbul ignore if */
         if (this.getDebug()) {
@@ -396,9 +416,8 @@ HMDAEngine.prototype.runSpecial = function(year) {
     if (this.getDebug()) {
         console.time('time to run special rules');
     }
-    return Promise.all([
-        this.runEdits(year, 'hmda', 'special')
-    ])
+    this.calcEstimatedTasks(year, ['hmda'], 'special');
+    return this.getEditRunPromise(year, 'special')
     .then(function() {
         /* istanbul ignore if */
         if (this.getDebug()) {
@@ -408,6 +427,68 @@ HMDAEngine.prototype.runSpecial = function(year) {
     .catch(function(err) {
         return utils.resolveError(err);
     });
+};
+
+/**
+ * Export errors in csv format for an individual edit
+ * @param {string} errorType    The edit category. Valid values: 'syntactical', 'validity', 'quality', 'macro', 'special'
+ * @param {string} errorID      The ID of the edit to export
+ * @return {object}             A readable stream of the csv output
+ * @see {@link CSVProcessor|CSVProcessor} for more info
+ */
+HMDAEngine.prototype.exportIndividualStream = function(errorType, errorID) {
+    var csvProcessorIndividual = new CSVProcessor(this.getRuleYear(), 'individual');
+    if (this.getErrors()[errorType][errorID]) {
+        var errorsIndividual = {};
+        errorsIndividual[errorID] = this.getErrors()[errorType][errorID];
+        csvProcessorIndividual.write(errorsIndividual);
+    }
+
+    return csvProcessorIndividual;
+};
+
+/**
+ * Export errors in csv format for all errors of a specific type
+ * @param {string} errorType    The edit category. Valid values: 'syntactical', 'validity', 'quality',
+ * @return {object}             A readable stream of the csv output
+ * @see {@link CSVProcessor|CSVProcessor} for more info
+ */
+HMDAEngine.prototype.exportTypeStream = function(errorType) {
+    var csvProcessorType = new CSVProcessor(this.getRuleYear(), 'type');
+    if (this.getErrors()[errorType] && errorType !== 'macro' && errorType !== 'special') {
+        csvProcessorType.write(this.getErrors()[errorType]);
+    }
+
+    return csvProcessorType;
+};
+
+/**
+ * Export errors in csv format for an individual edit
+ * @param {string} errorType    The edit category. Valid values: 'syntactical', 'validity', 'quality', 'macro', 'special'
+ * @param {string} errorID      The ID of the edit to export
+ * @return {object}             A promise for a string containing the csv output
+ * @see {@link CSVProcessor|CSVProcessor} for more info
+ */
+HMDAEngine.prototype.exportIndividualPromise = function(errorType, errorID) {
+    var csvProcessorIndividual = this.exportIndividualStream(errorType, errorID);
+
+    var promise = StringStreamPromise(csvProcessorIndividual);
+    csvProcessorIndividual.end();
+    return promise;
+};
+
+/**
+ * Export errors in csv format for all errors of a specific type
+ * @param {string} errorType    The edit category. Valid values: 'syntactical', 'validity', 'quality',
+ * @return {object}             A promise for a string containing the csv output
+ * @see {@link CSVProcessor|CSVProcessor} for more info
+ */
+HMDAEngine.prototype.exportTypePromise = function(errorType) {
+    var csvProcessorType = this.exportTypeStream(errorType);
+
+    var promise = StringStreamPromise(csvProcessorType);
+    csvProcessorType.end();
+    return promise;
 };
 
 /*
@@ -422,6 +503,7 @@ EngineBaseConditions.call(HMDAEngine.prototype);
 EngineCustomConditions.call(HMDAEngine.prototype);
 EngineCustomDataLookupConditions.call(HMDAEngine.prototype);
 RuleParseAndExec.call(HMDAEngine.prototype);
+RuleProgress.call(HMDAEngine.prototype);
 
 /*
  * -----------------------------------------------------
