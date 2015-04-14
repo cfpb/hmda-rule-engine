@@ -16,7 +16,6 @@ var CSVProcessor = require('./lib/csvProcessor'),
     hmdaRuleSpec = require('hmda-rule-spec'),
     _ = require('lodash'),
     stream = require('stream'),
-    EventEmitter = require('events').EventEmitter,
     Promise = require('bluebird');
 
 function Errors() {
@@ -29,14 +28,6 @@ function Errors() {
     };
 }
 
-function Progress() {
-    return {
-        events: new EventEmitter(),
-        count: 0,
-        estimate: 0
-    };
-}
-
 /**
  * Construct a new HMDAEngine instance
  * @constructs HMDAEngine
@@ -45,12 +36,12 @@ function HMDAEngine() {
     this.apiURL;
     this.currentYear;
     this.errors = new Errors();
-    this.progress = new Progress();
     this._DEBUG_LEVEL = 0;
     this._HMDA_JSON = {};
     this._CONCURRENT_LARS = 100;
     this._LOCAL_DB = null;
     this._USE_LOCAL_DB = false;
+    this.initProgress();
 }
 
 /*
@@ -107,23 +98,6 @@ HMDAEngine.prototype.clearErrors = function() {
 HMDAEngine.prototype.getErrors = function() {
     return this.errors;
 };
-
-/**
- * clears out the counts and estimates for the progress object
- */
-HMDAEngine.prototype.clearProgress = function() {
-    this.progress.count = 0;
-    this.progress.estimate = 0;
-};
-
-/**
- * Get the progress object used for task completion events displayed on the progress bar
- * @return {object} Progress object containing an eventemitter for progress notification
- */
-HMDAEngine.prototype.getProgress = function() {
-    return this.progress;
-};
-
 
 /**
  * Clear the current HMDA JSON object from the engine
@@ -203,6 +177,13 @@ HMDAEngine.prototype.getFileSpec = function(year) {
     return hmdaRuleSpec.getFileSpec(year);
 };
 
+/**
+ * Get the progress object used for task completion events displayed on the progress bar
+ * @return {object} Progress object containing an eventemitter for progress notification
+ */
+HMDAEngine.prototype.getFileProgress = function() {
+    return hmdajson.getProgress();
+};
 
 /*
  * -----------------------------------------------------
