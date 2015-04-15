@@ -10,21 +10,8 @@
 var EngineCustomConditions = require('../../lib/engineCustomConditions'),
     EngineBaseConditions = require('../../lib/engineBaseConditions'),
     RuleProgress = require('../../lib/ruleProgress'),
-    EventEmitter = require('events').EventEmitter,
     Engine = function() {
         this._HMDA_JSON = {};
-        this.progress = {
-            events: {},
-            count: 0,
-            estimate: 0
-        };
-        this.getProgress = function() {
-            return this.progress;
-        };
-        this.clearProgress = function() {
-            this.progress.estimate = 0;
-            this.progress.count = 0;
-        };
         this.getHmdaJson = function() {
             return this._HMDA_JSON;
         };
@@ -41,15 +28,13 @@ describe('RuleProgress', function() {
     });
 
     beforeEach(function(done) {
-        engine.getProgress().count = 0;
-        engine.getProgress().estimate = 0;
+        engine.initProgress();
         done();
     });
 
     it('should calcuate a percent of 100', function(done) {
         engine.getProgress().count = 0;
         engine.getProgress().estimate = 1;
-        engine.getProgress().events = new EventEmitter();
 
         engine.getProgress().events.on('progressStep', function(percent) {
             expect(percent).to.be(100);
@@ -62,7 +47,6 @@ describe('RuleProgress', function() {
     it('should calcuate a percent of 75', function(done) {
         engine.getProgress().count = 5;
         engine.getProgress().estimate = 8;
-        engine.getProgress().events = new EventEmitter();
 
         engine.getProgress().events.on('progressStep', function(percent) {
             expect(percent).to.be(75);
@@ -74,7 +58,6 @@ describe('RuleProgress', function() {
     it('should calcuate a percent of 50', function(done) {
         engine.getProgress().count = 1;
         engine.getProgress().estimate = 4;
-        engine.getProgress().events = new EventEmitter();
 
         engine.getProgress().events.on('progressStep', function(percent) {
             expect(percent).to.be(50);

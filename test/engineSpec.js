@@ -195,6 +195,17 @@ describe('Engine', function() {
         });
     });
 
+    describe('getFileProgress', function() {
+        it('should return a progress object', function(done) {
+            var progress = engine.getFileProgress();
+            expect(progress).to.have.property('count');
+            expect(progress.count).to.be(0);
+            expect(progress).to.have.property('estimate');
+            expect(progress.estimate).to.be(0);
+            done();
+        });
+    });
+
     describe('fileToJson', function() {
         it('should return json object when hmda file is valid and provided by stream', function(done) {
             var fs = require('fs');
@@ -520,7 +531,7 @@ describe('Engine', function() {
             engine.errors = require('./testdata/errors-syntactical');
             var expectedOutput = fs.readFileSync('test/testdata/syntactical.csv').toString();
             var testPromise = engine.exportTypePromise('syntactical');
-            
+
             testPromise.then(function(output) {
                 expect(_.isEqual(expectedOutput, output)).to.be.true();
                 done();
