@@ -279,11 +279,14 @@ HMDAEngine.prototype.getTotalsByMSA = function(hmdaFile) {
                     }
                 }
                 return result;
-            });
+            })
+            .cancellable();
         }.bind(this))
         .sortBy('msaCode')
-        .value());
-    }.bind(this));
+        .value())
+        .cancellable();
+    }.bind(this))
+    .cancellable();
 };
 
 /**
@@ -306,7 +309,8 @@ HMDAEngine.prototype.runSyntactical = function(year) {
     }.bind(this))
     .catch(function(err) {
         return utils.resolveError(err);
-    });
+    })
+    .cancellable();
 };
 
 /**
