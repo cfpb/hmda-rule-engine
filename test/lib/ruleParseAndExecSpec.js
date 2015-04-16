@@ -23,7 +23,16 @@ describe('RuleParseAndExec', function() {
         Engine.prototype.setHmdaJson = function(json) {
             this._HMDA_JSON = json;
         };
+        Engine.prototype.getHmdaJson = function() {
+            return this._HMDA_JSON;
+        };
+        Engine.prototype.getDebug = function() {
+            return false;
+        };
         Engine.prototype.postTaskCompletedMessage = function() { };
+        Engine.prototype.setRuleYear= function(year) {
+            this.currentYear = year;
+        };
         engine = new Engine();
         done();
     });
@@ -302,6 +311,17 @@ describe('RuleParseAndExec', function() {
             hmdaJson = JSON.parse(JSON.stringify(require('../testdata/complete.json')));
             topLevelObj = hmdaJson.hmdaFile.transmittalSheet;
             engine.setHmdaJson(hmdaJson);
+        });
+
+        it('should be cancellable', function(done) {
+            rule = {
+                'property': 'hmdaFile',
+                'condition': 'call',
+                'function': 'hasRecordIdentifiersForEachRow'
+            };
+
+            expect(engine.execRule(hmdaJson, rule).isCancellable()).to.be.true();
+            done();
         });
 
         it('should return true for a passing function rule', function(done) {
@@ -940,6 +960,26 @@ describe('RuleParseAndExec', function() {
                 done();
             });
         });
+    });
+
+    describe('getEditRunPromise', function() {
+
+        var hmdaJson = {};
+        var topLevelObj = {};
+
+        beforeEach(function() {
+            hmdaJson = JSON.parse(JSON.stringify(require('../testdata/complete.json')));
+            engine.setHmdaJson(hmdaJson);
+        });
+
+        it('should be cancellable', function(done) {
+            var prom = engine.getEditRunPromise('2013', 'syntactical')
+            .catch(function() {
+                expect(prom.isCancellable()).to.be.true();
+                done();
+            });
+        });
+
     });
 
 

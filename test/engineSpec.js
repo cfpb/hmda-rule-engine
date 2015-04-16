@@ -286,6 +286,17 @@ describe('Engine', function() {
                 done();
             });
         });
+
+        it('should be cancellable', function(done) {
+            // S013
+            var path = '/isValidTimestamp/' + engine.getRuleYear() + '/9/0123456789/201301171330';
+            mockAPI('get', path, 200, JSON.stringify({result: true}), true);
+            var prom = rewiredEngine.runSyntactical('2013')
+            .then(function() {
+                expect(prom.isCancellable()).to.be.true();
+                done();
+            });
+        });
     });
 
     describe('runValidity', function() {
@@ -319,6 +330,15 @@ describe('Engine', function() {
                 done();
             });
         });
+
+        it('should be cancellable', function(done) {
+            var prom = rewiredEngine.runValidity('2013')
+            .then(function(result) {
+                expect(prom.isCancellable()).to.be.true();
+                done();
+            });
+        });
+
     });
 
     describe('runQuality', function() {
@@ -365,6 +385,28 @@ describe('Engine', function() {
                 done();
             });
         });
+
+        it('should be cancellable', function(done) {
+              // Q029
+            var path = '/isValidCensusCombination/' + engine.getRuleYear() + '/06/034/0100.01';
+            mockAPI('get', path, 200, JSON.stringify({result: true, msa_code: '06920'}), true);
+
+            path = '/isChildFI/' + engine.getRuleYear() + '/9/0123456789';
+            mockAPI('get', path, 200, JSON.stringify({result: true}));
+
+            // Q030
+            path = '/isCraReporter/' + engine.getRuleYear() + '/0123456789';
+            mockAPI('get', path, 200, JSON.stringify({result: true}), true);
+            path = '/isValidCensusInMSA/' + engine.getRuleYear() + '/06920/06/034/0100.01';
+            mockAPI('get', path, 200, JSON.stringify({result: true}), true);
+
+            var prom = rewiredEngine.runQuality('2013')
+            .then(function(result) {
+                expect(prom.isCancellable()).to.be.true();
+                done();
+            });
+        });
+
     });
 
     describe('runMacro', function() {
@@ -394,15 +436,22 @@ describe('Engine', function() {
             });
         });
 
-        // TODO: When macro API elements are connected, re-enable
-        // it('should return an error when there is a connection problem', function(done) {
-        //     engine.setAPIURL('/');
-        //     engine.runMacro('2013')
-        //     .catch(function(err) {
-        //         expect(err).to.be('There was a problem connecting to the HMDA server. Please check your connection or try again later.');
-        //         done();
-        //     });
-        // });
+        it('should return an error when there is a connection problem', function(done) {
+            engine.setAPIURL('/');
+            engine.runMacro('2013')
+            .catch(function(err) {
+                expect(err.message).to.be('There was a problem connecting to the HMDA server. Please check your connection or try again later.');
+                done();
+            });
+        });
+
+        it('should be cancellable', function(done) {
+            var prom = rewiredEngine.runMacro('2013')
+            .then(function(result) {
+                expect(prom.isCancellable()).to.be.true();
+                done();
+            });
+        });
     });
 
     describe('runSpecial', function() {
@@ -479,6 +528,22 @@ describe('Engine', function() {
                 done();
             });
         });
+
+        it('should be cancellable', function(done) {
+            var hmdaFile = JSON.parse(JSON.stringify(require('./testdata/loans-to-total.json'))).hmdaFile;
+            var msaCode = '06920';
+            var path = '/getMSAName/' + engine.getRuleYear() + '/' + msaCode;
+            mockAPI('get', path, 200, JSON.stringify({msaName: ''}));
+            path = '/getMetroAreasOnRespondentPanel/2013/7/0123456789';
+            mockAPI('get', path, 200, JSON.stringify({msa: []}));
+
+            var prom = engine.getTotalsByMSA(hmdaFile)
+            .then(function() {
+                expect(prom.isCancellable()).to.be.true();
+                done();
+            });
+        });
+
     });
 
     describe('exportIndividualStream', function() {
