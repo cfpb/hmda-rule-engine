@@ -417,25 +417,27 @@ HMDAEngine.prototype.runSpecial = function(year) {
 
 /**
  * Run edits of a single type for an individual lar
- * @param {string} year     The specific year of the edit specification to work with
- * @param {string} type     The edit type to run. Valid values: 'syntactical', 'validity', 'quality'
- * @param {string} lar      The lar to run in .dat format
- * @param {object} errors   Optional previous set of errors to append the result to 
- * @return {Promise}        A promise for the finished edit process
+ * @param {string} year         The specific year of the edit specification to work with
+ * @param {string} type         The edit type to run. Valid values: 'syntactical', 'validity', 'quality'
+ * @param {string} lar          The lar to run in .dat format
+ * @param {object} editResults  Optional previous set of errors to append the result to 
+ * @return {Promise}            A promise for the finished edit process
  */
-HMDAEngine.prototype.runLarType = function(year, type, lar, errors) {
+HMDAEngine.prototype.runLarType = function(year, type, lar, editResults) {
     var fileSpec = hmdaRuleSpec.getFileSpec(year);
     var parsedLar = hmdajson.parseLine('loanApplicationRegister', fileSpec.loanApplicationRegister, lar);
 
-    if (!errors) {
-        errors = new Errors();
+    if (!editResults) {
+        editResults = {'errors': new Errors()};
     }
 
     if (type !== 'special' && type !== 'macro') {
-        var larPromise = this.getEditRunPromiseLar(year, type, parsedLar.record);
+        var larPromise = this.getEditRunPromiseLar(year, type, parsedLar.record, editResults);
         if (larPromise) {
             return larPromise
-            .then(function() {})
+            .then(function() {
+                return editResults.errors;
+            })
             .catch(function(err) {
                 return utils.resolveError(err);
             });
@@ -445,20 +447,31 @@ HMDAEngine.prototype.runLarType = function(year, type, lar, errors) {
 
 /**
  * Run all edits for an individual lar
- * @param {string} year     The specific year of the edit specification to work with
- * @param {string} lar      The lar to run in .dat format
- * @return {Promise}        A promise for the finished edit process
+ * @param {string} year         The specific year of the edit specification to work with
+ * @param {string} lar          The lar to run in .dat format
+ * @param {object} editResults  Optional previous set of errors to append the result to
+ * @return {Promise}            A promise for the finished edit process
  */
-HMDAEngine.prototype.runLar = function(year, lar, errors) {
+HMDAEngine.prototype.runLar = function(year, lar, editResults) {
     var editTypes = hmdaRuleSpec.getValidEditTypes();
 
-    if (!errors) {
-        errors = new Errors();
+    if (!editResults) {
+        editResults = {'errors': new Errors()};
     }
 
     return Promise.each(editTypes, function(currentEditType) {
-        return this.runLarType(year, currentEditType, lar, errors);
-    }.bind(this));
+        var larPromise = this.runLarType(year, currentEditType, lar, editResults);
+        if (larPromise) {
+            return larPromise
+            .then(function() {})
+            .catch(function(err) {
+                return utils.resolveError(err);
+            });
+        }
+    }.bind(this))
+    .then(function() {
+        return editResults.errors;
+    });
 };
 
 /*
