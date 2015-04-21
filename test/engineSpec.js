@@ -528,6 +528,7 @@ describe('Engine', function() {
 
             rewiredEngine.runLar('2013', lar)
             .then(function(errors) {
+                console.log(errors);
                 expect(_.isEqual(emptyErrors, errors)).to.be.true();
                 done();
             });   
