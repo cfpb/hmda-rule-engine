@@ -487,6 +487,7 @@ describe('Engine', function() {
 
     describe('runLarType', function() {
         it('should return empty errors for a passing lar', function(done) {
+            rewiredEngine.clearErrors();
             var lar = '284-15426429304320874623954000000000020130117111100256212013012019740080590098.40255    8    2500508   NA   21                                                                                                                                                                                                                                                                              ';
             var emptyErrors = {
                 'syntactical': {},
@@ -504,6 +505,7 @@ describe('Engine', function() {
         });
 
         it('should return a set of errors for a non passing lar', function(done) {
+            rewiredEngine.clearErrors();
             var lar = '201234567899ABCDEFGHIJKLMNOPQRSTUVWXY20130117432110000152013011906920060340100.01457432187654129000098701.0524B                                                                                                                                                                                                                                                                            x ';
             var expectedErrors = require('./testdata/errors-validity-single');
 
@@ -517,6 +519,7 @@ describe('Engine', function() {
 
     describe('runLar', function() {
         it('should return empty errors for a passing lar', function(done) {
+            rewiredEngine.clearErrors();
             var lar = '284-15426429304320874623954000000000020130117111100256212013012019740080590098.40255    8    2500508   NA   21                                                                                                                                                                                                                                                                              ';
             var emptyErrors = {
                 'syntactical': {},
@@ -528,13 +531,13 @@ describe('Engine', function() {
 
             rewiredEngine.runLar('2013', lar)
             .then(function(errors) {
-                console.log(errors);
                 expect(_.isEqual(emptyErrors, errors)).to.be.true();
                 done();
             });   
         });
 
         it('should return a set of errors for a non passing lar', function(done) {
+            rewiredEngine.clearErrors();
             var lar = '201234567899ABCDEFGHIJKLMNOPQRSTUVWXY20130117432110000152013011906920060340100.01457432187654129000098701.0524B                                                                                                                                                                                                                                                                            x ';
             var expectedErrors = require('./testdata/errors-single');
 
