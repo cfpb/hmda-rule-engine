@@ -947,14 +947,12 @@ describe('RuleParseAndExec', function() {
 
         it('should return true for a passing S270 rule', function(done) {
             rule = {
-                'property': 'actionDate',
+                'property': 'hmdaFile',
                 'condition': 'call',
-                'function': 'isActionDateInActivityYear',
-                'args': ['actionDate', 'hmdaFile.transmittalSheet.activityYear']
+                'function': 'isActionDateInActivityYear'
             };
 
-            topLevelObj = hmdaJson.hmdaFile.loanApplicationRegisters[0];
-            engine.execRule(topLevelObj, rule)
+            engine.execRule(hmdaJson.hmdaFile, rule)
             .then(function(result) {
                 expect(result.length).to.be(0);
                 done();
@@ -981,6 +979,4 @@ describe('RuleParseAndExec', function() {
         });
 
     });
-
-
 });

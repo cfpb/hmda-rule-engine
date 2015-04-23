@@ -415,6 +415,53 @@ HMDAEngine.prototype.runSpecial = function(year) {
 };
 
 /**
+ * Run edits of a single type for an individual lar
+ * @param {string} year     The specific year of the edit specification to work with
+ * @param {string} type     The edit type to run. Valid values: 'syntactical', 'validity', 'quality'
+ * @param {string} lar      The lar to run in .dat format
+ * @return {Promise}        A promise for the finished edit process
+ */
+HMDAEngine.prototype.runLarType = function(year, type, lar) {
+    var fileSpec = hmdaRuleSpec.getFileSpec(year);
+    var parsedLar = hmdajson.parseLine('loanApplicationRegister', fileSpec.loanApplicationRegister, lar);
+
+    if (type !== 'special' && type !== 'macro') {
+        var larPromise = this.getEditRunPromiseLar(year, type, parsedLar.record);
+        if (larPromise) {
+            return larPromise
+            .then(function() {
+                return this.getErrors();
+            }.bind(this))
+            .catch(function(err) {
+                return utils.resolveError(err);
+            });
+        }
+    }
+};
+
+/**
+ * Run all edits for an individual lar
+ * @param {string} year     The specific year of the edit specification to work with
+ * @param {string} lar      The lar to run in .dat format
+ * @return {Promise}        A promise for the finished edit process
+ */
+HMDAEngine.prototype.runLar = function(year, lar) {
+    var editTypes = hmdaRuleSpec.getValidEditTypes();
+    return Promise.each(editTypes, function(currentEditType) {
+        return this.runLarType(year, currentEditType, lar);
+    }.bind(this))
+    .then(function() {
+        return this.getErrors();
+    }.bind(this));
+};
+
+/*
+ * -----------------------------------------------------
+ * Public Interface for CSV Exporting
+ * -----------------------------------------------------
+ */
+
+/**
  * Export errors in csv format for an individual edit
  * @param {string} errorType    The edit category. Valid values: 'syntactical', 'validity', 'quality', 'macro', 'special'
  * @param {string} errorID      The ID of the edit to export

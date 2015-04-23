@@ -29,13 +29,13 @@
         "S270": {
             "description": "Century (CC) and Year (YY) of action taken date must = activity century/year (CCYY) for period being processed.",
             "explanation": "Century and/or year for action taken date does not match activity century/year.",
-            "scope": "lar",
+            "scope": "hmda",
             "errors": [
                 {
                     "lineNumber": "2",
                     "properties": {
                         "actionDate": "20130119",
-                        "hmdaFile.transmittalSheet.activityYear": "2014"
+                        "activityYear": "2014"
                     },
                     "loanNumber": "ABCDEFGHIJKLMNOPQRSTUVWXY"
                 },
@@ -43,7 +43,7 @@
                     "lineNumber": "3",
                     "properties": {
                         "actionDate": "20130119",
-                        "hmdaFile.transmittalSheet.activityYear": "2014"
+                        "activityYear": "2014"
                     },
                     "loanNumber": "ABCDEFGHIJKLMNOPQRSTUVWXY"
                 },
@@ -51,7 +51,7 @@
                     "lineNumber": "4",
                     "properties": {
                         "actionDate": "20130119",
-                        "hmdaFile.transmittalSheet.activityYear": "2014"
+                        "activityYear": "2014"
                     },
                     "loanNumber": "ABCDEFGHIJKLMNOPQRSTUVWXY"
                 }

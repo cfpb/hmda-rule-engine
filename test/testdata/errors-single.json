@@ -1,0 +1,185 @@
+{
+    "syntactical": {},
+    "validity": {
+        "V430": {
+            "description": "If loan purpose = 2 or 3, then preapproval must = 3.",
+            "explanation": "Loan purpose = 2 or 3 and preapproval is missing or does not = 3.",
+            "scope": "lar",
+            "errors": [
+                {
+                    "lineNumber": "",
+                    "properties": {
+                        "loanPurpose": "2",
+                        "preapprovals": "1"
+                    },
+                    "loanNumber": "ABCDEFGHIJKLMNOPQRSTUVWXY"
+                }
+            ]
+        },
+        "V260": {
+            "description": "If reasons for denial are in the range 1-9, then action taken type must = 3 or 7.",
+            "explanation": "Application or preapproval not denied, but denial reasons given.",
+            "scope": "lar",
+            "errors": [
+                {
+                    "lineNumber": "",
+                    "properties": {
+                        "denialReason1": "9",
+                        "denialReason2": "8",
+                        "denialReason3": "7",
+                        "actionTaken": "5"
+                    },
+                    "loanNumber": "ABCDEFGHIJKLMNOPQRSTUVWXY"
+                }
+            ]
+        },
+        "V475": {
+            "description": "If applicant race = 6 or 7 in applicant race field 1, then all other applicant race fields must = blank.",
+            "explanation": "Applicant race field 1= 6 or 7; therefore all other applicant race fields must = blank.",
+            "scope": "lar",
+            "errors": [
+                {
+                    "lineNumber": "",
+                    "properties": {
+                        "applicantRace1": "7",
+                        "applicantRace2": "4",
+                        "applicantRace3": "3",
+                        "applicantRace4": "2",
+                        "applicantRace5": "1"
+                    },
+                    "loanNumber": "ABCDEFGHIJKLMNOPQRSTUVWXY"
+                }
+            ]
+        },
+        "V490": {
+            "description": "If co-applicant race = 6, 7, or 8 in co-applicant race field 1, then all other co-applicant race fields must = blank.",
+            "explanation": "Co-Applicant race field 1 = 6, 7, or 8; therefore all other co-applicant race fields must = blank.",
+            "scope": "lar",
+            "errors": [
+                {
+                    "lineNumber": "",
+                    "properties": {
+                        "coapplicantRace1": "8",
+                        "coapplicantRace2": "7",
+                        "coapplicantRace3": "6",
+                        "coapplicantRace4": "5",
+                        "coapplicantRace5": "4"
+                    },
+                    "loanNumber": "ABCDEFGHIJKLMNOPQRSTUVWXY"
+                }
+            ]
+        },
+        "V326": {
+            "description": "Co-Applicant sex does not = 5; however, co-applicant ethnicity = 5 and/or co-applicant race field 1 = 8.",
+            "explanation": "If no co-applicant, co-applicant sex/ethnicity/race combination invalid.",
+            "scope": "lar",
+            "errors": [
+                {
+                    "lineNumber": "",
+                    "properties": {
+                        "coapplicantEthnicity": "5",
+                        "coapplicantRace1": "8",
+                        "coapplicantSex": "2"
+                    },
+                    "loanNumber": "ABCDEFGHIJKLMNOPQRSTUVWXY"
+                }
+            ]
+        },
+        "V335": {
+            "description": "If property type = 3, then income must = NA.",
+            "explanation": "Property type = 3; therefore income must = NA.",
+            "scope": "lar",
+            "errors": [
+                {
+                    "lineNumber": "",
+                    "properties": {
+                        "propertyType": "3",
+                        "applicantIncome": "9000"
+                    },
+                    "loanNumber": "ABCDEFGHIJKLMNOPQRSTUVWXY"
+                }
+            ]
+        },
+        "V505": {
+            "description": "If action taken type = 2-8, then rate spread must = NA.",
+            "explanation": "Action taken type = 2-8; therefore rate spread must = NA.",
+            "scope": "lar",
+            "errors": [
+                {
+                    "lineNumber": "",
+                    "properties": {
+                        "actionTaken": "5",
+                        "rateSpread": "01.05"
+                    },
+                    "loanNumber": "ABCDEFGHIJKLMNOPQRSTUVWXY"
+                }
+            ]
+        },
+        "V560": {
+            "description": "If action taken type = 1-5, 7 or 8, then lien status must = 1, 2, or 3.",
+            "explanation": "Action taken type = 1-5, 7 or 8; therefore lien status must = 1, 2, or 3.",
+            "scope": "lar",
+            "errors": [
+                {
+                    "lineNumber": "",
+                    "properties": {
+                        "actionTaken": "5",
+                        "lienStatus": "4"
+                    },
+                    "loanNumber": "ABCDEFGHIJKLMNOPQRSTUVWXY"
+                }
+            ]
+        }
+    },
+    "quality": {
+        "Q026": {
+            "description": "If action taken type = 1-5, 7, or 8, and (application date ≥ 20040101 and not = NA), then applicant ethnicity, race and/or sex should not = 4, 7, or 4, respectively.",
+            "explanation": "Applicant ethnicity, race and/or sex = 4, 7, or 4, respectively; Verify.",
+            "scope": "lar",
+            "errors": [
+                {
+                    "lineNumber": "",
+                    "properties": {
+                        "applicantEthnicity": "4",
+                        "applicantRace1": "7",
+                        "applicantSex": "1",
+                        "applicationReceivedDate": "20130117",
+                        "actionTaken": "5"
+                    },
+                    "loanNumber": "ABCDEFGHIJKLMNOPQRSTUVWXY"
+                }
+            ]
+        },
+        "Q014": {
+            "description": "If income is numeric, then income should be < $2 million.",
+            "explanation": "Income is numeric and ≥ to $2 million; Verify.",
+            "scope": "lar",
+            "errors": [
+                {
+                    "lineNumber": "",
+                    "properties": {
+                        "applicantIncome": "9000"
+                    },
+                    "loanNumber": "ABCDEFGHIJKLMNOPQRSTUVWXY"
+                }
+            ]
+        },
+        "Q059": {
+            "description": "If loan type = 3 or 4, then property type should not = 3.",
+            "explanation": "Loan type = 3 or 4 and property type = 3; Verify.",
+            "scope": "lar",
+            "errors": [
+                {
+                    "lineNumber": "",
+                    "properties": {
+                        "loanType": "4",
+                        "propertyType": "3"
+                    },
+                    "loanNumber": "ABCDEFGHIJKLMNOPQRSTUVWXY"
+                }
+            ]
+        }
+    },
+    "macro": {},
+    "special": {}
+}
