@@ -87,7 +87,8 @@ describe('EngineCustomDataLookupConditions', function() {
                 transmittalSheet: {
                     agencyCode: '1',
                     respondentID: '0000000001'
-            }})
+                }
+            })
             .then(function(result) {
                 expect(result.length).to.be(1);
                 expect(result[0]).to.have.property('lineNumber');
@@ -167,7 +168,6 @@ describe('EngineCustomDataLookupConditions', function() {
             });
         });
     });
-
 
     describe('isValidMsaMdCountyCensusForNonDepository', function() {
         var hmdaJson = {};
@@ -502,7 +502,7 @@ describe('EngineCustomDataLookupConditions', function() {
             var path = '/isValidCensusCombination/' + engine.getRuleYear() + '/06/034/0100.01';
             mockAPI('get', path, 200, JSON.stringify({result: true, msa_code: '35100'}));
             var hmdaFile = JSON.parse(JSON.stringify(require('../testdata/complete.json'))).hmdaFile;
-            _.each(hmdaFile.loanApplicationRegisters, function (element) {
+            _.each(hmdaFile.loanApplicationRegisters, function(element) {
                 element.metroArea = 'NA';
             });
 
@@ -549,7 +549,7 @@ describe('EngineCustomDataLookupConditions', function() {
 
         it('should return false when using local data and msaCode != the code returned', function(done) {
             var hmdaFile = JSON.parse(JSON.stringify(require('../testdata/complete.json'))).hmdaFile;
-            _.each(hmdaFile.loanApplicationRegisters, function (element) {
+            _.each(hmdaFile.loanApplicationRegisters, function(element) {
                 element.metroArea = '035100';
             });
 
@@ -567,7 +567,7 @@ describe('EngineCustomDataLookupConditions', function() {
 
         it('should return error information when we use local data and metroArea = NA and there is a valid code', function(done) {
             var hmdaFile = JSON.parse(JSON.stringify(require('../testdata/complete.json'))).hmdaFile;
-            _.each(hmdaFile.loanApplicationRegisters, function (element) {
+            _.each(hmdaFile.loanApplicationRegisters, function(element) {
                 element.metroArea = 'NA';
             });
 
@@ -613,7 +613,7 @@ describe('EngineCustomDataLookupConditions', function() {
             path = '/getMsaName/' + engine.getRuleYear() + '/35100';
             mockAPI('get', path, 200, JSON.stringify({ msaName: 'New Bern, NC' }), true);
             var hmdaFile = JSON.parse(JSON.stringify(require('../testdata/complete.json'))).hmdaFile;
-            _.each(hmdaFile.loanApplicationRegisters, function (element) {
+            _.each(hmdaFile.loanApplicationRegisters, function(element) {
                 element.actionTaken = '9';
             });
 
@@ -644,7 +644,7 @@ describe('EngineCustomDataLookupConditions', function() {
             path = '/getMsaName/' + engine.getRuleYear() + '/35100';
             mockAPI('get', path, 200, JSON.stringify({ msaName: 'New Bern, NC' }));
             var hmdaFile = JSON.parse(JSON.stringify(require('../testdata/complete.json'))).hmdaFile;
-            _.each(hmdaFile.loanApplicationRegisters, function (element) {
+            _.each(hmdaFile.loanApplicationRegisters, function(element) {
                 element.metroArea = '35100';
             });
             engine.isMetroAreaOnRespondentPanel(hmdaFile)

@@ -222,7 +222,7 @@ describe('Engine', function() {
 
         it('should return json object when hmda file is valid and provided by text', function(done) {
             var fs = require('fs');
-            var text = fs.readFile('test/testdata/complete.dat', 'utf8', function (err, text) {
+            var text = fs.readFile('test/testdata/complete.dat', 'utf8', function(err, text) {
                 if (err) { throw err; }
 
                 engine.fileToJson(text, 2013, function(err, result) {
@@ -353,7 +353,8 @@ describe('Engine', function() {
         });
 
         it('should return a modified set of errors for failing quality edits', function(done) {
-              // Q029
+
+            // Q029
             var path = '/isValidCensusCombination/' + engine.getRuleYear() + '/06/034/0100.01';
             mockAPI('get', path, 200, JSON.stringify({result: true, msa_code: '06920'}), true);
 
@@ -387,7 +388,8 @@ describe('Engine', function() {
         });
 
         it('should be cancellable', function(done) {
-              // Q029
+
+            // Q029
             var path = '/isValidCensusCombination/' + engine.getRuleYear() + '/06/034/0100.01';
             mockAPI('get', path, 200, JSON.stringify({result: true, msa_code: '06920'}), true);
 
@@ -533,7 +535,7 @@ describe('Engine', function() {
             .then(function(errors) {
                 expect(_.isEqual(emptyErrors, errors)).to.be.true();
                 done();
-            });   
+            });
         });
 
         it('should return a set of errors for a non passing lar', function(done) {

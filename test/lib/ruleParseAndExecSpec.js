@@ -30,7 +30,7 @@ describe('RuleParseAndExec', function() {
             return false;
         };
         Engine.prototype.postTaskCompletedMessage = function() { };
-        Engine.prototype.setRuleYear= function(year) {
+        Engine.prototype.setRuleYear = function(year) {
             this.currentYear = year;
         };
         engine = new Engine();
@@ -979,4 +979,5 @@ describe('RuleParseAndExec', function() {
         });
 
     });
+
 });
