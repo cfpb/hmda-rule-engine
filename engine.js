@@ -3,7 +3,7 @@
 'use strict';
 
 var CSVProcessor = require('./lib/csvProcessor'),
-    StringStreamPromise = require('./lib/stringStreamPromise'),
+    stringStreamPromise = require('./lib/stringStreamPromise'),
     EngineBaseConditions = require('./lib/engineBaseConditions'),
     EngineCustomConditions = require('./lib/engineCustomConditions'),
     EngineCustomDataLookupConditions = require('./lib/engineCustomDataLookupConditions'),
@@ -151,7 +151,6 @@ HMDAEngine.prototype.setUseLocalDB = function(bool) {
     }
 };
 
-
 /*
  * -----------------------------------------------------
  * Convenience
@@ -212,7 +211,7 @@ HMDAEngine.prototype.fileToJson = function(file, year, next) {
     }
 
     hmdajson.process(file, spec, function(err, result) {
-        if (! err && result) {
+        if (!err && result) {
             this._HMDA_JSON = result;
         }
         next(err, this._HMDA_JSON);
@@ -232,22 +231,22 @@ HMDAEngine.prototype.fileToJson = function(file, year, next) {
  */
 HMDAEngine.prototype.getTotalsByMSA = function(hmdaFile) {
     // get the msa branch list for depository to reduce calls to API
-    var depository = (hmdaFile.transmittalSheet.agencyCode==='7') ? false : true;
+    var depository = (hmdaFile.transmittalSheet.agencyCode === '7') ? false : true;
     return this.getMetroAreasOnRespondentPanel(hmdaFile.transmittalSheet.agencyCode, hmdaFile.transmittalSheet.respondentID)
-    .then(function (branchResult) {
+    .then(function(branchResult) {
         return Promise.all(_.chain(hmdaFile.loanApplicationRegisters)
         .groupBy('metroArea')
-        .pick(function (lar, metroArea) {
-            return (!depository && lar.length>=5) ||
-                (depository && _.contains(branchResult,metroArea)) ||
-                (metroArea==='NA');
+        .pick(function(lar, metroArea) {
+            return (!depository && lar.length >= 5) ||
+                (depository && _.contains(branchResult, metroArea)) ||
+                (metroArea === 'NA');
         })
         .collect(function(value, key) {
             return this.getMSAName(key).then(function(msaName) {
                 var result = {msaCode: key, msaName: msaName, totalLAR: 0, totalLoanAmount: 0, totalConventional: 0, totalFHA: 0, totalVA: 0, totalFSA: 0,
                     total1To4Family: 0, totalMFD: 0, totalMultifamily: 0, totalHomePurchase: 0, totalHomeImprovement: 0, totalRefinance: 0},
                     len = value.length;
-                for (var i=0; i < len; i++) {
+                for (var i = 0; i < len; i++) {
                     var element = value[i];
                     result.totalLAR++;
                     result.totalLoanAmount += +element.loanAmount;
@@ -299,7 +298,7 @@ HMDAEngine.prototype.runSyntactical = function(year) {
     if (this.getDebug()) {
         console.time('time to run syntactical rules');
     }
-    this.calcEstimatedTasks(year, ['ts','lar','hmda'], 'syntactical');
+    this.calcEstimatedTasks(year, ['ts', 'lar', 'hmda'], 'syntactical');
     return this.getEditRunPromise(year, 'syntactical')
     .then(function() {
         /* istanbul ignore if */
@@ -320,7 +319,7 @@ HMDAEngine.prototype.runSyntactical = function(year) {
  */
 HMDAEngine.prototype.runValidity = function(year) {
     var validityPromise;
-    this.calcEstimatedTasks(year, ['ts','lar'], 'validity');
+    this.calcEstimatedTasks(year, ['ts', 'lar'], 'validity');
     if (this.shouldUseLocalDB()) {
         validityPromise = this.loadCensusData()
         .then(function() {
@@ -355,7 +354,7 @@ HMDAEngine.prototype.runQuality = function(year) {
     if (this.getDebug()) {
         console.time('time to run quality rules');
     }
-    this.calcEstimatedTasks(year, ['ts','lar','hmda'], 'quality');
+    this.calcEstimatedTasks(year, ['ts', 'lar', 'hmda'], 'quality');
     return this.getEditRunPromise(year, 'quality')
     .then(function() {
         /* istanbul ignore if */
@@ -504,7 +503,7 @@ HMDAEngine.prototype.exportTypeStream = function(errorType) {
 HMDAEngine.prototype.exportIndividualPromise = function(errorType, errorID) {
     var csvProcessorIndividual = this.exportIndividualStream(errorType, errorID);
 
-    var promise = StringStreamPromise(csvProcessorIndividual);
+    var promise = stringStreamPromise(csvProcessorIndividual);
     csvProcessorIndividual.end();
     return promise;
 };
@@ -518,7 +517,7 @@ HMDAEngine.prototype.exportIndividualPromise = function(errorType, errorID) {
 HMDAEngine.prototype.exportTypePromise = function(errorType) {
     var csvProcessorType = this.exportTypeStream(errorType);
 
-    var promise = StringStreamPromise(csvProcessorType);
+    var promise = stringStreamPromise(csvProcessorType);
     csvProcessorType.end();
     return promise;
 };

@@ -13,7 +13,6 @@ var EngineBaseConditions = require('../../lib/engineBaseConditions'),
 
 EngineBaseConditions.call(Engine.prototype);
 
-
 describe('EngineBaseConditions', function() {
 
     before(function(done) {
@@ -37,11 +36,11 @@ describe('EngineBaseConditions', function() {
 
         it('should return false if property is a malformed email address', function(done) {
             var test_addresses = [
-                'test@.test.com                                                    ', // @.
-                'test.@test.com                                                    ', // .@
-                'te st@test.com                                                    ', // Space in address
-                'te@st@test.com                                                    ', // Double '@''
-                'test@test..com                                                    '  // Double '.'
+                'test@.test.com                                                    ',
+                'test.@test.com                                                    ',
+                'te st@test.com                                                    ',
+                'te@st@test.com                                                    ',
+                'test@test..com                                                    '
             ];
 
             for (var i = 0; i < test_addresses.length; i++) {
@@ -60,10 +59,19 @@ describe('EngineBaseConditions', function() {
         });
 
         it('should return false if property is a malformed zipcode', function(done) {
-            expect(engine.zipcode('55cat     ')).to.be(false);      // No cats allowed
-            expect(engine.zipcode('5555      ')).to.be(false);      // Too short
-            expect(engine.zipcode('55555-55  ')).to.be(false);      // Too short
-            expect(engine.zipcode('55555 5555')).to.be(false);      // Missing '-'
+
+            // No cats allowed
+            expect(engine.zipcode('55cat     ')).to.be(false);
+
+            // Too short
+            expect(engine.zipcode('5555      ')).to.be(false);
+
+            // Too short
+            expect(engine.zipcode('55555-55  ')).to.be(false);
+
+            // Missing '-'
+            expect(engine.zipcode('55555 5555')).to.be(false);
+
             done();
         });
     });
@@ -77,19 +85,39 @@ describe('EngineBaseConditions', function() {
         });
 
         it('should return false if property is not a valid date', function(done) {
-            expect(engine.yyyy_mm_dd_hh_mm_ss('20141315123215')).to.be(false);   // Invalid month
-            expect(engine.yyyy_mm_dd_hh_mm_ss('20140015123215')).to.be(false);   // Invalid month
-            expect(engine.yyyy_mm_dd_hh_mm_ss('20140231123215')).to.be(false);   // Invalid day (Feb 31)
-            expect(engine.yyyy_mm_dd_hh_mm_ss('20140225241715')).to.be(false);   // Invalid hour
-            expect(engine.yyyy_mm_dd_hh_mm_ss('20140225207815')).to.be(false);   // Invalid minutes
-            expect(engine.yyyy_mm_dd_hh_mm_ss('20140225203278')).to.be(false);   // Invalid seconds
+
+            // Invalid month
+            expect(engine.yyyy_mm_dd_hh_mm_ss('20141315123215')).to.be(false);
+
+            // Invalid month
+            expect(engine.yyyy_mm_dd_hh_mm_ss('20140015123215')).to.be(false);
+
+            // Invalid day (Feb 31)
+            expect(engine.yyyy_mm_dd_hh_mm_ss('20140231123215')).to.be(false);
+
+            // Invalid hour
+            expect(engine.yyyy_mm_dd_hh_mm_ss('20140225241715')).to.be(false);
+
+            // Invalid minutes
+            expect(engine.yyyy_mm_dd_hh_mm_ss('20140225207815')).to.be(false);
+
+            // Invalid seconds
+            expect(engine.yyyy_mm_dd_hh_mm_ss('20140225203278')).to.be(false);
+
             done();
         });
 
         it('should return false if property is malformed', function(done) {
-            expect(engine.yyyy_mm_dd_hh_mm_ss('20141005')).to.be(false);         // Too short
-            expect(engine.yyyy_mm_dd_hh_mm_ss('2014010101010101')).to.be(false); // Too long
-            expect(engine.yyyy_mm_dd_hh_mm_ss('2014cat0511542')).to.be(false);   // No cats allowed
+
+            // Too short
+            expect(engine.yyyy_mm_dd_hh_mm_ss('20141005')).to.be(false);
+
+            // Too long
+            expect(engine.yyyy_mm_dd_hh_mm_ss('2014010101010101')).to.be(false);
+
+            // No cats allowed
+            expect(engine.yyyy_mm_dd_hh_mm_ss('2014cat0511542')).to.be(false);
+
             done();
         });
     });
@@ -103,18 +131,36 @@ describe('EngineBaseConditions', function() {
         });
 
         it('should return false if property is not a valid date', function(done) {
-            expect(engine.yyyy_mm_dd_hh_mm('201413151232')).to.be(false);   // Invalid month
-            expect(engine.yyyy_mm_dd_hh_mm('201400151232')).to.be(false);   // Invalid month
-            expect(engine.yyyy_mm_dd_hh_mm('201402311232')).to.be(false);   // Invalid day (Feb 31)
-            expect(engine.yyyy_mm_dd_hh_mm('201402252417')).to.be(false);   // Invalid hour
-            expect(engine.yyyy_mm_dd_hh_mm('201402252078')).to.be(false);   // Invalid minutes
+
+            // Invalid month
+            expect(engine.yyyy_mm_dd_hh_mm('201413151232')).to.be(false);
+
+            // Invalid month
+            expect(engine.yyyy_mm_dd_hh_mm('201400151232')).to.be(false);
+
+            // Invalid day (Feb 31)
+            expect(engine.yyyy_mm_dd_hh_mm('201402311232')).to.be(false);
+
+            // Invalid hour
+            expect(engine.yyyy_mm_dd_hh_mm('201402252417')).to.be(false);
+
+            // Invalid minutes
+            expect(engine.yyyy_mm_dd_hh_mm('201402252078')).to.be(false);
+
             done();
         });
 
         it('should return false if property is malformed', function(done) {
-            expect(engine.yyyy_mm_dd_hh_mm('20141005')).to.be(false);       // Too short
-            expect(engine.yyyy_mm_dd_hh_mm('20140101010101')).to.be(false); // Too long
-            expect(engine.yyyy_mm_dd_hh_mm('2014cat05115')).to.be(false);   // No cats allowed
+
+            // Too short
+            expect(engine.yyyy_mm_dd_hh_mm('20141005')).to.be(false);
+
+            // Too long
+            expect(engine.yyyy_mm_dd_hh_mm('20140101010101')).to.be(false);
+
+            // No cats allowed
+            expect(engine.yyyy_mm_dd_hh_mm('2014cat05115')).to.be(false);
+
             done();
         });
     });
@@ -128,16 +174,30 @@ describe('EngineBaseConditions', function() {
         });
 
         it('should return false if property is not a valid date', function(done) {
-            expect(engine.yyyy_mm_dd('20141315')).to.be(false);   // Invalid month
-            expect(engine.yyyy_mm_dd('20140015')).to.be(false);   // Invalid month
-            expect(engine.yyyy_mm_dd('20140231')).to.be(false);   // Invalid day (Feb 31)
+
+            // Invalid month
+            expect(engine.yyyy_mm_dd('20141315')).to.be(false);
+
+            // Invalid month
+            expect(engine.yyyy_mm_dd('20140015')).to.be(false);
+
+            // Invalid day (Feb 31)
+            expect(engine.yyyy_mm_dd('20140231')).to.be(false);
+
             done();
         });
 
         it('should return false if property is malformed', function(done) {
-            expect(engine.yyyy_mm_dd('201410')).to.be(false);       // Too short
-            expect(engine.yyyy_mm_dd('20140101010101')).to.be(false); // Too long
-            expect(engine.yyyy_mm_dd('2014cat0')).to.be(false);   // No cats allowed
+
+            // Too short
+            expect(engine.yyyy_mm_dd('201410')).to.be(false);
+
+            // Too long
+            expect(engine.yyyy_mm_dd('20140101010101')).to.be(false);
+
+            // No cats allowed
+            expect(engine.yyyy_mm_dd('2014cat0')).to.be(false);
+
             done();
         });
     });
@@ -151,16 +211,30 @@ describe('EngineBaseConditions', function() {
         });
 
         it('should return false if property is not a valid date', function(done) {
-            expect(engine.mm_dd_yyyy('15132014')).to.be(false);   // Invalid month
-            expect(engine.mm_dd_yyyy('15002014')).to.be(false);   // Invalid month
-            expect(engine.mm_dd_yyyy('32022014')).to.be(false);   // Invalid day (Feb 31)
+
+            // Invalid month
+            expect(engine.mm_dd_yyyy('15132014')).to.be(false);
+
+            // Invalid month
+            expect(engine.mm_dd_yyyy('15002014')).to.be(false);
+
+            // Invalid day (Feb 31)
+            expect(engine.mm_dd_yyyy('32022014')).to.be(false);
+
             done();
         });
 
         it('should return false if property is malformed', function(done) {
-            expect(engine.mm_dd_yyyy('102014')).to.be(false);       // Too short
-            expect(engine.mm_dd_yyyy('01010101012014')).to.be(false); // Too long
-            expect(engine.mm_dd_yyyy('0cat2014')).to.be(false);   // No cats allowed
+
+            // Too short
+            expect(engine.mm_dd_yyyy('102014')).to.be(false);
+
+            // Too long
+            expect(engine.mm_dd_yyyy('01010101012014')).to.be(false);
+
+            // No cats allowed
+            expect(engine.mm_dd_yyyy('0cat2014')).to.be(false);
+
             done();
         });
     });
@@ -174,7 +248,10 @@ describe('EngineBaseConditions', function() {
 
         it('should return false if property is not a valid year', function(done) {
             expect(engine.yyyy('    ')).to.be(false);
-            expect(engine.yyyy('cats')).to.be(false);           // No cats allowed
+
+            // No cats allowed
+            expect(engine.yyyy('cats')).to.be(false);
+
             expect(engine.yyyy('205')).to.be(false);
             done();
         });
@@ -187,9 +264,16 @@ describe('EngineBaseConditions', function() {
         });
 
         it('should return false for a malformed time', function(done) {
-            expect(engine.hh_mm('2412')).to.be(false);          // Invalid hours
-            expect(engine.hh_mm('0186')).to.be(false);          // Invalid minutes
-            expect(engine.hh_mm('cats')).to.be(false);          // No cats allowed
+
+            // Invalid hours
+            expect(engine.hh_mm('2412')).to.be(false);
+
+            // Invalid minutes
+            expect(engine.hh_mm('0186')).to.be(false);
+
+            // No cats allowed
+            expect(engine.hh_mm('cats')).to.be(false);
+
             done();
         });
     });
@@ -201,10 +285,19 @@ describe('EngineBaseConditions', function() {
         });
 
         it('should return false for a malformed time', function(done) {
-            expect(engine.hh_mm_ss('241205')).to.be(false);     // Invalid hours
-            expect(engine.hh_mm_ss('018651')).to.be(false);     // Invalid minutes
-            expect(engine.hh_mm_ss('041794')).to.be(false);     // Invalid seconds
-            expect(engine.hh_mm_ss('cats52')).to.be(false);     // No cats allowed
+
+            // Invalid hours
+            expect(engine.hh_mm_ss('241205')).to.be(false);
+
+            // Invalid minutes
+            expect(engine.hh_mm_ss('018651')).to.be(false);
+
+            // Invalid seconds
+            expect(engine.hh_mm_ss('041794')).to.be(false);
+
+            // No cats allowed
+            expect(engine.hh_mm_ss('cats52')).to.be(false);
+
             done();
         });
     });
@@ -373,7 +466,6 @@ describe('EngineBaseConditions', function() {
             done();
         });
     });
-
 
     describe('includes_none', function() {
         it('should return false if property includes any values', function(done) {

@@ -210,14 +210,14 @@ describe('EngineCustomConditions', function() {
             done();
         });
 
-        it('should return true for an actionDate that is an invalid date but in the activity year', function(done) {
+        it('should return true for an actionDate that is an invalid month but in the activity year', function(done) {
             var hmdaFile = {
                 'transmittalSheet': {
                     'activityYear': '2014'
                 },
                 'loanApplicationRegisters': [
                     {
-                        'actionDate': '20142014'    //Invalid month
+                        'actionDate': '20142014'
                     }
                 ]
             };

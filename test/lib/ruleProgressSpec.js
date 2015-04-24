@@ -68,7 +68,7 @@ describe('RuleProgress', function() {
 
     it('should calculate estimated tasks for transmittal sheet scope', function(done) {
         engine._HMDA_JSON = JSON.parse(JSON.stringify(require('../testdata/complete.json')));
-        engine.calcEstimatedTasks('2013',['ts'],'syntactical');
+        engine.calcEstimatedTasks('2013', ['ts'], 'syntactical');
         expect(engine.getProgress().estimate).to.be(3);
         done();
     });
@@ -76,7 +76,7 @@ describe('RuleProgress', function() {
     it('should calculate estimated tasks for lar sheet scope', function(done) {
         engine.clearProgress();
         engine._HMDA_JSON = JSON.parse(JSON.stringify(require('../testdata/complete.json')));
-        engine.calcEstimatedTasks('2013',['lar'],'validity');
+        engine.calcEstimatedTasks('2013', ['lar'], 'validity');
         expect(engine.getProgress().estimate).to.be(63);
         done();
     });
@@ -84,11 +84,9 @@ describe('RuleProgress', function() {
     it('should calculate estimated tasks for macro sheet scope', function(done) {
         engine.clearProgress();
         engine._HMDA_JSON = JSON.parse(JSON.stringify(require('../testdata/complete.json')));
-        engine.calcEstimatedTasks('2013',['hmda'],'macro');
+        engine.calcEstimatedTasks('2013', ['hmda'], 'macro');
         expect(engine.getProgress().estimate).to.be(33);
         done();
     });
-
-
 
 });
