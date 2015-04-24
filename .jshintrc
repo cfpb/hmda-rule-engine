@@ -69,9 +69,6 @@
     "expr": true,
     // Whether `for in` loops must filter with `hasOwnPrototype`.
     "forin": false,
-    // Whether immediate invocations must be wrapped in parens, e.g.
-    // `( function(){}() );`.
-    "immed": true,
     // Whether use before define should be forbidden.
     "latedef": false,
     // Whether functions should be allowed to be defined within loops.
@@ -118,8 +115,6 @@
 
     // Style preferences
 
-    // Whether constructor names must be capitalized.
-    "newcap": false,
     // Whether empty blocks should be forbidden.
     "noempty": false,
     // Whether using `new` for side-effects should be forbidden.
@@ -135,12 +130,8 @@
     "sub": false,
     // Whether trailing whitespace rules apply.
     "trailing": true,
-    // Specify indentation.
-    "indent": 4,
     // Whether strict whitespace rules apply.
     "white": false,
-    // Quote formatting
-    "quotmark": true,
 
     // Complexity
 

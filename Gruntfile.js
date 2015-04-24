@@ -1,5 +1,6 @@
 'use strict';
 
+// jscs:disable
 var exec = require('child_process').exec;
 
 module.exports = function (grunt) {
@@ -86,6 +87,26 @@ module.exports = function (grunt) {
             }
         },
 
+        // Make sure code styles are up to par and there are no obvious mistakes
+        jscs: {
+            options: {
+                config: '.jscsrc',
+                reporter: require('jscs-stylish').path
+            },
+            all: {
+                src: [
+                    'engine.js',
+                    'lib/{,*/}*.js',
+                    'test/{,*/}*Spec.js'
+                ]
+            },
+            test: {
+                src: [
+                    'test/{,*/}*Spec.js'
+                ]
+            }
+        },
+
         jsdoc : {
             dist : {
                 src: ['engine.js', 'lib/*.js', 'timing/*.js', 'README.md'],
@@ -106,6 +127,7 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-develop');
     grunt.loadNpmTasks('grunt-env');
     grunt.loadNpmTasks('grunt-contrib-jshint');
+    grunt.loadNpmTasks('grunt-jscs');
     grunt.loadNpmTasks('grunt-release');
     grunt.loadNpmTasks('grunt-jsdoc');
 
@@ -121,7 +143,7 @@ module.exports = function (grunt) {
 
     // Register group tasks
     grunt.registerTask('clean_all', [ 'clean:node_modules', 'clean:coverage', 'npm_install' ]);
-    grunt.registerTask('test', ['env:test', 'clean:coverage', 'jshint', 'mocha_istanbul']);
+    grunt.registerTask('test', ['env:test', 'clean:coverage', 'jscs:all', 'jshint', 'mocha_istanbul']);
     grunt.registerTask('coverage', ['test', 'open_coverage' ]);
     grunt.registerTask('generate-docs', ['clean:docs', 'jsdoc']);
     grunt.registerTask('view-docs', ['generate-docs', 'open_docs']);
