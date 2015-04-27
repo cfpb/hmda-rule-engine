@@ -1,9 +1,53 @@
+/*global describe:false*/
+/*global it:false*/
+/*global expect:false*/
+/*global beforeEach:false*/
 'use strict';
 
 var HMDAJson = require('../../lib/hmdajson');
 var FILE_SPEC = require('../testdata/2013_file_spec.json');
 
 describe('lib/hmdajson', function() {
+
+    describe('Progress', function() {
+
+        beforeEach(function(done) {
+            HMDAJson.initProgress();
+            done();
+        });
+
+        it('getProgress', function(done) {
+            var progress = HMDAJson.getProgress();
+            expect(progress).to.have.property('count');
+            expect(progress.count).to.be(0);
+            expect(progress).to.have.property('estimate');
+            expect(progress.estimate).to.be(0);
+            done();
+        });
+
+        it('should calculate estimate based on totalLineEntries in transmittal sheet', function(done) {
+            var fs = require('fs');
+            var stream = fs.createReadStream('test/testdata/complete.dat');
+            HMDAJson.process(stream, FILE_SPEC, function(err, result) {
+                var progress = HMDAJson.getProgress();
+                expect(progress).to.have.property('estimate');
+                expect(progress.estimate).to.be(90);
+                done();
+            });
+        });
+
+        it('should emit progress when processing', function(done) {
+            HMDAJson.getProgress().events.on('progressStep', function(percent) {
+                expect(percent).to.be(0);
+            });
+
+            var fs = require('fs');
+            var stream = fs.createReadStream('test/testdata/complete.dat');
+            HMDAJson.process(stream, FILE_SPEC, function(err, result) {
+                done();
+            });
+        });
+    });
 
     describe('getJsonObject', function() {
         it('should return an object with expected properties', function(done) {
@@ -141,7 +185,7 @@ describe('lib/hmdajson', function() {
                 expect(result.hmdaFile.loanApplicationRegisters.length).to.be(9);
                 done();
             });
-        })
+        });
 
         it('should return json object when hmda file is valid and provided by name', function(done) {
             HMDAJson.process('test/testdata/complete.dat', FILE_SPEC, function(err, result) {

@@ -195,6 +195,17 @@ describe('Engine', function() {
         });
     });
 
+    describe('getFileProgress', function() {
+        it('should return a progress object', function(done) {
+            var progress = engine.getFileProgress();
+            expect(progress).to.have.property('count');
+            expect(progress.count).to.be(0);
+            expect(progress).to.have.property('estimate');
+            expect(progress.estimate).to.be(0);
+            done();
+        });
+    });
+
     describe('fileToJson', function() {
         it('should return json object when hmda file is valid and provided by stream', function(done) {
             var fs = require('fs');
@@ -211,7 +222,7 @@ describe('Engine', function() {
 
         it('should return json object when hmda file is valid and provided by text', function(done) {
             var fs = require('fs');
-            var text = fs.readFile('test/testdata/complete.dat', 'utf8', function (err, text) {
+            var text = fs.readFile('test/testdata/complete.dat', 'utf8', function(err, text) {
                 if (err) { throw err; }
 
                 engine.fileToJson(text, 2013, function(err, result) {
@@ -275,6 +286,17 @@ describe('Engine', function() {
                 done();
             });
         });
+
+        it('should be cancellable', function(done) {
+            // S013
+            var path = '/isValidTimestamp/' + engine.getRuleYear() + '/9/0123456789/201301171330';
+            mockAPI('get', path, 200, JSON.stringify({result: true}), true);
+            var prom = rewiredEngine.runSyntactical('2013')
+            .then(function() {
+                expect(prom.isCancellable()).to.be.true();
+                done();
+            });
+        });
     });
 
     describe('runValidity', function() {
@@ -308,6 +330,15 @@ describe('Engine', function() {
                 done();
             });
         });
+
+        it('should be cancellable', function(done) {
+            var prom = rewiredEngine.runValidity('2013')
+            .then(function(result) {
+                expect(prom.isCancellable()).to.be.true();
+                done();
+            });
+        });
+
     });
 
     describe('runQuality', function() {
@@ -322,7 +353,8 @@ describe('Engine', function() {
         });
 
         it('should return a modified set of errors for failing quality edits', function(done) {
-              // Q029
+
+            // Q029
             var path = '/isValidCensusCombination/' + engine.getRuleYear() + '/06/034/0100.01';
             mockAPI('get', path, 200, JSON.stringify({result: true, msa_code: '06920'}), true);
 
@@ -354,6 +386,29 @@ describe('Engine', function() {
                 done();
             });
         });
+
+        it('should be cancellable', function(done) {
+
+            // Q029
+            var path = '/isValidCensusCombination/' + engine.getRuleYear() + '/06/034/0100.01';
+            mockAPI('get', path, 200, JSON.stringify({result: true, msa_code: '06920'}), true);
+
+            path = '/isChildFI/' + engine.getRuleYear() + '/9/0123456789';
+            mockAPI('get', path, 200, JSON.stringify({result: true}));
+
+            // Q030
+            path = '/isCraReporter/' + engine.getRuleYear() + '/0123456789';
+            mockAPI('get', path, 200, JSON.stringify({result: true}), true);
+            path = '/isValidCensusInMSA/' + engine.getRuleYear() + '/06920/06/034/0100.01';
+            mockAPI('get', path, 200, JSON.stringify({result: true}), true);
+
+            var prom = rewiredEngine.runQuality('2013')
+            .then(function(result) {
+                expect(prom.isCancellable()).to.be.true();
+                done();
+            });
+        });
+
     });
 
     describe('runMacro', function() {
@@ -383,15 +438,22 @@ describe('Engine', function() {
             });
         });
 
-        // TODO: When macro API elements are connected, re-enable
-        // it('should return an error when there is a connection problem', function(done) {
-        //     engine.setAPIURL('/');
-        //     engine.runMacro('2013')
-        //     .catch(function(err) {
-        //         expect(err).to.be('There was a problem connecting to the HMDA server. Please check your connection or try again later.');
-        //         done();
-        //     });
-        // });
+        it('should return an error when there is a connection problem', function(done) {
+            engine.setAPIURL('/');
+            engine.runMacro('2013')
+            .catch(function(err) {
+                expect(err.message).to.be('There was a problem connecting to the HMDA server. Please check your connection or try again later.');
+                done();
+            });
+        });
+
+        it('should be cancellable', function(done) {
+            var prom = rewiredEngine.runMacro('2013')
+            .then(function(result) {
+                expect(prom.isCancellable()).to.be.true();
+                done();
+            });
+        });
     });
 
     describe('runSpecial', function() {
@@ -420,6 +482,70 @@ describe('Engine', function() {
             rewiredEngine.runSpecial('2013')
             .then(function(result) {
                 expect(_.isEqual(rewiredEngine.getErrors(), errors)).to.be.true();
+                done();
+            });
+        });
+    });
+
+    describe('runLarType', function() {
+        it('should return empty errors for a passing lar', function(done) {
+            rewiredEngine.clearErrors();
+            var lar = '284-15426429304320874623954000000000020130117111100256212013012019740080590098.40255    8    2500508   NA   21                                                                                                                                                                                                                                                                              ';
+            var emptyErrors = {
+                'syntactical': {},
+                'validity': {},
+                'quality': {},
+                'macro': {},
+                'special': {}
+            };
+
+            rewiredEngine.runLarType('2013', 'validity', lar)
+            .then(function(errors) {
+                expect(_.isEqual(emptyErrors, errors)).to.be.true();
+                done();
+            });
+        });
+
+        it('should return a set of errors for a non passing lar', function(done) {
+            rewiredEngine.clearErrors();
+            var lar = '201234567899ABCDEFGHIJKLMNOPQRSTUVWXY20130117432110000152013011906920060340100.01457432187654129000098701.0524B                                                                                                                                                                                                                                                                            x ';
+            var expectedErrors = require('./testdata/errors-validity-single');
+
+            rewiredEngine.runLarType('2013', 'validity', lar)
+            .then(function(errors) {
+                expect(_.isEqual(expectedErrors, errors)).to.be.true();
+                done();
+            });
+        });
+    });
+
+    describe('runLar', function() {
+        it('should return empty errors for a passing lar', function(done) {
+            rewiredEngine.clearErrors();
+            var lar = '284-15426429304320874623954000000000020130117111100256212013012019740080590098.40255    8    2500508   NA   21                                                                                                                                                                                                                                                                              ';
+            var emptyErrors = {
+                'syntactical': {},
+                'validity': {},
+                'quality': {},
+                'macro': {},
+                'special': {}
+            };
+
+            rewiredEngine.runLar('2013', lar)
+            .then(function(errors) {
+                expect(_.isEqual(emptyErrors, errors)).to.be.true();
+                done();
+            });
+        });
+
+        it('should return a set of errors for a non passing lar', function(done) {
+            rewiredEngine.clearErrors();
+            var lar = '201234567899ABCDEFGHIJKLMNOPQRSTUVWXY20130117432110000152013011906920060340100.01457432187654129000098701.0524B                                                                                                                                                                                                                                                                            x ';
+            var expectedErrors = require('./testdata/errors-single');
+
+            rewiredEngine.runLar('2013', lar)
+            .then(function(errors) {
+                expect(_.isEqual(expectedErrors, errors)).to.be.true();
                 done();
             });
         });
@@ -468,6 +594,22 @@ describe('Engine', function() {
                 done();
             });
         });
+
+        it('should be cancellable', function(done) {
+            var hmdaFile = JSON.parse(JSON.stringify(require('./testdata/loans-to-total.json'))).hmdaFile;
+            var msaCode = '06920';
+            var path = '/getMSAName/' + engine.getRuleYear() + '/' + msaCode;
+            mockAPI('get', path, 200, JSON.stringify({msaName: ''}));
+            path = '/getMetroAreasOnRespondentPanel/2013/7/0123456789';
+            mockAPI('get', path, 200, JSON.stringify({msa: []}));
+
+            var prom = engine.getTotalsByMSA(hmdaFile)
+            .then(function() {
+                expect(prom.isCancellable()).to.be.true();
+                done();
+            });
+        });
+
     });
 
     describe('exportIndividualStream', function() {
@@ -520,7 +662,7 @@ describe('Engine', function() {
             engine.errors = require('./testdata/errors-syntactical');
             var expectedOutput = fs.readFileSync('test/testdata/syntactical.csv').toString();
             var testPromise = engine.exportTypePromise('syntactical');
-            
+
             testPromise.then(function(output) {
                 expect(_.isEqual(expectedOutput, output)).to.be.true();
                 done();

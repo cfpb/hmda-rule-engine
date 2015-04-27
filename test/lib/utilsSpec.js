@@ -129,7 +129,7 @@ describe('lib/utils', function() {
                 argIndex: 2,
                 args: ['foo', 'bar'],
                 funcs: ['this.is_true(arguments[0])', 'this.is_false(arguments[1])'],
-                spreads: ['promise0result','promise1result'],
+                spreads: ['promise0result', 'promise1result'],
                 body: '(promise0result && promise1result)',
                 properties: {foo: true, bar: true}
             };
@@ -176,7 +176,7 @@ describe('lib/utils', function() {
         it('should reject with original error', function(done) {
             var err = new Error('FAIL');
             utils.resolveError(err)
-            .catch(function (err) {
+            .catch(function(err) {
                 expect(err.toString()).to.be('Error: FAIL');
                 done();
             });

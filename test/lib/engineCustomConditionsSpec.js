@@ -174,7 +174,57 @@ describe('EngineCustomConditions', function() {
             expect(result[0].lineNumber).to.be('3');
             done();
         });
+    });
 
+    describe('isActionDateInActivityYear', function() {
+        it('should return true for an actionDate with activityYear', function(done) {
+            var hmdaFile = {
+                'transmittalSheet': {
+                    'activityYear': '2013'
+                },
+                'loanApplicationRegisters': [
+                    {
+                        'actionDate': '20130723'
+                    }
+                ]
+            };
+
+            expect(engine.isActionDateInActivityYear(hmdaFile)).to.be.true();
+            done();
+        });
+
+        it('should return false for an actionDate not in activityYear', function(done) {
+            var hmdaFile = {
+                'transmittalSheet': {
+                    'activityYear': '2013'
+                },
+                'loanApplicationRegisters': [
+                    {
+                        'actionDate': '20140723'
+                    }
+                ]
+            };
+
+            var result = engine.isActionDateInActivityYear(hmdaFile);
+            expect(result.length).to.be(1);
+            done();
+        });
+
+        it('should return true for an actionDate that is an invalid month but in the activity year', function(done) {
+            var hmdaFile = {
+                'transmittalSheet': {
+                    'activityYear': '2014'
+                },
+                'loanApplicationRegisters': [
+                    {
+                        'actionDate': '20142014'
+                    }
+                ]
+            };
+
+            expect(engine.isActionDateInActivityYear(hmdaFile)).to.be.true();
+            done();
+        });
     });
 
     describe('hasAtLeastOneLAR', function() {
@@ -313,32 +363,6 @@ describe('EngineCustomConditions', function() {
             var result = engine.hasUniqueLoanNumbers(hmdaFile);
 
             expect(result.length).to.be(0);
-            done();
-        });
-    });
-
-    describe('isActionDateInActivityYear', function() {
-        it('should return true for an actionDate with activityYear', function(done) {
-            var actionDate = '20130723';
-            var activityYear = '2013';
-
-            expect(engine.isActionDateInActivityYear(actionDate, activityYear)).to.be(true);
-            done();
-        });
-
-        it('should return false for an actionDate not in activityYear', function(done) {
-            var actionDate = '20140723';
-            var activityYear = '2013';
-
-            expect(engine.isActionDateInActivityYear(actionDate, activityYear)).to.be(false);
-            done();
-        });
-
-        it('should return true for an actionDate that is an invalid date but in the activity year', function(done) {
-            var actionDate = '20142014';    // Invalid month
-            var activityYear = '2014';
-
-            expect(engine.isActionDateInActivityYear(actionDate, activityYear)).to.be(true);
             done();
         });
     });
