@@ -7,7 +7,8 @@
 
 'use strict';
 
-var EngineCustomConditions = require('../../lib/engineCustomConditions'),
+var sinon = require('sinon'),
+    EngineCustomConditions = require('../../lib/engineCustomConditions'),
     EngineBaseConditions = require('../../lib/engineBaseConditions'),
     RuleProgress = require('../../lib/ruleProgress'),
     Engine = function() {
@@ -16,7 +17,8 @@ var EngineCustomConditions = require('../../lib/engineCustomConditions'),
             return this._HMDA_JSON;
         };
     },
-    engine;
+    engine,
+    spy;
 
 RuleProgress.call(Engine.prototype);
 
@@ -29,6 +31,7 @@ describe('RuleProgress', function() {
 
     beforeEach(function(done) {
         engine.initProgress();
+        spy = sinon.spy();
         done();
     });
 
@@ -36,34 +39,47 @@ describe('RuleProgress', function() {
         engine.getProgress().count = 0;
         engine.getProgress().estimate = 1;
 
-        engine.getProgress().events.on('progressStep', function(percent) {
-            expect(percent).to.be(100);
-            done();
-        });
+        engine.getProgress().events.on('progressStep', spy);
 
         engine.postTaskCompletedMessage();
+        expect(spy.called).to.be.true();
+        expect(sinon.assert.calledWith(spy, 100));
+        done();
     });
 
     it('should calcuate a percent of 75', function(done) {
         engine.getProgress().count = 5;
         engine.getProgress().estimate = 8;
 
-        engine.getProgress().events.on('progressStep', function(percent) {
-            expect(percent).to.be(75);
-            done();
-        });
+        engine.getProgress().events.on('progressStep', spy);
+
         engine.postTaskCompletedMessage();
+        expect(spy.called).to.be.true();
+        expect(sinon.assert.calledWith(spy, 75));
+        done();
     });
 
     it('should calcuate a percent of 50', function(done) {
         engine.getProgress().count = 1;
         engine.getProgress().estimate = 4;
 
-        engine.getProgress().events.on('progressStep', function(percent) {
-            expect(percent).to.be(50);
-            done();
-        });
+        engine.getProgress().events.on('progressStep', spy);
+
         engine.postTaskCompletedMessage();
+        expect(spy.called).to.be.true();
+        expect(sinon.assert.calledWith(spy, 50));
+        done();
+    });
+
+    it('should not emit events when percent is over 100', function(done) {
+        engine.getProgress().count = 2;
+        engine.getProgress().estimate = 1;
+
+        engine.getProgress().events.on('progressStep', spy);
+
+        engine.postTaskCompletedMessage();
+        expect(spy.called).to.be.false();
+        done();
     });
 
     it('should calculate estimated tasks for transmittal sheet scope', function(done) {
