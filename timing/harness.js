@@ -5,7 +5,7 @@
 
 var Promise = require('bluebird'),
     engine = require('../engine'),
-    memwatch = require('memwatch'),
+    memwatch = require('memwatch-next'),
     fs = require('fs');
 
 var runSynValThen = function(year) {
