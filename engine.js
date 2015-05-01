@@ -436,9 +436,7 @@ HMDAEngine.prototype.runLarType = function(year, type, lar) {
             });
         }
     } else {
-        var deferred = Promise.defer();
-        deferred.reject(new Error('Invalid edit type: ' + type));
-        return deferred.promise;
+        return Promise.reject(new Error('Invalid edit type: ' + type));
     }
 };
 
