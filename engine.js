@@ -424,7 +424,7 @@ HMDAEngine.prototype.runLarType = function(year, type, lar) {
     var fileSpec = hmdaRuleSpec.getFileSpec(year);
     var parsedLar = hmdajson.parseLine('loanApplicationRegister', fileSpec.loanApplicationRegister, lar);
 
-    if (type !== 'special' && type !== 'macro') {
+    if (hmdaRuleSpec.getEdits(year, 'lar', type)) {
         var larPromise = this.getEditRunPromiseLar(year, type, parsedLar.record);
         if (larPromise) {
             return larPromise
@@ -435,6 +435,10 @@ HMDAEngine.prototype.runLarType = function(year, type, lar) {
                 return utils.resolveError(err);
             });
         }
+    } else {
+        var deferred = Promise.defer();
+        deferred.reject(new Error('Invalid edit type: ' + type));
+        return deferred.promise;
     }
 };
 
@@ -446,8 +450,11 @@ HMDAEngine.prototype.runLarType = function(year, type, lar) {
  */
 HMDAEngine.prototype.runLar = function(year, lar) {
     var editTypes = hmdaRuleSpec.getValidEditTypes();
+
     return Promise.each(editTypes, function(currentEditType) {
-        return this.runLarType(year, currentEditType, lar);
+        if (hmdaRuleSpec.getEdits(year, 'lar', currentEditType)) {
+            return this.runLarType(year, currentEditType, lar);
+        }
     }.bind(this))
     .then(function() {
         return this.getErrors();
