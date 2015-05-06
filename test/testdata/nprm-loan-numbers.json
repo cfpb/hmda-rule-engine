@@ -1,0 +1,17 @@
+{
+    "transmittalSheet": {
+
+    },
+    "loanApplicationRegisters": [
+        {
+            "legalEntityID": "00010000520001000052",
+            "universalLoanID": "1",
+            "lineNumber": "2"
+        },
+        {
+            "legalEntityID": "00010000520001000052",
+            "universalLoanID": "2",
+            "lineNumber": "3"
+        }
+    ]
+}

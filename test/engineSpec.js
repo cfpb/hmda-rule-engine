@@ -680,4 +680,22 @@ describe('Engine', function() {
             });
         });
     });
+
+    describe('engineCustomYearConditions', function() {
+        it('should correctly mix in conditions for a given year', function(done) {
+            engine.setRuleYear('nprm');
+            var hmdaFile = require('./testdata/nprm-loan-numbers');
+
+            expect(engine.hasUniqueLoanNumbers(hmdaFile).length).to.be(0);
+            hmdaFile.loanApplicationRegisters[1].universalLoanID = '1';
+            expect(engine.hasUniqueLoanNumbers(hmdaFile).length).to.be(1);
+
+            engine.setRuleYear(mockYEAR);
+            hmdaFile.loanApplicationRegisters[0].loanNumber = '1';
+            hmdaFile.loanApplicationRegisters[1].loanNumber = '2';
+
+            expect(engine.hasUniqueLoanNumbers(hmdaFile).length).to.be(0);
+            done();
+        });
+    });
 });
