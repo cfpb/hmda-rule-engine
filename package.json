@@ -1,6 +1,6 @@
 {
   "name": "hmda-rule-engine",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "BRIJ compliant rules engine for HMDA data",
   "main": "engine.js",
   "scripts": {
