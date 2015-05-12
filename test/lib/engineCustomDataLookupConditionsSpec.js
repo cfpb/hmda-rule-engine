@@ -463,7 +463,8 @@ describe('EngineCustomDataLookupConditions', function() {
     describe('isValidStateCountyCensusTractCombo', function() {
         it('should return true when API call to isValidCensusCombination result is false', function(done) {
             var path = '/isValidCensusCombination/' + engine.getRuleYear() + '/06/034/0100.01';
-            mockAPI('get', path, 200, JSON.stringify({result: false}));
+            var resp = JSON.stringify({result: false});
+            mockAPI('get', path, 200, resp);
             var hmdaFile = JSON.parse(JSON.stringify(require('../testdata/complete.json'))).hmdaFile;
 
             engine.isValidStateCountyCensusTractCombo(hmdaFile)
@@ -475,7 +476,8 @@ describe('EngineCustomDataLookupConditions', function() {
 
         it('should return true when msaCode = the code returned from the API', function(done) {
             var path = '/isValidCensusCombination/' + engine.getRuleYear() + '/06/034/0100.01';
-            mockAPI('get', path, 200, JSON.stringify({result: true, msa_code: '06920'}));
+            var resp = JSON.stringify({result: true, msa_code: '06920'});
+            mockAPI('get', path, 200, resp);
             var hmdaFile = JSON.parse(JSON.stringify(require('../testdata/complete.json'))).hmdaFile;
 
             engine.isValidStateCountyCensusTractCombo(hmdaFile)
@@ -487,7 +489,8 @@ describe('EngineCustomDataLookupConditions', function() {
 
         it('should return false when msaCode != the code returned from the API', function(done) {
             var path = '/isValidCensusCombination/' + engine.getRuleYear() + '/06/034/0100.01';
-            mockAPI('get', path, 200, JSON.stringify({result: true, msa_code: '35100'}), true);
+            var resp = JSON.stringify({result: true, msa_code: '35100'});
+            mockAPI('get', path, 200, resp, true);
             var hmdaFile = JSON.parse(JSON.stringify(require('../testdata/complete.json'))).hmdaFile;
 
             engine.isValidStateCountyCensusTractCombo(hmdaFile)
@@ -500,7 +503,8 @@ describe('EngineCustomDataLookupConditions', function() {
 
         it('should return error information when metroArea = NA and there is a valid code', function(done) {
             var path = '/isValidCensusCombination/' + engine.getRuleYear() + '/06/034/0100.01';
-            mockAPI('get', path, 200, JSON.stringify({result: true, msa_code: '35100'}));
+            var resp = JSON.stringify({result: true, msa_code: '35100'});
+            mockAPI('get', path, 200, resp);
             var hmdaFile = JSON.parse(JSON.stringify(require('../testdata/complete.json'))).hmdaFile;
             _.each(hmdaFile.loanApplicationRegisters, function(element) {
                 element.metroArea = 'NA';

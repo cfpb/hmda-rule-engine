@@ -517,6 +517,17 @@ describe('Engine', function() {
                 done();
             });
         });
+
+        it('should return a rejected promise for an invalid edit type', function(done) {
+            rewiredEngine.clearErrors();
+            var lar = '201234567899ABCDEFGHIJKLMNOPQRSTUVWXY20130117432110000152013011906920060340100.01457432187654129000098701.0524B                                                                                                                                                                                                                                                                            x ';
+
+            rewiredEngine.runLarType('2013', 'cat', lar)
+            .catch(function(err) {
+                expect(err.message).to.be('Invalid edit type: cat');
+                done();
+            });
+        });
     });
 
     describe('runLar', function() {
