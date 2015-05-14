@@ -59,14 +59,14 @@ function HMDAEngine() {
  * -----------------------------------------------------
  */
 
-var extendEngine = function(engine) {
-    EngineApiInterface.call(engine);
-    EngineLocalDB.call(engine);
-    EngineBaseConditions.call(engine);
-    EngineCustomConditions.call(engine);
-    EngineCustomDataLookupConditions.call(engine);
-    RuleParseAndExec.call(engine);
-    RuleProgress.call(engine);
+var extendEngine = function() {
+    EngineApiInterface.call(HMDAEngine.prototype);
+    EngineLocalDB.call(HMDAEngine.prototype);
+    EngineBaseConditions.call(HMDAEngine.prototype);
+    EngineCustomConditions.call(HMDAEngine.prototype);
+    EngineCustomDataLookupConditions.call(HMDAEngine.prototype);
+    RuleParseAndExec.call(HMDAEngine.prototype);
+    RuleProgress.call(HMDAEngine.prototype);
 };
 
 /*
@@ -101,12 +101,15 @@ HMDAEngine.prototype.setRuleYear = function(year) {
     this.currentYear = year;
 
     // Run base mixins to return engine to default
-    extendEngine(HMDAEngine.prototype);
+    extendEngine();
 
     // Override engine conditions with year specific ones if they exist
     if (customYearMixins[year]) {
         customYearMixins[year].call(HMDAEngine.prototype);
     }
+
+    // Clear out record prototypes for the previous year
+    hmdajson.recordPrototypes = {};
 };
 
 /**
@@ -560,7 +563,7 @@ HMDAEngine.prototype.exportTypePromise = function(errorType) {
     return promise;
 };
 
-extendEngine(HMDAEngine.prototype);
+extendEngine();
 
 /*
  * -----------------------------------------------------
