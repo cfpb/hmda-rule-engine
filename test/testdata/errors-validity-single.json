@@ -7,7 +7,6 @@
             "scope": "lar",
             "errors": [
                 {
-                    "lineNumber": "",
                     "properties": {
                         "loanPurpose": "2",
                         "preapprovals": "1"
@@ -22,7 +21,6 @@
             "scope": "lar",
             "errors": [
                 {
-                    "lineNumber": "",
                     "properties": {
                         "denialReason1": "9",
                         "denialReason2": "8",
@@ -39,7 +37,6 @@
             "scope": "lar",
             "errors": [
                 {
-                    "lineNumber": "",
                     "properties": {
                         "applicantRace1": "7",
                         "applicantRace2": "4",
@@ -57,7 +54,6 @@
             "scope": "lar",
             "errors": [
                 {
-                    "lineNumber": "",
                     "properties": {
                         "coapplicantRace1": "8",
                         "coapplicantRace2": "7",
@@ -75,7 +71,6 @@
             "scope": "lar",
             "errors": [
                 {
-                    "lineNumber": "",
                     "properties": {
                         "coapplicantEthnicity": "5",
                         "coapplicantRace1": "8",
@@ -91,7 +86,6 @@
             "scope": "lar",
             "errors": [
                 {
-                    "lineNumber": "",
                     "properties": {
                         "propertyType": "3",
                         "applicantIncome": "9000"
@@ -106,7 +100,6 @@
             "scope": "lar",
             "errors": [
                 {
-                    "lineNumber": "",
                     "properties": {
                         "actionTaken": "5",
                         "rateSpread": "01.05"
@@ -121,7 +114,6 @@
             "scope": "lar",
             "errors": [
                 {
-                    "lineNumber": "",
                     "properties": {
                         "actionTaken": "5",
                         "lienStatus": "4"
