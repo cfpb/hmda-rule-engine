@@ -44,7 +44,7 @@
     "bluebird": "^2.9.25",
     "brij-spec": "0.0.5",
     "csv": "^0.4.2",
-    "hmda-rule-spec": "cfpb/hmda-rule-spec#milestone11",
+    "hmda-rule-spec": "cfpb/hmda-rule-spec#master",
     "level-browserify": "^0.18.1",
     "line-chomper": "^0.4.5",
     "lodash": "^3.7.0",
