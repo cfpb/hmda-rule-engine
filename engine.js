@@ -18,6 +18,15 @@ var CSVProcessor = require('./lib/csvProcessor'),
     stream = require('stream'),
     Promise = require('bluebird');
 
+/**
+ * -----------------------------------------------------
+ * Load in custom year mixins
+ * -----------------------------------------------------
+ */
+var customYearMixins = {
+    'nprm': require('./lib/nprm/engineCustomYearConditions')
+};
+
 function Errors() {
     return {
         syntactical: {},
@@ -43,6 +52,22 @@ function HMDAEngine() {
     this._USE_LOCAL_DB = false;
     this.initProgress();
 }
+
+/*
+ * -----------------------------------------------------
+ * Extend the Engine with Mixins
+ * -----------------------------------------------------
+ */
+
+var extendEngine = function() {
+    EngineApiInterface.call(HMDAEngine.prototype);
+    EngineLocalDB.call(HMDAEngine.prototype);
+    EngineBaseConditions.call(HMDAEngine.prototype);
+    EngineCustomConditions.call(HMDAEngine.prototype);
+    EngineCustomDataLookupConditions.call(HMDAEngine.prototype);
+    RuleParseAndExec.call(HMDAEngine.prototype);
+    RuleProgress.call(HMDAEngine.prototype);
+};
 
 /*
  * -----------------------------------------------------
@@ -74,6 +99,17 @@ HMDAEngine.prototype.getAPIURL = function() {
  */
 HMDAEngine.prototype.setRuleYear = function(year) {
     this.currentYear = year;
+
+    // Run base mixins to return engine to default
+    extendEngine();
+
+    // Override engine conditions with year specific ones if they exist
+    if (customYearMixins[year]) {
+        customYearMixins[year].call(HMDAEngine.prototype);
+    }
+
+    // Clear out record prototypes for the previous year
+    hmdajson.recordPrototypes = {};
 };
 
 /**
@@ -527,19 +563,7 @@ HMDAEngine.prototype.exportTypePromise = function(errorType) {
     return promise;
 };
 
-/*
- * -----------------------------------------------------
- * Extend the Engine with Mixins
- * -----------------------------------------------------
- */
-
-EngineApiInterface.call(HMDAEngine.prototype);
-EngineLocalDB.call(HMDAEngine.prototype);
-EngineBaseConditions.call(HMDAEngine.prototype);
-EngineCustomConditions.call(HMDAEngine.prototype);
-EngineCustomDataLookupConditions.call(HMDAEngine.prototype);
-RuleParseAndExec.call(HMDAEngine.prototype);
-RuleProgress.call(HMDAEngine.prototype);
+extendEngine();
 
 /*
  * -----------------------------------------------------

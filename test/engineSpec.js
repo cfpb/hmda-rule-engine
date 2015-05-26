@@ -509,10 +509,11 @@ describe('Engine', function() {
         it('should return a set of errors for a non passing lar', function(done) {
             rewiredEngine.clearErrors();
             var lar = '201234567899ABCDEFGHIJKLMNOPQRSTUVWXY20130117432110000152013011906920060340100.01457432187654129000098701.0524B                                                                                                                                                                                                                                                                            x ';
-            var expectedErrors = require('./testdata/errors-validity-single');
+            var expectedErrors = JSON.parse(JSON.stringify(require('./testdata/errors-validity-single')));
 
             rewiredEngine.runLarType('2013', 'validity', lar)
             .then(function(errors) {
+                errors = JSON.parse(JSON.stringify(errors));
                 expect(_.isEqual(expectedErrors, errors)).to.be.true();
                 done();
             });
@@ -552,10 +553,11 @@ describe('Engine', function() {
         it('should return a set of errors for a non passing lar', function(done) {
             rewiredEngine.clearErrors();
             var lar = '201234567899ABCDEFGHIJKLMNOPQRSTUVWXY20130117432110000152013011906920060340100.01457432187654129000098701.0524B                                                                                                                                                                                                                                                                            x ';
-            var expectedErrors = require('./testdata/errors-single');
+            var expectedErrors = JSON.parse(JSON.stringify(require('./testdata/errors-single')));
 
             rewiredEngine.runLar('2013', lar)
             .then(function(errors) {
+                errors = JSON.parse(JSON.stringify(errors));
                 expect(_.isEqual(expectedErrors, errors)).to.be.true();
                 done();
             });
@@ -678,6 +680,24 @@ describe('Engine', function() {
                 expect(_.isEqual(expectedOutput, output)).to.be.true();
                 done();
             });
+        });
+    });
+
+    describe('engineCustomYearConditions', function() {
+        it('should correctly mix in conditions for a given year', function(done) {
+            engine.setRuleYear('nprm');
+            var hmdaFile = require('./testdata/nprm-loan-numbers');
+
+            expect(engine.hasUniqueLoanNumbers(hmdaFile).length).to.be(0);
+            hmdaFile.loanApplicationRegisters[1].universalLoanID = '1';
+            expect(engine.hasUniqueLoanNumbers(hmdaFile).length).to.be(1);
+
+            engine.setRuleYear(mockYEAR);
+            hmdaFile.loanApplicationRegisters[0].loanNumber = '1';
+            hmdaFile.loanApplicationRegisters[1].loanNumber = '2';
+
+            expect(engine.hasUniqueLoanNumbers(hmdaFile).length).to.be(0);
+            done();
         });
     });
 });
